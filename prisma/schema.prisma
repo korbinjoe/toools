@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tool {
+  id            String     @id @default(cuid())
+  name          String
+  slug          String     @unique
+  tagline       String
+  description   String
+  url           String
+  iconUrl       String?
+  screenshotUrl String?
+
+  embedMode   EmbedMode @default(EXTERNAL)
+  embedUrl    String?
+  embedConfig Json?
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  tags       ToolTag[]
+
+  pricing      Pricing  @default(FREE)
+  platforms    String[] @default([])
+  github       String?
+  isOpenSource Boolean  @default(false)
+
+  status   ToolStatus @default(PENDING)
+  featured Boolean    @default(false)
+
+  viewCount  Int @default(0)
+  clickCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([featured])
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  icon        String?
+  sortOrder   Int     @default(0)
+  tools       Tool[]
+}
+
+model Tag {
+  id    String    @id @default(cuid())
+  name  String    @unique
+  slug  String    @unique
+  tools ToolTag[]
+}
+
+model ToolTag {
+  toolId String
+  tagId  String
+  tool   Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([toolId, tagId])
+}
+
+enum EmbedMode {
+  IFRAME
+  API
+  EXTERNAL
+}
+
+enum Pricing {
+  FREE
+  FREEMIUM
+  PAID
+  OPEN_SOURCE
+}
+
+enum ToolStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
