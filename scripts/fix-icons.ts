@@ -1,9 +1,14 @@
 /**
- * Fix tool icons by resolving real URLs from PH redirects and GitHub repos.
+ * Fix tool icons by discovering real website domains.
+ *
+ * Strategy:
+ *   1. Tools with PH/GitHub/Apple Store URLs → guess domain from tool name
+ *   2. Probe candidate domains (name.com, name.io, name.app, etc.)
+ *   3. Update iconUrl to Google favicon of the real domain
  *
  * Usage:
- *   npx tsx scripts/fix-icons.ts
- *   DRY_RUN=false npx tsx scripts/fix-icons.ts
+ *   npx tsx scripts/fix-icons.ts            # dry run
+ *   DRY_RUN=false npx tsx scripts/fix-icons.ts   # apply
  */
 
 import "dotenv/config";
@@ -15,175 +20,131 @@ const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
 
 const DRY_RUN = process.env.DRY_RUN !== "false";
-const CONCURRENCY = 20;
-const TIMEOUT_MS = 8000;
+const CONCURRENCY = 30;
+const TIMEOUT_MS = 5000;
 
-async function resolveRedirect(url: string): Promise<string | null> {
+const TLDS = [".com", ".io", ".app", ".dev", ".ai", ".co", ".org", ".net", ".so", ".sh", ".tools"];
+
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
+}
+
+function getCandidateDomains(name: string): string[] {
+  const slug = slugify(name);
+  if (!slug) return [];
+
+  const slugHyphen = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .trim();
+
+  const candidates = new Set<string>();
+  for (const tld of TLDS) {
+    candidates.add(slug + tld);
+    if (slugHyphen !== slug) {
+      candidates.add(slugHyphen + tld);
+    }
+  }
+  return [...candidates];
+}
+
+async function probeDomain(domain: string): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-    const res = await fetch(url, {
+    const res = await fetch(`https://${domain}`, {
       method: "HEAD",
       redirect: "follow",
       signal: controller.signal,
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; Toools/1.0)" },
-    });
-    clearTimeout(timer);
-    return res.url;
-  } catch {
-    // HEAD might be blocked, try GET
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-      const res = await fetch(url, {
-        redirect: "follow",
-        signal: controller.signal,
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; Toools/1.0)" },
-      });
-      clearTimeout(timer);
-      return res.url;
-    } catch {
-      return null;
-    }
-  }
-}
-
-async function getGitHubHomepage(repoUrl: string): Promise<string | null> {
-  try {
-    const match = repoUrl.match(/github\.com\/([^/]+\/[^/]+)/);
-    if (!match) return null;
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-    const res = await fetch(`https://api.github.com/repos/${match[1]}`, {
-      signal: controller.signal,
       headers: {
-        "User-Agent": "Toools/1.0",
-        Accept: "application/vnd.github.v3+json",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
     });
     clearTimeout(timer);
-    if (!res.ok) return null;
-    const data = (await res.json()) as { homepage?: string };
-    if (data.homepage && data.homepage.length > 0 && !data.homepage.includes("github.com")) {
-      return data.homepage;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function isGenericDomain(url: string): boolean {
-  try {
-    const host = new URL(url).hostname;
-    return ["www.producthunt.com", "producthunt.com", "github.com", "www.github.com", "apps.apple.com"].includes(host);
+    return res.ok || res.status === 403 || res.status === 405;
   } catch {
     return false;
   }
 }
 
-async function processBatch<T, R>(
-  items: T[],
-  fn: (item: T) => Promise<R>,
-  concurrency: number,
-): Promise<R[]> {
-  const results: R[] = [];
-  for (let i = 0; i < items.length; i += concurrency) {
-    const batch = items.slice(i, i + concurrency);
-    const batchResults = await Promise.all(batch.map(fn));
-    results.push(...batchResults);
-    if (i + concurrency < items.length) {
-      await new Promise((r) => setTimeout(r, 200));
+async function findRealDomain(name: string): Promise<string | null> {
+  const candidates = getCandidateDomains(name);
+  for (const domain of candidates) {
+    if (await probeDomain(domain)) {
+      return domain;
     }
   }
-  return results;
+  return null;
+}
+
+function isGenericIcon(iconUrl: string | null): boolean {
+  if (!iconUrl) return true;
+  return (
+    iconUrl.includes("producthunt.com") ||
+    iconUrl.includes("github.com") ||
+    iconUrl.includes("apps.apple.com")
+  );
+}
+
+async function processBatch<T>(
+  items: T[],
+  fn: (item: T) => Promise<void>,
+  concurrency: number,
+  label: string,
+): Promise<void> {
+  let done = 0;
+  for (let i = 0; i < items.length; i += concurrency) {
+    const batch = items.slice(i, i + concurrency);
+    await Promise.all(batch.map(fn));
+    done += batch.length;
+    if (done % 100 === 0 || done === items.length) {
+      process.stdout.write(`\r  ${label}: ${done}/${items.length}`);
+    }
+  }
+  console.log();
 }
 
 async function main() {
   console.log(`=== Fix Tool Icons ${DRY_RUN ? "(DRY RUN)" : "(LIVE)"} ===\n`);
 
-  // Phase 1: Fix PH redirect URLs
-  const phTools = await prisma.tool.findMany({
-    where: { status: "APPROVED", url: { contains: "producthunt.com" } },
-    select: { id: true, name: true, url: true },
+  const tools = await prisma.tool.findMany({
+    where: { status: "APPROVED" },
+    select: { id: true, name: true, url: true, iconUrl: true },
   });
-  console.log(`PH redirect URLs to resolve: ${phTools.length}`);
 
-  let phFixed = 0;
-  let phFailed = 0;
+  const needFix = tools.filter((t) => isGenericIcon(t.iconUrl));
+  console.log(`Tools with generic icons: ${needFix.length}/${tools.length}\n`);
+
+  let fixed = 0;
+  let notFound = 0;
 
   await processBatch(
-    phTools,
+    needFix,
     async (tool) => {
-      const realUrl = await resolveRedirect(tool.url);
-      if (realUrl && !isGenericDomain(realUrl)) {
-        phFixed++;
+      const domain = await findRealDomain(tool.name);
+      if (domain) {
+        fixed++;
         if (!DRY_RUN) {
           await prisma.tool.update({
             where: { id: tool.id },
-            data: {
-              url: realUrl,
-              iconUrl: getGoogleFaviconUrl(realUrl),
-            },
+            data: { iconUrl: getGoogleFaviconUrl(`https://${domain}`) },
           });
         }
       } else {
-        phFailed++;
+        notFound++;
       }
     },
     CONCURRENCY,
+    "Probing",
   );
 
-  console.log(`  Resolved: ${phFixed}`);
-  console.log(`  Failed: ${phFailed}\n`);
-
-  // Phase 2: Fix GitHub URLs — try to get homepage from GitHub API
-  const ghTools = await prisma.tool.findMany({
-    where: {
-      status: "APPROVED",
-      url: { contains: "github.com" },
-      iconUrl: { contains: "github.com" },
-    },
-    select: { id: true, name: true, url: true },
-  });
-  console.log(`GitHub URLs to check for homepage: ${ghTools.length}`);
-
-  let ghFixed = 0;
-  let ghNoHomepage = 0;
-
-  await processBatch(
-    ghTools,
-    async (tool) => {
-      const homepage = await getGitHubHomepage(tool.url);
-      if (homepage && !isGenericDomain(homepage)) {
-        ghFixed++;
-        if (!DRY_RUN) {
-          await prisma.tool.update({
-            where: { id: tool.id },
-            data: { iconUrl: getGoogleFaviconUrl(homepage) },
-          });
-        }
-      } else {
-        ghNoHomepage++;
-      }
-    },
-    CONCURRENCY,
-  );
-
-  console.log(`  Got homepage icon: ${ghFixed}`);
-  console.log(`  No homepage found: ${ghNoHomepage}\n`);
-
-  // Summary
-  const remaining = await prisma.tool.count({
-    where: {
-      status: "APPROVED",
-      OR: [
-        { iconUrl: { contains: "producthunt.com" } },
-        { iconUrl: { contains: "github.com" } },
-      ],
-    },
-  });
-  console.log(`Remaining generic icons: ${remaining}`);
+  console.log(`\n=== Results ===`);
+  console.log(`  Fixed: ${fixed}`);
+  console.log(`  Not found: ${notFound}`);
 
   if (DRY_RUN) {
     console.log("\n(Dry run — set DRY_RUN=false to apply)");
