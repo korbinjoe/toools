@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowLeft, ArrowUpRight, Zap } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolEmbed } from "@/components/tool-embed";
 import { ToolAvatar } from "@/components/tool-avatar";
@@ -77,14 +77,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
   const relatedTools = await getRelatedTools(tool.categoryId, tool.slug);
 
-  const embedConfig = tool.embedConfig as {
-    height?: string;
-    sandbox?: string;
-    allow?: string;
-  } | null;
-
   const p = pricingConfig[tool.pricing];
-  const canEmbed = tool.embedMode !== "EXTERNAL";
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-8 sm:py-10">
@@ -100,15 +93,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
         <div className="flex items-start gap-4">
           <ToolAvatar name={tool.name} url={tool.url} iconUrl={tool.iconUrl} className="h-14 w-14" />
           <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-bold tracking-tight">{tool.name}</h1>
-              {canEmbed && (
-                <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
-                  <Zap className="h-3 w-3" />
-                  Embeddable
-                </span>
-              )}
-            </div>
+            <h1 className="text-2xl font-bold tracking-tight">{tool.name}</h1>
             <p className="mt-1 text-muted-foreground leading-relaxed">{tool.tagline}</p>
             <div className="mt-3 flex flex-wrap items-center gap-1.5">
               <Link href={`/categories/${tool.category.slug}`}>
@@ -174,9 +159,8 @@ export default async function ToolPage({ params }: ToolPageProps) {
         <ToolEmbed
           name={tool.name}
           url={tool.url}
-          embedMode={tool.embedMode}
-          embedUrl={tool.embedUrl}
-          embedConfig={embedConfig}
+          iconUrl={tool.iconUrl}
+          screenshotUrl={tool.screenshotUrl}
         />
       </div>
 

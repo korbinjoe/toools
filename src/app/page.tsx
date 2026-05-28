@@ -1,21 +1,24 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { Search, ArrowRight, Zap } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolGrid } from "@/components/tool-grid";
+import { FeaturedSection } from "@/components/featured-section";
 import { CategoryGrid, CategoryIcon } from "@/components/category-nav";
 import { prisma } from "@/lib/db";
 
 async function getFeaturedTools() {
+  const rows = await prisma.$queryRawUnsafe<{ id: string }[]>(
+    `SELECT id FROM "Tool" WHERE status = 'APPROVED' ORDER BY RANDOM() LIMIT 6`
+  );
+  if (rows.length === 0) return [];
   return prisma.tool.findMany({
-    where: { featured: true, status: "APPROVED" },
+    where: { id: { in: rows.map((r) => r.id) } },
     include: {
       category: { select: { name: true, slug: true } },
       tags: { include: { tag: { select: { name: true } } } },
     },
-    take: 6,
-    orderBy: { viewCount: "desc" },
   });
 }
 
@@ -38,19 +41,12 @@ async function getRecentTools() {
   });
 }
 
-async function getEmbeddableCount() {
-  return prisma.tool.count({
-    where: { status: "APPROVED", embedMode: { in: ["IFRAME", "API"] } },
-  });
-}
-
 export default async function HomePage() {
-  const [featuredTools, categories, recentTools, embeddableCount] =
+  const [featuredTools, categories, recentTools] =
     await Promise.all([
       getFeaturedTools(),
       getCategories(),
       getRecentTools(),
-      getEmbeddableCount(),
     ]);
 
   const totalTools = categories.reduce(
@@ -71,8 +67,8 @@ export default async function HomePage() {
                 <span className="text-primary">ready to use.</span>
               </h1>
               <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-lg">
-                A curated workspace of {totalTools}+ tools. Try embeddable ones directly
-                in your browser, or find the right alternative for your workflow.
+                A curated collection of {totalTools}+ tools.
+                Discover the right alternative for your workflow.
               </p>
 
               <form action="/tools" className="mt-8 max-w-md">
@@ -101,11 +97,10 @@ export default async function HomePage() {
                   Browse all
                 </Link>
                 <Link
-                  href="/tools?embed=embeddable"
-                  className="inline-flex items-center gap-1.5 text-primary font-medium hover:text-primary/80 transition-colors"
+                  href="/categories"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Zap className="h-3.5 w-3.5" />
-                  {embeddableCount} embeddable
+                  Categories
                 </Link>
               </div>
             </div>
@@ -138,20 +133,7 @@ export default async function HomePage() {
       {/* Featured */}
       {featuredTools.length > 0 && (
         <section className="mx-auto w-full max-w-6xl px-6 lg:px-8 py-14 sm:py-16">
-          <div className="flex items-baseline justify-between mb-8">
-            <div>
-              <h2 className="text-xl font-bold tracking-tight">Featured</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Hand-picked tools worth trying first
-              </p>
-            </div>
-            <Link href="/tools">
-              <Button variant="ghost" size="sm" className="gap-1 text-xs text-muted-foreground hover:text-foreground">
-                View all <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </Link>
-          </div>
-          <ToolGrid tools={featuredTools} />
+          <FeaturedSection initialTools={featuredTools} />
         </section>
       )}
 

@@ -1,120 +1,70 @@
 "use client";
 
-import { useState } from "react";
-import { ExternalLink, Maximize2, Minimize2, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { EmbedMode } from "@prisma/client";
+import { ToolAvatar } from "@/components/tool-avatar";
 
 interface ToolEmbedProps {
   name: string;
   url: string;
-  embedMode: EmbedMode;
-  embedUrl?: string | null;
-  embedConfig?: {
-    height?: string;
-    sandbox?: string;
-    allow?: string;
-  } | null;
+  iconUrl?: string | null;
+  screenshotUrl?: string | null;
 }
 
 export function ToolEmbed({
   name,
   url,
-  embedMode,
-  embedUrl,
-  embedConfig,
+  iconUrl,
+  screenshotUrl,
 }: ToolEmbedProps) {
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-
-  if (embedMode === "EXTERNAL" || hasError) {
+  if (screenshotUrl) {
     return (
-      <div className="flex flex-col items-center justify-center gap-5 bg-stone-50 p-16 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white border border-border text-foreground font-bold text-3xl shadow-sm">
-          {name[0]}
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold">{name}</h3>
-          <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
-            {hasError
-              ? "This tool doesn't allow embedding. Visit their site directly."
-              : "Open in a new tab to use this tool"}
-          </p>
-        </div>
-        <a href={url} target="_blank" rel="noopener noreferrer">
-          <Button size="lg" className="gap-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 active:translate-y-px">
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative block overflow-hidden"
+      >
+        <img
+          src={screenshotUrl}
+          alt={`${name} screenshot`}
+          className="w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
+          style={{ maxHeight: "32rem" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="flex items-center gap-2 rounded-xl bg-white/95 px-5 py-2.5 text-sm font-semibold text-stone-900 shadow-lg backdrop-blur-sm">
             Visit {name}
             <ArrowUpRight className="h-4 w-4" />
-          </Button>
-        </a>
-      </div>
+          </div>
+        </div>
+      </a>
     );
   }
 
-  const src = embedUrl || url;
-  const height = embedConfig?.height || "calc(100vh - 12rem)";
-  const sandbox =
-    embedConfig?.sandbox ||
-    "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox";
-  const allow = embedConfig?.allow || "clipboard-write; clipboard-read";
-
   return (
-    <div
-      className={
-        isFullscreen
-          ? "fixed inset-0 z-50 bg-background flex flex-col"
-          : "relative flex flex-col"
-      }
-    >
-      <div className="flex items-center justify-between border-b border-border/60 px-4 py-2 bg-stone-50">
-        <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-sm font-medium text-foreground">{name}</span>
-        </div>
-        <div className="flex items-center gap-0.5">
-          <a href={url} target="_blank" rel="noopener noreferrer">
-            <Button variant="ghost" size="sm" className="gap-1.5 text-xs h-7 text-muted-foreground hover:text-foreground">
-              Open <ExternalLink className="h-3 w-3" />
-            </Button>
-          </a>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-foreground"
-            onClick={() => setIsFullscreen(!isFullscreen)}
-          >
-            {isFullscreen ? (
-              <Minimize2 className="h-3.5 w-3.5" />
-            ) : (
-              <Maximize2 className="h-3.5 w-3.5" />
-            )}
-          </Button>
-        </div>
+    <div className="flex flex-col items-center justify-center gap-5 bg-stone-50 p-16 text-center">
+      <ToolAvatar
+        name={name}
+        url={url}
+        iconUrl={iconUrl}
+        className="h-20 w-20 rounded-2xl shadow-sm"
+      />
+      <div>
+        <h3 className="text-lg font-semibold">{name}</h3>
+        <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
+          Open in a new tab to use this tool
+        </p>
       </div>
-      <div className="relative flex-1" style={{ minHeight: isFullscreen ? 0 : height }}>
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-stone-50">
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-8 w-8 rounded-lg animate-shimmer" />
-              <span className="text-xs text-muted-foreground">Loading {name}...</span>
-            </div>
-          </div>
-        )}
-        <iframe
-          src={src}
-          sandbox={sandbox}
-          allow={allow}
-          className="h-full w-full border-0"
-          style={{ minHeight: isFullscreen ? "100%" : height }}
-          onLoad={() => setIsLoading(false)}
-          onError={() => {
-            setIsLoading(false);
-            setHasError(true);
-          }}
-          title={name}
-        />
-      </div>
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        <Button
+          size="lg"
+          className="gap-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 active:translate-y-px"
+        >
+          Visit {name}
+          <ArrowUpRight className="h-4 w-4" />
+        </Button>
+      </a>
     </div>
   );
 }

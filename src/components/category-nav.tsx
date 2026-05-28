@@ -9,9 +9,14 @@ import {
   TrendingUp,
   BarChart3,
   Zap,
-  Plug,
   Rocket,
   Shield,
+  MessageSquare,
+  Briefcase,
+  FolderOpen,
+  GraduationCap,
+  Wrench,
+  Workflow,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -25,9 +30,14 @@ const categoryIcons: Record<string, LucideIcon> = {
   "seo-marketing": TrendingUp,
   "data-analytics": BarChart3,
   productivity: Zap,
-  "api-integration": Plug,
   "deploy-hosting": Rocket,
   "security-privacy": Shield,
+  communication: MessageSquare,
+  business: Briefcase,
+  automation: Workflow,
+  "file-management": FolderOpen,
+  education: GraduationCap,
+  utilities: Wrench,
 };
 
 interface CategoryItem {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 
 export function Footer() {
   return (
@@ -7,9 +8,7 @@ export function Footer() {
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-[10px]">
-                T
-              </div>
+              <Logo size={24} />
               <span className="font-bold tracking-tight">Toools</span>
             </div>
             <p className="mt-2 text-sm text-muted-foreground max-w-xs leading-relaxed">

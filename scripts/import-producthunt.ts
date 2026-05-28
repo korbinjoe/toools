@@ -92,6 +92,15 @@ async function fetchPosts(topic: string, cursor: string | null, first: number): 
     }),
   });
 
+  if (res.status === 429) {
+    const text = await res.text();
+    const match = text.match(/"reset_in":(\d+)/);
+    const waitSec = match ? parseInt(match[1], 10) : 900;
+    console.log(`  Rate limited. Waiting ${waitSec}s...`);
+    await new Promise((r) => setTimeout(r, waitSec * 1000));
+    return fetchPosts(topic, cursor, first);
+  }
+
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`PH API error ${res.status}: ${text}`);

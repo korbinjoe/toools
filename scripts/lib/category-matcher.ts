@@ -5,16 +5,18 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
   ],
   design: [
     "design", "ui", "ux", "prototyping", "figma", "sketch", "color",
-    "typography", "icon", "illustration", "wireframe", "mockup",
+    "typography", "icon", "illustration", "wireframe", "mockup", "font",
+    "css", "graphic", "svg",
   ],
   development: [
     "developer-tools", "code", "editor", "ide", "programming", "sdk",
     "framework", "library", "debugging", "testing", "git", "terminal",
-    "cli", "devtools", "sandbox",
+    "cli", "devtools", "sandbox", "linter", "lint", "formatter",
+    "compiler", "transpiler", "refactor", "snippet", "boilerplate",
   ],
   "writing-notes": [
     "writing", "note", "documentation", "markdown", "wiki", "knowledge-base",
-    "journal", "text-editor", "blogging", "cms",
+    "journal", "text-editor", "blogging", "cms", "content-management",
   ],
   "image-media": [
     "image", "photo", "graphics", "svg", "png", "compression", "editing",
@@ -31,23 +33,52 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
   "data-analytics": [
     "analytics", "dashboard", "data", "visualization", "bi",
     "business-intelligence", "spreadsheet", "database", "sql", "charts",
+    "reporting", "metrics", "log-management",
   ],
   productivity: [
-    "productivity", "task-management", "calendar", "project-management",
-    "collaboration", "workflow", "automation", "time-tracking", "meeting",
-    "todo", "kanban",
+    "productivity", "task-management", "project-management",
+    "collaboration", "time-tracking", "todo", "kanban", "agile",
   ],
-  "api-integration": [
-    "api", "integration", "webhook", "rest", "graphql", "automation",
-    "zapier", "middleware", "connector", "sdk",
+  automation: [
+    "automation", "workflow", "no-code", "low-code", "integration",
+    "api", "webhook", "rest", "graphql", "zapier", "middleware",
+    "connector", "scheduler", "cron", "pipeline", "orchestration",
+    "etl", "rpa",
   ],
   "deploy-hosting": [
     "hosting", "deploy", "deployment", "cloud", "serverless", "cdn",
     "infrastructure", "devops", "ci-cd", "container", "docker", "kubernetes",
+    "web-server", "reverse-proxy",
   ],
   "security-privacy": [
     "security", "privacy", "password", "encryption", "vpn", "authentication",
-    "firewall", "vulnerability", "compliance", "audit",
+    "firewall", "vulnerability", "compliance", "audit", "sso", "oauth",
+  ],
+  communication: [
+    "chat", "messaging", "email", "forum", "discussion", "voice",
+    "video-call", "conference", "social-network", "fediverse",
+    "matrix", "xmpp", "irc", "notification", "real-time",
+  ],
+  business: [
+    "crm", "sales", "invoice", "accounting", "billing", "payroll",
+    "expense", "budget", "finance", "payment", "helpdesk", "ticketing",
+    "support", "hr", "employee", "ecommerce", "e-commerce", "store",
+    "inventory", "erp", "booking", "reservation", "appointment",
+  ],
+  "file-management": [
+    "file-manager", "storage", "backup", "sync", "file-sharing",
+    "cloud-storage", "file-hosting", "media-server", "photo-gallery",
+    "torrent", "downloader", "pastebin",
+  ],
+  education: [
+    "learning", "education", "course", "lms", "quiz", "classroom",
+    "student", "teacher", "training", "flashcard",
+  ],
+  utilities: [
+    "utility", "tool", "converter", "calculator", "browser",
+    "launcher", "window-manager", "clipboard", "pdf", "archive",
+    "bookmark", "rss", "feed-reader", "timer", "clock", "calendar",
+    "translate", "weather", "health", "fitness",
   ],
 };
 
@@ -56,7 +87,7 @@ export function matchCategory(hints: string[]): string {
     h.toLowerCase().replace(/[^a-z0-9-]/g, "-")
   );
 
-  let bestMatch = "productivity";
+  let bestMatch = "utilities";
   let bestScore = 0;
 
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
@@ -109,7 +140,15 @@ export const PH_TOPIC_MAP: Record<string, string> = {
   "audio": "video-audio",
   "writing-tools": "writing-notes",
   "note-taking": "writing-notes",
-  "api": "api-integration",
-  "no-code": "api-integration",
-  "automation": "api-integration",
+  "api": "automation",
+  "no-code": "automation",
+  "automation": "automation",
+  "messaging": "communication",
+  "social-networking": "communication",
+  "email": "communication",
+  "fintech": "business",
+  "e-commerce": "business",
+  "customer-communication": "business",
+  "education": "education",
+  "file-sharing": "file-management",
 };

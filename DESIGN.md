@@ -9,6 +9,28 @@ A confident, tool-workshop atmosphere — like walking into a well-organized mak
 - **Motion:** 6 — Fluid CSS transitions with spring-feel micro-interactions
 - **Creativity:** 8 — Distinctive personality without being distracting
 
+## Logo — 漆器描金 (Gold-Inlaid Lacquerware)
+
+The logo references the single most premium Chinese craft pairing: aged gold on deep lacquer.
+Three identical gold dots echo the three "o"s in Toools. No multi-color. One material. One surface.
+
+### Logo Colors
+- **玄漆 (Xuan Lacquer)** `#18181F` — Background. Cool-leaning near-black with a whisper of indigo depth, like aged lacquer under gallery light. The cool undertone prevents muddiness when paired with warm gold. NOT warm-muddy stone (#1C1917 ✗). NOT generic neutral (#111111 ✗).
+- **古金 (Aged Gold)** `#C4A862` — Dot fill, all three identical. The color of Forbidden City gilt bronze after centuries — warm, matte, zero shininess. Saturation ~55%, luminance ~68%.
+
+### Why This Combination
+- **Temperature contrast**: cool dark + warm gold = visual tension without conflict (warm-on-warm = mud)
+- **Material quality**: reads as a real surface, not a "color scheme"
+- **Single accent**: one color does all the work — maximum restraint
+
+### Logo Anti-Patterns
+- No multi-color dots (traffic light) — one accent maximum
+- No warm-toned backgrounds (#1C1917) — causes mud with warm accents
+- No celadon/teal (#7FAAAF) — reads as generic "Asian themed"
+- No vermillion (#C14332) — reads as Chinese restaurant menu
+- No cream/off-white dots (#EDE6DA) — zero presence, unfinished
+- Brand text "Toools" stays plain foreground — logo mark is the sole color carrier
+
 ## 2. Color Palette & Roles
 
 - **Canvas** (#FAFAF9) — Primary background, warm stone-white

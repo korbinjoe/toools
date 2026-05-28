@@ -15,10 +15,6 @@ const pricingOptions = [
   { value: "PAID", label: "Paid" },
 ];
 
-const embedOptions = [
-  { value: "embeddable", label: "Use In-Site" },
-];
-
 function Chip({
   label,
   active,
@@ -50,8 +46,6 @@ export function FilterPanel({ categories }: FilterPanelProps) {
 
   const currentCategory = searchParams.get("category") || "";
   const currentPricing = searchParams.get("pricing") || "";
-  const currentEmbed = searchParams.get("embed") || "";
-
   const setFilter = useCallback(
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -86,37 +80,19 @@ export function FilterPanel({ categories }: FilterPanelProps) {
         </div>
       </div>
 
-      <div className="flex gap-8">
-        <div>
-          <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2.5">
-            Pricing
-          </h4>
-          <div className="flex flex-wrap gap-1.5">
-            {pricingOptions.map((opt) => (
-              <Chip
-                key={opt.value}
-                label={opt.label}
-                active={currentPricing === opt.value}
-                onClick={() => setFilter("pricing", opt.value)}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2.5">
-            Experience
-          </h4>
-          <div className="flex flex-wrap gap-1.5">
-            {embedOptions.map((opt) => (
-              <Chip
-                key={opt.value}
-                label={opt.label}
-                active={currentEmbed === opt.value}
-                onClick={() => setFilter("embed", opt.value)}
-              />
-            ))}
-          </div>
+      <div>
+        <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2.5">
+          Pricing
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          {pricingOptions.map((opt) => (
+            <Chip
+              key={opt.value}
+              label={opt.label}
+              active={currentPricing === opt.value}
+              onClick={() => setFilter("pricing", opt.value)}
+            />
+          ))}
         </div>
       </div>
     </div>

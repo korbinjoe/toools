@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -21,9 +23,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-xs transition-transform duration-200 group-hover:scale-105">
-            T
-          </div>
+          <Logo size={28} className="transition-transform duration-200 group-hover:scale-105" />
           <span className="text-lg font-bold tracking-tight text-foreground">
             Toools
           </span>
@@ -63,6 +63,7 @@ export function Header() {
               <Search className="h-4 w-4" />
             </Button>
           </Link>
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="icon"

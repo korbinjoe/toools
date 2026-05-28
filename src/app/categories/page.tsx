@@ -18,7 +18,7 @@ export default async function CategoriesPage() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12">
+    <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12 min-h-[calc(100dvh-8rem)]">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">Categories</h1>
         <p className="text-sm text-muted-foreground mt-1">

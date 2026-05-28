@@ -4,15 +4,18 @@ import { Suspense } from "react";
 import { SearchBar } from "@/components/search-bar";
 import { FilterPanel } from "@/components/filter-panel";
 import { ToolGrid } from "@/components/tool-grid";
+import { Pagination } from "@/components/pagination";
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
+
+const PAGE_SIZE = 24;
 
 interface ToolsPageProps {
   searchParams: Promise<{
     q?: string;
     category?: string;
     pricing?: string;
-    embed?: string;
+    page?: string;
   }>;
 }
 
@@ -23,15 +26,12 @@ async function getCategories() {
   });
 }
 
-async function getTools(params: {
+function buildWhere(params: {
   q?: string;
   category?: string;
   pricing?: string;
-  embed?: string;
-}) {
-  const where: Prisma.ToolWhereInput = {
-    status: "APPROVED",
-  };
+}): Prisma.ToolWhereInput {
+  const where: Prisma.ToolWhereInput = { status: "APPROVED" };
 
   if (params.q) {
     where.OR = [
@@ -48,34 +48,49 @@ async function getTools(params: {
     where.pricing = params.pricing as Prisma.EnumPricingFilter["equals"];
   }
 
-  if (params.embed === "embeddable") {
-    where.embedMode = { in: ["IFRAME", "API"] };
-  }
+  return where;
+}
 
-  return prisma.tool.findMany({
-    where,
-    include: {
-      category: { select: { name: true, slug: true } },
-      tags: { include: { tag: { select: { name: true } } } },
-    },
-    orderBy: [{ featured: "desc" }, { viewCount: "desc" }],
-  });
+async function getTools(
+  where: Prisma.ToolWhereInput,
+  page: number,
+) {
+  const [tools, total] = await Promise.all([
+    prisma.tool.findMany({
+      where,
+      include: {
+        category: { select: { name: true, slug: true } },
+        tags: { include: { tag: { select: { name: true } } } },
+      },
+      orderBy: [{ featured: "desc" }, { viewCount: "desc" }],
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.tool.count({ where }),
+  ]);
+
+  return { tools, total };
 }
 
 export default async function ToolsPage({ searchParams }: ToolsPageProps) {
   const params = await searchParams;
-  const [tools, categories] = await Promise.all([
-    getTools(params),
+  const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
+  const where = buildWhere(params);
+
+  const [{ tools, total }, categories] = await Promise.all([
+    getTools(where, page),
     getCategories(),
   ]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">Browse Tools</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          <span className="font-mono tabular-nums">{tools.length}</span>
-          {" "}tool{tools.length !== 1 ? "s" : ""}
+          <span className="font-mono tabular-nums">{total}</span>
+          {" "}tool{total !== 1 ? "s" : ""}
           {params.q && (
             <span> matching <span className="text-foreground font-medium">&ldquo;{params.q}&rdquo;</span></span>
           )}
@@ -93,6 +108,7 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
 
         <div className="pt-2">
           <ToolGrid tools={tools} />
+          <Pagination currentPage={page} totalPages={totalPages} />
         </div>
       </div>
     </div>

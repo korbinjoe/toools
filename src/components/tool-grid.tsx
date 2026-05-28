@@ -1,5 +1,5 @@
 import { ToolCard } from "./tool-card";
-import type { EmbedMode, Pricing } from "@prisma/client";
+import type { Pricing } from "@prisma/client";
 
 export interface ToolItem {
   slug: string;
@@ -10,7 +10,6 @@ export interface ToolItem {
   category: { name: string; slug: string };
   tags: { tag: { name: string } }[];
   pricing: Pricing;
-  embedMode: EmbedMode;
 }
 
 export function ToolGrid({ tools }: { tools: ToolItem[] }) {
@@ -43,7 +42,6 @@ export function ToolGrid({ tools }: { tools: ToolItem[] }) {
             category={tool.category}
             tags={tool.tags.map((t) => ({ name: t.tag.name }))}
             pricing={tool.pricing}
-            embedMode={tool.embedMode}
           />
         </div>
       ))}

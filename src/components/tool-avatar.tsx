@@ -50,7 +50,7 @@ export function ToolAvatar({ name, url, iconUrl, className = "" }: ToolAvatarPro
     <img
       src={src}
       alt=""
-      className={`rounded-xl object-contain shrink-0 bg-white ${className}`}
+      className={`rounded-xl object-contain shrink-0 bg-card ${className}`}
       onError={() => {
         if (stage === "primary") {
           setStage("google");

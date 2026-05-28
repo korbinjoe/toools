@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ExternalLink, Zap } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { ToolAvatar } from "./tool-avatar";
-import type { EmbedMode, Pricing } from "@prisma/client";
+import type { Pricing } from "@prisma/client";
 
 interface ToolCardProps {
   slug: string;
@@ -12,7 +12,6 @@ interface ToolCardProps {
   category: { name: string; slug: string };
   tags: { name: string }[];
   pricing: Pricing;
-  embedMode: EmbedMode;
 }
 
 const pricingConfig: Record<Pricing, { text: string; className: string }> = {
@@ -31,10 +30,8 @@ export function ToolCard({
   category,
   tags,
   pricing,
-  embedMode,
 }: ToolCardProps) {
   const p = pricingConfig[pricing];
-  const canEmbed = embedMode !== "EXTERNAL";
 
   return (
     <Link href={`/tools/${slug}`} className="group block">
@@ -42,24 +39,14 @@ export function ToolCard({
         <div className="flex items-start gap-3.5">
           <ToolAvatar name={name} url={url} iconUrl={iconUrl} className="h-10 w-10" />
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-[15px] leading-tight truncate group-hover:text-primary transition-colors duration-200">
-                {name}
-              </h3>
-              {canEmbed && (
-                <span className="flex items-center gap-0.5 shrink-0 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
-                  <Zap className="h-2.5 w-2.5" />
-                  Live
-                </span>
-              )}
-            </div>
+            <h3 className="font-semibold text-[15px] leading-tight truncate group-hover:text-primary transition-colors duration-200">
+              {name}
+            </h3>
             <span className="text-xs text-muted-foreground">
               {category.name}
             </span>
           </div>
-          {!canEmbed && (
-            <ExternalLink className="h-3.5 w-3.5 text-stone-300 shrink-0 mt-0.5" />
-          )}
+          <ArrowUpRight className="h-3.5 w-3.5 text-stone-300 group-hover:text-primary shrink-0 mt-0.5 transition-colors duration-200" />
         </div>
 
         <p className="mt-3 text-sm text-muted-foreground leading-relaxed line-clamp-2">
