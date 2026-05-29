@@ -39,7 +39,7 @@ export function SearchBar({
       <input
         type="search"
         placeholder={placeholder}
-        className="h-11 w-full rounded-xl border border-border bg-card pl-10 pr-4 text-sm shadow-sm outline-none transition-all duration-200 placeholder:text-stone-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
+        className="h-11 w-full rounded-xl border border-border bg-card pl-10 pr-4 text-sm shadow-sm outline-none transition-all duration-200 placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
         value={value}
         onChange={(e) => handleSearch(e.target.value)}
         data-pending={isPending ? "" : undefined}

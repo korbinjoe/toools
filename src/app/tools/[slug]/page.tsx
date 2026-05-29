@@ -59,10 +59,10 @@ export async function generateMetadata({
 }
 
 const pricingConfig: Record<string, { text: string; className: string }> = {
-  FREE: { text: "Free", className: "bg-emerald-50 text-emerald-700" },
-  FREEMIUM: { text: "Freemium", className: "bg-amber-50 text-amber-700" },
-  PAID: { text: "Paid", className: "bg-stone-100 text-stone-600" },
-  OPEN_SOURCE: { text: "Open Source", className: "bg-sky-50 text-sky-700" },
+  FREE: { text: "Free", className: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400" },
+  FREEMIUM: { text: "Freemium", className: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
+  PAID: { text: "Paid", className: "bg-muted text-muted-foreground" },
+  OPEN_SOURCE: { text: "Open Source", className: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400" },
 };
 
 export default async function ToolPage({ params }: ToolPageProps) {
@@ -97,7 +97,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
             <p className="mt-1 text-muted-foreground leading-relaxed">{tool.tagline}</p>
             <div className="mt-3 flex flex-wrap items-center gap-1.5">
               <Link href={`/categories/${tool.category.slug}`}>
-                <span className="inline-flex rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-600 hover:bg-stone-200 transition-colors">
+                <span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:bg-accent transition-colors">
                   {tool.category.name}
                 </span>
               </Link>
@@ -105,7 +105,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
                 {p.text}
               </span>
               {tool.tags.map(({ tag }) => (
-                <span key={tag.id} className="inline-flex rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-500">
+                <span key={tag.id} className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                   {tag.name}
                 </span>
               ))}
@@ -115,14 +115,14 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
         <div className="flex items-center gap-2 shrink-0">
           <a href={tool.url} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm" className="gap-1.5 rounded-lg border-border hover:border-stone-300">
+            <Button variant="outline" size="sm" className="gap-1.5 rounded-lg border-border hover:border-border">
               Visit Website
               <ArrowUpRight className="h-3.5 w-3.5" />
             </Button>
           </a>
           {tool.github && (
             <a href={tool.github} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm" className="gap-1.5 rounded-lg border-border hover:border-stone-300">
+              <Button variant="outline" size="sm" className="gap-1.5 rounded-lg border-border hover:border-border">
                 GitHub
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Button>
@@ -146,7 +146,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
           </span>
           <div className="flex flex-wrap gap-1">
             {tool.platforms.map((platform) => (
-              <span key={platform} className="inline-flex rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-500">
+              <span key={platform} className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                 {platform}
               </span>
             ))}

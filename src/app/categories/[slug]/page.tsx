@@ -68,7 +68,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <div className="mb-8">
         <div className="flex items-center gap-3">
           {category.icon && (
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100 text-2xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-2xl">
               {category.icon}
             </div>
           )}

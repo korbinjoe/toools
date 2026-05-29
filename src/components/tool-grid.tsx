@@ -16,7 +16,7 @@ export function ToolGrid({ tools }: { tools: ToolItem[] }) {
   if (tools.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100 text-stone-400 text-2xl mb-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground/50 text-2xl mb-4">
           ?
         </div>
         <p className="text-muted-foreground text-sm">No tools match your filters.</p>

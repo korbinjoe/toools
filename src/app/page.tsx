@@ -78,7 +78,7 @@ export default async function HomePage() {
                     type="search"
                     name="q"
                     placeholder="Search by name or use case..."
-                    className="h-12 w-full rounded-xl border border-border bg-card pl-11 pr-28 text-sm shadow-sm outline-none transition-all duration-200 placeholder:text-stone-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
+                    className="h-12 w-full rounded-xl border border-border bg-card pl-11 pr-28 text-sm shadow-sm outline-none transition-all duration-200 placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                   />
                   <Button
                     type="submit"
@@ -113,7 +113,7 @@ export default async function HomePage() {
                     href={`/categories/${cat.slug}`}
                     className="group flex items-center gap-2.5 rounded-xl border border-border/80 bg-card p-3.5 transition-all duration-200 hover:border-primary/30 hover:shadow-sm"
                   >
-                    <CategoryIcon slug={cat.slug} className="h-4.5 w-4.5 text-stone-500 group-hover:text-primary transition-colors shrink-0" />
+                    <CategoryIcon slug={cat.slug} className="h-4.5 w-4.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                     <div className="min-w-0">
                       <span className="text-xs font-semibold truncate block group-hover:text-primary transition-colors">
                         {cat.name}
@@ -139,7 +139,7 @@ export default async function HomePage() {
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="border-y border-border/60 bg-stone-50/50">
+        <section className="border-y border-border/60 bg-muted/50">
           <div className="mx-auto w-full max-w-6xl px-6 lg:px-8 py-14 sm:py-16">
             <div className="flex items-baseline justify-between mb-8">
               <div>

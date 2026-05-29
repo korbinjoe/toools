@@ -66,8 +66,8 @@ export function CategoryGrid({ categories }: { categories: CategoryItem[] }) {
             style={{ animationDelay: `${i * 40}ms` }}
           >
             <div className="flex items-center gap-3 rounded-xl border border-border/80 bg-card p-4 transition-all duration-200 hover:bg-accent/40 hover:border-primary/30 hover:shadow-[0_2px_8px_rgba(217,119,6,0.06)]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-stone-100 shrink-0 transition-transform duration-200 group-hover:scale-105">
-                <Icon className="h-5 w-5 text-stone-600 group-hover:text-primary transition-colors duration-200" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted shrink-0 transition-transform duration-200 group-hover:scale-105">
+                <Icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
               </div>
               <div className="min-w-0">
                 <h3 className="text-sm font-semibold truncate group-hover:text-primary transition-colors duration-200">

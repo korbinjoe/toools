@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ToolCard } from "./tool-card";
 import type { ToolItem } from "./tool-grid";
 
@@ -56,13 +58,18 @@ export function FeaturedSection({
         </div>
         <button
           onClick={refresh}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-stone-100 transition-colors"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           aria-label="Refresh featured tools"
         >
           <RefreshCw
             className={`h-4 w-4 ${spinning ? "animate-spin" : ""}`}
           />
         </button>
+        <Link href="/tools">
+          <Button variant="ghost" size="sm" className="gap-1 text-xs text-muted-foreground hover:text-foreground">
+            View all <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
+        </Link>
       </div>
 
       <div

@@ -31,7 +31,7 @@ function Chip({
         "inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 min-h-[32px] active:scale-[0.97]",
         active
           ? "bg-primary text-primary-foreground shadow-sm"
-          : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+          : "bg-muted text-muted-foreground hover:bg-accent"
       )}
     >
       {label}

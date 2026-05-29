@@ -21,22 +21,29 @@ function getGoogleFaviconUrl(domain: string, size: number = 64): string {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
 }
 
+const SKIP_FAVICON_DOMAINS = ["producthunt.com", "www.producthunt.com"];
+
 function isReliableIconUrl(iconUrl: string | null | undefined): boolean {
   if (!iconUrl) return false;
   if (iconUrl.endsWith("/favicon.ico")) return false;
   return true;
 }
 
+function shouldSkipGoogleFavicon(domain: string): boolean {
+  return SKIP_FAVICON_DOMAINS.includes(domain);
+}
+
 export function ToolAvatar({ name, url, iconUrl, className = "" }: ToolAvatarProps) {
   const hasReliableIcon = isReliableIconUrl(iconUrl);
-  const [stage, setStage] = useState<"primary" | "google" | "letter">(
-    hasReliableIcon ? "primary" : "google"
-  );
   const domain = getDomain(url);
+  const skipGoogle = shouldSkipGoogleFavicon(domain);
+  const [stage, setStage] = useState<"primary" | "google" | "letter">(
+    hasReliableIcon ? "primary" : skipGoogle ? "letter" : "google"
+  );
 
   if (stage === "letter") {
     return (
-      <div className={`flex items-center justify-center rounded-xl bg-stone-100 text-stone-500 font-semibold text-base shrink-0 ${className}`}>
+      <div className={`flex items-center justify-center rounded-xl bg-muted text-muted-foreground font-semibold text-base shrink-0 ${className}`}>
         {name[0]}
       </div>
     );

@@ -33,7 +33,7 @@ export function ToolEmbed({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="flex items-center gap-2 rounded-xl bg-white/95 px-5 py-2.5 text-sm font-semibold text-stone-900 shadow-lg backdrop-blur-sm">
+          <div className="flex items-center gap-2 rounded-xl bg-background/95 px-5 py-2.5 text-sm font-semibold text-foreground shadow-lg backdrop-blur-sm">
             Visit {name}
             <ArrowUpRight className="h-4 w-4" />
           </div>
@@ -43,7 +43,7 @@ export function ToolEmbed({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-5 bg-stone-50 p-16 text-center">
+    <div className="flex flex-col items-center justify-center gap-5 bg-muted/50 p-16 text-center">
       <ToolAvatar
         name={name}
         url={url}

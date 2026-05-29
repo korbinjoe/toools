@@ -39,10 +39,10 @@ function Field({
 }
 
 const inputClass =
-  "h-11 w-full rounded-xl border border-border bg-card px-3.5 text-sm outline-none transition-all duration-200 placeholder:text-stone-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/40";
+  "h-11 w-full rounded-xl border border-border bg-card px-3.5 text-sm outline-none transition-all duration-200 placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/20 focus:border-primary/40";
 
 const textareaClass =
-  "w-full rounded-xl border border-border bg-card px-3.5 py-3 text-sm outline-none transition-all duration-200 placeholder:text-stone-400 focus:ring-2 focus:ring-primary/20 focus:border-primary/40 resize-none";
+  "w-full rounded-xl border border-border bg-card px-3.5 py-3 text-sm outline-none transition-all duration-200 placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/20 focus:border-primary/40 resize-none";
 
 export function SubmitForm({ categories }: SubmitFormProps) {
   const [state, formAction, isPending] = useActionState(submitTool, {
@@ -53,8 +53,8 @@ export function SubmitForm({ categories }: SubmitFormProps) {
   if (state.success) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-card p-14 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50">
-          <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/40">
+          <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
         </div>
         <h2 className="text-lg font-semibold">Tool Submitted</h2>
         <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
