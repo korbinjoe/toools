@@ -9,22 +9,24 @@ export function Logo({ size = 28, className = "" }: { size?: number; className?:
       aria-hidden="true"
     >
       <rect width="256" height="256" rx="51" fill="#18181F" />
-      <circle cx="128" cy="128" r="56" stroke="#C4A862" strokeWidth="5" />
-      <circle cx="128" cy="128" r="30" stroke="#C4A862" strokeWidth="3.5" />
-      <line x1="62" y1="128" x2="194" y2="128" stroke="#C4A862" strokeWidth="4" />
-      <line x1="128" y1="62" x2="128" y2="194" stroke="#C4A862" strokeWidth="4" />
-      <circle cx="128" cy="128" r="8" fill="#C4A862" />
+      <g transform="translate(54 28) scale(2)">
+        <path
+          fillRule="evenodd"
+          d="M0 10h74v24H48v56H24V34H0zM24 10l14 0-14 22z"
+          fill="white"
+        />
+      </g>
     </svg>
   );
 }
 
 export function Wordmark({ height = 24, className = "" }: { height?: number; className?: string }) {
-  const width = Math.round(height * 4.5);
+  const width = Math.round(height * 4.1);
   return (
     <svg
       width={width}
       height={height}
-      viewBox="0 0 450 100"
+      viewBox="0 0 410 100"
       className={className}
       aria-label="Toools"
       role="img"
@@ -34,12 +36,12 @@ export function Wordmark({ height = 24, className = "" }: { height?: number; cla
         d="M0 10h74v24H48v56H24V34H0zM24 10l14 0-14 22z"
         fill="currentColor"
       />
-      <circle cx="124" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="24" />
-      <circle cx="214" cy="50" r="28" fill="none" stroke="currentColor" strokeWidth="24" />
-      <circle cx="304" cy="50" r="28" fill="none" stroke="var(--primary)" strokeWidth="24" />
-      <rect x="354" y="10" width="24" height="80" fill="currentColor" />
+      <circle cx="118" cy="56" r="22" fill="none" stroke="currentColor" strokeWidth="24" />
+      <circle cx="196" cy="56" r="22" fill="none" stroke="currentColor" strokeWidth="24" />
+      <circle cx="274" cy="56" r="22" fill="none" stroke="var(--primary)" strokeWidth="24" />
+      <rect x="318" y="10" width="24" height="80" fill="currentColor" />
       <path
-        d="M428 26c0-6-4-8-12-8-12 0-18 6-18 16s6 12 16 16 20 8 20 18-8 16-18 16c-10 0-18-6-18-14"
+        d="M384 38c0-4-3-6-9-6-9 0-13 4-13 12s4 9 12 12 15 6 15 13-6 12-13 12c-7 0-13-4-13-10"
         fill="none"
         stroke="currentColor"
         strokeWidth="20"
