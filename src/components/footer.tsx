@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "@/components/logo";
+import { Wordmark } from "@/components/logo";
 
 export function Footer() {
   return (
@@ -7,10 +7,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-6 py-10 lg:px-8">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <div className="flex items-center gap-2.5">
-              <Logo size={24} />
-              <span className="font-bold tracking-tight">Toools</span>
-            </div>
+            <Wordmark height={20} className="text-foreground" />
             <p className="mt-2 text-sm text-muted-foreground max-w-xs leading-relaxed">
               A curated workspace of tools you can try right here, or find the right one for your workflow.
             </p>
