@@ -45,6 +45,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
       <button
         onClick={() => goToPage(currentPage - 1)}
         disabled={currentPage <= 1}
+        aria-label="Previous page"
         className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
       >
         <ChevronLeft className="h-4 w-4" />
@@ -62,6 +63,8 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
           <button
             key={p}
             onClick={() => goToPage(p)}
+            aria-label={`Page ${p}`}
+            aria-current={p === currentPage ? "page" : undefined}
             className={cn(
               "inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors",
               p === currentPage
@@ -77,6 +80,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
       <button
         onClick={() => goToPage(currentPage + 1)}
         disabled={currentPage >= totalPages}
+        aria-label="Next page"
         className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
       >
         <ChevronRight className="h-4 w-4" />

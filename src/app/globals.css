@@ -135,6 +135,11 @@
   .text-balance {
     text-wrap: balance;
   }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
 }
 
 @keyframes fade-in-up {

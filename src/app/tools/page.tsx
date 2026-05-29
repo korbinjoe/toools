@@ -16,6 +16,7 @@ interface ToolsPageProps {
     category?: string;
     pricing?: string;
     page?: string;
+    focus?: string;
   }>;
 }
 
@@ -99,7 +100,7 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
 
       <div className="space-y-6">
         <Suspense fallback={<div className="h-11 rounded-xl animate-shimmer" />}>
-          <SearchBar defaultValue={params.q || ""} placeholder="Search tools..." />
+          <SearchBar defaultValue={params.q || ""} placeholder="Search tools..." autoFocus={params.focus === "search"} />
         </Suspense>
 
         <Suspense fallback={<div className="h-20 rounded-xl animate-shimmer" />}>

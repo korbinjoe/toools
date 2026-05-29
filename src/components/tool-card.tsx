@@ -34,8 +34,8 @@ export function ToolCard({
   const p = pricingConfig[pricing];
 
   return (
-    <Link href={`/tools/${slug}`} className="group block">
-      <article className="relative h-full rounded-2xl border border-border/80 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-border hover:-translate-y-0.5">
+    <Link href={`/tools/${slug}`} className="group block h-full">
+      <article className="relative h-full flex flex-col rounded-2xl border border-border/80 bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-border hover:-translate-y-0.5">
         <div className="flex items-start gap-3.5">
           <ToolAvatar name={name} url={url} iconUrl={iconUrl} className="h-10 w-10" />
           <div className="min-w-0 flex-1">
@@ -49,7 +49,7 @@ export function ToolCard({
           <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary shrink-0 mt-0.5 transition-colors duration-200" />
         </div>
 
-        <p className="mt-3 text-sm text-muted-foreground leading-relaxed line-clamp-2">
+        <p className="mt-3 text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-1">
           {tagline}
         </p>
 

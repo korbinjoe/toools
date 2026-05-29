@@ -43,26 +43,23 @@ export function ToolEmbed({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-5 bg-muted/50 p-16 text-center">
+    <div className="flex items-center gap-5 bg-muted/50 p-6 sm:p-8">
       <ToolAvatar
         name={name}
         url={url}
         iconUrl={iconUrl}
-        className="h-20 w-20 rounded-2xl shadow-sm"
+        className="h-14 w-14 rounded-xl shadow-sm shrink-0"
       />
-      <div>
-        <h3 className="text-lg font-semibold">{name}</h3>
-        <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
+      <div className="flex-1 min-w-0">
+        <h3 className="text-base font-semibold">{name}</h3>
+        <p className="text-sm text-muted-foreground mt-0.5">
           Open in a new tab to use this tool
         </p>
       </div>
-      <a href={url} target="_blank" rel="noopener noreferrer">
-        <Button
-          size="lg"
-          className="gap-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 active:translate-y-px"
-        >
+      <a href={url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+        <Button className="gap-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 active:translate-y-px">
           Visit {name}
-          <ArrowUpRight className="h-4 w-4" />
+          <ArrowUpRight className="h-3.5 w-3.5" />
         </Button>
       </a>
     </div>

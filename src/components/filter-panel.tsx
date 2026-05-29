@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useCallback, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 
 interface FilterPanelProps {
   categories: { slug: string; name: string }[];
@@ -39,10 +39,13 @@ function Chip({
   );
 }
 
+const COLLAPSED_COUNT = 8;
+
 export function FilterPanel({ categories }: FilterPanelProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+  const [expanded, setExpanded] = useState(false);
 
   const currentCategory = searchParams.get("category") || "";
   const currentPricing = searchParams.get("pricing") || "";
@@ -59,8 +62,12 @@ export function FilterPanel({ categories }: FilterPanelProps) {
         router.push(`/tools?${params.toString()}`);
       });
     },
-    [router, searchParams]
+    [router, searchParams],
   );
+
+  const hasActiveOutside = !expanded && categories.slice(COLLAPSED_COUNT).some((c) => c.slug === currentCategory);
+  const visibleCategories = expanded || hasActiveOutside ? categories : categories.slice(0, COLLAPSED_COUNT);
+  const canCollapse = categories.length > COLLAPSED_COUNT;
 
   return (
     <div className="space-y-4">
@@ -69,7 +76,7 @@ export function FilterPanel({ categories }: FilterPanelProps) {
           Category
         </h4>
         <div className="flex flex-wrap gap-1.5">
-          {categories.map((cat) => (
+          {visibleCategories.map((cat) => (
             <Chip
               key={cat.slug}
               label={cat.name}
@@ -77,6 +84,14 @@ export function FilterPanel({ categories }: FilterPanelProps) {
               onClick={() => setFilter("category", cat.slug)}
             />
           ))}
+          {canCollapse && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors min-h-[32px]"
+            >
+              {expanded ? "Show less" : `+${categories.length - COLLAPSED_COUNT} more`}
+            </button>
+          )}
         </div>
       </div>
 

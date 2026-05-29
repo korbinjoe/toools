@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolEmbed } from "@/components/tool-embed";
 import { ToolAvatar } from "@/components/tool-avatar";
@@ -81,12 +81,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-8 sm:py-10">
-      <Link href="/tools">
-        <Button variant="ghost" size="sm" className="gap-1.5 mb-6 -ml-2 text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back
-        </Button>
-      </Link>
+      <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-6" aria-label="Breadcrumb">
+        <Link href="/tools" className="hover:text-foreground transition-colors">Tools</Link>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <Link href={`/categories/${tool.category.slug}`} className="hover:text-foreground transition-colors">{tool.category.name}</Link>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <span className="text-foreground font-medium truncate max-w-[200px]">{tool.name}</span>
+      </nav>
 
       {/* Header */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between mb-8">
@@ -104,7 +105,9 @@ export default async function ToolPage({ params }: ToolPageProps) {
               <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${p.className}`}>
                 {p.text}
               </span>
-              {tool.tags.map(({ tag }) => (
+              {tool.tags
+                .filter(({ tag }) => tag.name.toLowerCase() !== tool.category.name.toLowerCase())
+                .map(({ tag }) => (
                 <span key={tag.id} className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                   {tag.name}
                 </span>

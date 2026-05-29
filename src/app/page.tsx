@@ -103,6 +103,19 @@ export default async function HomePage() {
                   Categories
                 </Link>
               </div>
+
+              <div className="mt-5 flex gap-2 overflow-x-auto pb-2 -mx-6 px-6 lg:hidden scrollbar-none">
+                {categories.slice(0, 8).map((cat) => (
+                  <Link
+                    key={cat.slug}
+                    href={`/categories/${cat.slug}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors whitespace-nowrap shrink-0"
+                  >
+                    <CategoryIcon slug={cat.slug} className="h-3.5 w-3.5" />
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
             </div>
 
             <div className="hidden lg:flex lg:col-span-2 flex-col justify-center gap-3">

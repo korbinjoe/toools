@@ -21,18 +21,18 @@ export function FeaturedSection({
   const pausedRef = useRef(false);
 
   const refresh = useCallback(async () => {
-    setFading(true);
     setSpinning(true);
     try {
       const res = await fetch("/api/featured");
-      if (!res.ok) return;
+      if (!res.ok) throw new Error("fetch failed");
       const data: ToolItem[] = await res.json();
+      setFading(true);
       await new Promise((r) => setTimeout(r, 300));
       setTools(data);
-    } catch {
-      // keep current on error
-    } finally {
       setFading(false);
+    } catch {
+      // keep current on error, no fade
+    } finally {
       setTimeout(() => setSpinning(false), 500);
     }
   }, []);
@@ -72,23 +72,35 @@ export function FeaturedSection({
         </Link>
       </div>
 
-      <div
-        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 transition-opacity duration-300 ${fading ? "opacity-0" : "opacity-100"}`}
-      >
-        {tools.map((tool) => (
-          <div key={tool.slug}>
-            <ToolCard
-              slug={tool.slug}
-              name={tool.name}
-              tagline={tool.tagline}
-              url={tool.url}
-              iconUrl={tool.iconUrl}
-              category={tool.category}
-              tags={tool.tags.map((t) => ({ name: t.tag.name }))}
-              pricing={tool.pricing}
-            />
-          </div>
-        ))}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" style={{ gridAutoRows: "1fr", minHeight: 368 }}>
+        {fading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border/80 bg-card p-5 space-y-3">
+                <div className="flex items-start gap-3.5">
+                  <div className="h-10 w-10 rounded-xl animate-shimmer shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-24 rounded animate-shimmer" />
+                    <div className="h-3 w-16 rounded animate-shimmer" />
+                  </div>
+                </div>
+                <div className="h-3 w-full rounded animate-shimmer" />
+                <div className="h-3 w-2/3 rounded animate-shimmer" />
+              </div>
+            ))
+          : tools.map((tool) => (
+              <div key={tool.slug}>
+                <ToolCard
+                  slug={tool.slug}
+                  name={tool.name}
+                  tagline={tool.tagline}
+                  url={tool.url}
+                  iconUrl={tool.iconUrl}
+                  category={tool.category}
+                  tags={tool.tags.map((t) => ({ name: t.tag.name }))}
+                  pricing={tool.pricing}
+                />
+              </div>
+            ))}
       </div>
     </div>
   );
