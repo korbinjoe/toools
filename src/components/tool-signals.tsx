@@ -5,7 +5,7 @@ import {
   isOpenSourceTool,
   popularityTier,
 } from "@/lib/tool-signals";
-import { formatDataUpdatedAt } from "@/lib/utils";
+import { LocalDateTime } from "@/components/local-date-time";
 import { cn } from "@/lib/utils";
 
 function SignalBadge({
@@ -159,9 +159,7 @@ export function ToolAtAGlance({ signals }: { signals: ToolSignals }) {
         <GlanceRow label="Try in-site">{embedLabel}</GlanceRow>
 
         <GlanceRow label="Last updated">
-          <time dateTime={signals.updatedAt.toISOString()}>
-            {formatDataUpdatedAt(signals.updatedAt)}
-          </time>
+          <LocalDateTime iso={signals.updatedAt.toISOString()} />
         </GlanceRow>
 
         {signals.source && signals.source !== "MANUAL" && (

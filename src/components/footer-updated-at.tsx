@@ -1,5 +1,5 @@
-import { formatDataUpdatedAt } from "@/lib/utils";
 import { getDataUpdatedAt } from "@/lib/db";
+import { LocalDateTime } from "@/components/local-date-time";
 
 export async function FooterUpdatedAt() {
   const dataUpdatedAt = await getDataUpdatedAt();
@@ -7,8 +7,9 @@ export async function FooterUpdatedAt() {
   if (!dataUpdatedAt) return null;
 
   return (
-    <time dateTime={dataUpdatedAt.toISOString()}>
-      Last updated {formatDataUpdatedAt(dataUpdatedAt)}
-    </time>
+    <LocalDateTime
+      iso={dataUpdatedAt.toISOString()}
+      prefix="Last updated "
+    />
   );
 }

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Browse Toools
+    url: https://toools.dev
+    about: Explore the tool directory before submitting
+  - name: View existing submissions
+    url: https://github.com/korbinjoe/toools/issues?q=is%3Aissue+label%3Asubmission
+    about: Check if someone already suggested this tool

@@ -1,0 +1,113 @@
+name: Submit a tool
+description: Suggest a tool for the Toools directory
+title: "[Tool] "
+labels:
+  - submission
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing to [Toools](https://toools.dev)! Please fill in the fields below.
+        We review every submission and add approved tools to the directory.
+
+  - type: input
+    id: name
+    attributes:
+      label: Tool name
+      description: Official product name
+      placeholder: e.g. Notion
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: Website URL
+      description: Link to the tool's homepage
+      placeholder: https://
+    validations:
+      required: true
+
+  - type: input
+    id: tagline
+    attributes:
+      label: Tagline
+      description: One sentence — what does it do?
+      placeholder: e.g. All-in-one workspace for notes and docs
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A short paragraph on why it belongs in Toools
+      placeholder: What problem does it solve? Who is it for?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Best-fit category in the directory
+      options:
+        - AI Assistants
+        - Design
+        - Development
+        - Writing & Notes
+        - Image & Media
+        - Video & Audio
+        - SEO & Marketing
+        - Data & Analytics
+        - Productivity
+        - Deploy & Hosting
+        - Security & Privacy
+        - Communication
+        - Business
+        - Automation
+        - File Management
+        - Education
+        - Utilities
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pricing
+    attributes:
+      label: Pricing
+      options:
+        - Free
+        - Freemium
+        - Paid
+        - Open Source
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Platforms
+      description: Select all that apply (optional)
+      options:
+        - label: Web
+        - label: Mac
+        - label: Windows
+        - label: Linux
+        - label: iOS
+        - label: Android
+
+  - type: input
+    id: github
+    attributes:
+      label: GitHub URL
+      description: Optional — if open source
+      placeholder: https://github.com/org/repo
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Anything else?
+      description: Optional — why you recommend it, similar tools, etc.
+    validations:
+      required: false
