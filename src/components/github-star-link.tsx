@@ -1,4 +1,5 @@
-import { Github, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { GitHubIcon } from "@/components/github-icon";
 import { GITHUB_REPO_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,7 @@ export function GithubStarLink({
       )}
       {...props}
     >
-      <Github className="h-4 w-4 shrink-0" />
+      <GitHubIcon className="h-4 w-4" />
       <span>Star on GitHub</span>
       {showStarIcon && variant === "button" && (
         <Star className="h-3.5 w-3.5 shrink-0 text-amber-500 fill-amber-500" />

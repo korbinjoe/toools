@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   Bot,
@@ -17,8 +19,11 @@ import {
   GraduationCap,
   Wrench,
   Workflow,
+  ChevronDown,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 const categoryIcons: Record<string, LucideIcon> = {
   "ai-assistants": Bot,
@@ -54,20 +59,43 @@ export function CategoryIcon({ slug, className }: { slug: string; className?: st
 }
 
 export function HeroCategoryNav({ categories }: { categories: CategoryItem[] }) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <div className="rounded-2xl border border-border/50 bg-card/30 p-5 sm:p-6 shadow-sm">
-      <div className="flex items-center justify-between gap-4 mb-4">
+      <div className="flex items-center justify-between gap-4">
         <p className="text-sm font-semibold tracking-tight text-foreground">
           Explore categories
         </p>
         <Link
           href="/categories"
-          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0"
         >
           View all
         </Link>
       </div>
-      <div className="flex flex-wrap gap-2">
+
+      <button
+        type="button"
+        onClick={() => setExpanded((open) => !open)}
+        aria-expanded={expanded}
+        className="mt-3 flex w-full items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/60 px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-background hover:text-foreground md:hidden"
+      >
+        <span>{expanded ? "Hide categories" : `${categories.length} categories`}</span>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 shrink-0 transition-transform duration-200",
+            expanded && "rotate-180",
+          )}
+        />
+      </button>
+
+      <div
+        className={cn(
+          "flex flex-wrap gap-2",
+          expanded ? "mt-4" : "mt-0 hidden md:flex md:mt-4",
+        )}
+      >
         {categories.map((cat) => {
           const Icon = categoryIcons[cat.slug] || Bot;
           return (

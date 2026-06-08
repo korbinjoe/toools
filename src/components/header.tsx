@@ -53,21 +53,24 @@ export function Header() {
 
         <div className="flex items-center gap-1">
           <GithubStarLink variant="ghost" className="hidden sm:inline-flex" />
-          <Link href="/tools?focus=search">
+          <Link href="/tools?focus=search" className="hidden md:block">
             <Button
               variant="ghost"
               size="icon"
-              className="hidden md:flex h-8 w-8 text-muted-foreground hover:text-foreground"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
             >
               <Search className="h-4 w-4" />
             </Button>
           </Link>
           <ThemeToggle />
           <Button
+            type="button"
             variant="ghost"
             size="icon"
             className="md:hidden h-9 w-9"
-            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-expanded={mobileOpen}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMobileOpen((open) => !open)}
           >
             {mobileOpen ? (
               <X className="h-5 w-5" />
