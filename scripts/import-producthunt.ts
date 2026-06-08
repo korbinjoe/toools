@@ -25,20 +25,15 @@ import {
   deduplicateSlug,
 } from "./lib/dedup";
 import { getGoogleFaviconUrl } from "./lib/favicon";
+import { getUrlIndex } from "./lib/url-index";
+import { getProductHuntToken } from "./lib/producthunt-auth";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
 
 const PH_API = "https://api.producthunt.com/v2/api/graphql";
-const TOKEN = process.env.PRODUCTHUNT_TOKEN;
 const POSTS_PER_TOPIC = parseInt(process.env.PH_POSTS_PER_TOPIC || "100", 10);
 const AUTO_APPROVE = process.env.PH_AUTO_APPROVE === "true";
-
-if (!TOKEN) {
-  console.error("Error: PRODUCTHUNT_TOKEN environment variable is required.");
-  console.error("Get one at: https://www.producthunt.com/v2/oauth/applications");
-  process.exit(1);
-}
 
 interface PHPost {
   id: string;
@@ -75,7 +70,12 @@ const QUERY = `
   }
 `;
 
-async function fetchPosts(topic: string, cursor: string | null, first: number): Promise<{
+async function fetchPosts(
+  token: string,
+  topic: string,
+  cursor: string | null,
+  first: number,
+): Promise<{
   posts: PHPost[];
   hasNextPage: boolean;
   endCursor: string | null;
@@ -84,7 +84,7 @@ async function fetchPosts(topic: string, cursor: string | null, first: number): 
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${TOKEN}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       query: QUERY,
@@ -98,7 +98,7 @@ async function fetchPosts(topic: string, cursor: string | null, first: number): 
     const waitSec = match ? parseInt(match[1], 10) : 900;
     console.log(`  Rate limited. Waiting ${waitSec}s...`);
     await new Promise((r) => setTimeout(r, waitSec * 1000));
-    return fetchPosts(topic, cursor, first);
+    return fetchPosts(token, topic, cursor, first);
   }
 
   if (!res.ok) {
@@ -128,18 +128,26 @@ async function fetchPosts(topic: string, cursor: string | null, first: number): 
   };
 }
 
-async function fetchAllPostsForTopic(topic: string, limit: number): Promise<PHPost[]> {
+async function fetchAllPostsForTopic(
+  token: string,
+  topic: string,
+  limit: number,
+): Promise<PHPost[]> {
   const all: PHPost[] = [];
   let cursor: string | null = null;
   let hasNext = true;
 
   while (hasNext && all.length < limit) {
     const remaining = limit - all.length;
-    const { posts, hasNextPage, endCursor } = await fetchPosts(topic, cursor, remaining);
+    const { posts, hasNextPage, endCursor } = await fetchPosts(
+      token,
+      topic,
+      cursor,
+      remaining,
+    );
     all.push(...posts);
     hasNext = hasNextPage && posts.length > 0;
     cursor = endCursor;
-    // Rate limit: ~200ms between requests
     await new Promise((r) => setTimeout(r, 200));
   }
 
@@ -147,6 +155,12 @@ async function fetchAllPostsForTopic(topic: string, limit: number): Promise<PHPo
 }
 
 async function main() {
+  const token = await getProductHuntToken();
+  if (!token) {
+    console.error("Error: set PRODUCTHUNT_TOKEN or PRODUCTHUNT_API_KEY/SECRET");
+    process.exit(1);
+  }
+
   console.log("=== Product Hunt Import ===\n");
   console.log(`Posts per topic: ${POSTS_PER_TOPIC}`);
   console.log(`Auto approve: ${AUTO_APPROVE}`);
@@ -155,6 +169,7 @@ async function main() {
   // Load existing data for dedup
   const existingUrls = await getExistingUrls(prisma);
   const existingSlugs = await getExistingSlugs(prisma);
+  const urlIndex = await getUrlIndex(prisma);
   console.log(`Existing tools in DB: ${existingUrls.size}\n`);
 
   // Load category map
@@ -163,6 +178,7 @@ async function main() {
 
   let imported = 0;
   let skipped = 0;
+  let updated = 0;
   let errors = 0;
 
   const topics = Object.keys(PH_TOPIC_MAP);
@@ -180,7 +196,7 @@ async function main() {
 
     let posts: PHPost[];
     try {
-      posts = await fetchAllPostsForTopic(topic, POSTS_PER_TOPIC);
+      posts = await fetchAllPostsForTopic(token, topic, POSTS_PER_TOPIC);
     } catch (err) {
       console.error(`  Error fetching topic "${topic}":`, (err as Error).message);
       errors++;
@@ -194,7 +210,25 @@ async function main() {
       const normalized = normalizeUrl(toolUrl);
 
       if (existingUrls.has(normalized)) {
-        skipped++;
+        const toolId = urlIndex.get(normalized);
+        if (toolId) {
+          try {
+            await prisma.tool.update({
+              where: { id: toolId },
+              data: {
+                phVotes: post.votesCount,
+                source: "PRODUCT_HUNT",
+                sourceUrl: post.url,
+                featured: post.votesCount > 1000,
+              },
+            });
+            updated++;
+          } catch {
+            errors++;
+          }
+        } else {
+          skipped++;
+        }
         continue;
       }
 
@@ -233,6 +267,7 @@ async function main() {
 
   console.log("\n=== Import Complete ===");
   console.log(`  Imported: ${imported}`);
+  console.log(`  Updated (signals): ${updated}`);
   console.log(`  Skipped (duplicate): ${skipped}`);
   console.log(`  Errors: ${errors}`);
 }

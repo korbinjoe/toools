@@ -4,6 +4,7 @@ import {
   formatCount,
   isOpenSourceTool,
   popularityTier,
+  showOpenSourceBadge,
 } from "@/lib/tool-signals";
 import { LocalDateTime } from "@/components/local-date-time";
 import { cn } from "@/lib/utils";
@@ -42,7 +43,7 @@ export function ToolSignalBadges({
           Featured
         </SignalBadge>
       )}
-      {isOpenSourceTool(signals) && (
+      {showOpenSourceBadge(signals) && (
         <SignalBadge className="bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400">
           Open Source
         </SignalBadge>

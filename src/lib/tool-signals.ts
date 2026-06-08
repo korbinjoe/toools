@@ -30,6 +30,11 @@ export function isOpenSourceTool(signals: Pick<ToolSignals, "isOpenSource" | "pr
   return signals.isOpenSource || signals.pricing === "OPEN_SOURCE";
 }
 
+/** Card badge only — pricing badge already says "Open Source" for OPEN_SOURCE pricing. */
+export function showOpenSourceBadge(signals: Pick<ToolSignals, "isOpenSource" | "pricing">) {
+  return signals.isOpenSource && signals.pricing !== "OPEN_SOURCE";
+}
+
 export const toolSignalSelect = {
   featured: true,
   isOpenSource: true,

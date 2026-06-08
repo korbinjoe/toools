@@ -24,145 +24,17 @@ import {
 import { getGoogleFaviconUrl } from "./lib/favicon";
 import { normalizePlatforms } from "./lib/platform";
 import { fetchGithubStars } from "./lib/github";
+import { getUrlIndex } from "./lib/url-index";
+import {
+  AWESOME_REPOS,
+  fetchAwesomeReadme,
+  parseAwesomeReadme,
+} from "./lib/awesome";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
 const AUTO_APPROVE = process.env.AWESOME_AUTO_APPROVE === "true";
-
-interface AwesomeRepo {
-  owner: string;
-  repo: string;
-  categoryHint?: string;
-}
-
-const AWESOME_REPOS: AwesomeRepo[] = [
-  { owner: "awesome-selfhosted", repo: "awesome-selfhosted" },
-  { owner: "jaywcjlove", repo: "awesome-mac", categoryHint: "productivity" },
-  { owner: "goabstract", repo: "Awesome-Design-Tools", categoryHint: "design" },
-  { owner: "bradtraversy", repo: "design-resources-for-developers", categoryHint: "design" },
-  { owner: "agarrharr", repo: "awesome-cli-apps", categoryHint: "development" },
-  { owner: "rothgar", repo: "awesome-tuis", categoryHint: "development" },
-  { owner: "analysis-tools-dev", repo: "static-analysis", categoryHint: "development" },
-  { owner: "trimstray", repo: "the-book-of-secret-knowledge", categoryHint: "security-privacy" },
-  { owner: "kahun", repo: "awesome-sysadmin", categoryHint: "deploy-hosting" },
-  { owner: "n1trux", repo: "awesome-sysadmin", categoryHint: "deploy-hosting" },
-  { owner: "maguowei", repo: "starred", categoryHint: "development" },
-];
-
-interface ParsedTool {
-  name: string;
-  url: string;
-  description: string;
-  section: string;
-  github?: string;
-}
-
-async function fetchReadme(owner: string, repo: string): Promise<string> {
-  // Try raw.githubusercontent.com first (no auth needed, no rate limit)
-  const branches = ["main", "master"];
-  const filenames = ["README.md", "readme.md"];
-
-  for (const branch of branches) {
-    for (const filename of filenames) {
-      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filename}`;
-      const res = await fetch(rawUrl, {
-        headers: { "User-Agent": "toools-importer" },
-      });
-      if (res.ok) {
-        return res.text();
-      }
-    }
-  }
-
-  // Fallback to GitHub API
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github.v3.raw",
-    "User-Agent": "toools-importer",
-  };
-  if (GITHUB_TOKEN) {
-    headers.Authorization = `token ${GITHUB_TOKEN}`;
-  }
-
-  const url = `https://api.github.com/repos/${owner}/${repo}/readme`;
-  const res = await fetch(url, { headers });
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch README for ${owner}/${repo} (${res.status})`);
-  }
-
-  return res.text();
-}
-
-function parseAwesomeReadme(content: string): ParsedTool[] {
-  const tools: ParsedTool[] = [];
-  let currentSection = "";
-
-  const lines = content.split("\n");
-
-  for (const line of lines) {
-    // Detect section headings
-    const headingMatch = line.match(/^#{1,3}\s+(.+)/);
-    if (headingMatch) {
-      currentSection = headingMatch[1].trim().replace(/[*_`]/g, "");
-      continue;
-    }
-
-    // Parse list items with links: - [Name](url) - Description
-    // Also handles: * [Name](url) — Description
-    const itemMatch = line.match(
-      /^[\s]*[-*]\s+\[([^\]]+)\]\(([^)]+)\)\s*[-–—:]\s*(.+)/
-    );
-    if (itemMatch) {
-      const [, name, url, description] = itemMatch;
-
-      // Skip anchors, relative links, badges
-      if (url.startsWith("#") || url.startsWith("/") || url.includes("shields.io")) {
-        continue;
-      }
-
-      // Skip non-http links
-      if (!url.startsWith("http")) {
-        continue;
-      }
-
-      const isGithub = url.includes("github.com");
-
-      tools.push({
-        name: name.trim(),
-        url: url.trim(),
-        description: description.trim().replace(/\*\*$/, "").replace(/`/g, ""),
-        section: currentSection,
-        github: isGithub ? url.trim() : undefined,
-      });
-      continue;
-    }
-
-    // Simpler format: - [Name](url)
-    const simpleMatch = line.match(/^[\s]*[-*]\s+\[([^\]]+)\]\(([^)]+)\)\s*$/);
-    if (simpleMatch) {
-      const [, name, url] = simpleMatch;
-      if (url.startsWith("http") && !url.includes("shields.io")) {
-        tools.push({
-          name: name.trim(),
-          url: url.trim(),
-          description: name.trim(),
-          section: currentSection,
-          github: url.includes("github.com") ? url.trim() : undefined,
-        });
-      }
-    }
-  }
-
-  return tools;
-}
-
-function inferWebsiteFromGithub(url: string): string | null {
-  // For GitHub repos, we still use the github URL as the main url
-  // since many awesome-list tools ARE their GitHub repos
-  return null;
-}
 
 async function main() {
   console.log("=== GitHub Awesome Lists Import ===\n");
@@ -171,6 +43,7 @@ async function main() {
 
   const existingUrls = await getExistingUrls(prisma);
   const existingSlugs = await getExistingSlugs(prisma);
+  const urlIndex = await getUrlIndex(prisma);
   console.log(`Existing tools in DB: ${existingUrls.size}\n`);
 
   const categories = await prisma.category.findMany();
@@ -178,6 +51,7 @@ async function main() {
 
   let imported = 0;
   let skipped = 0;
+  let updated = 0;
   let errors = 0;
 
   for (const { owner, repo, categoryHint } of AWESOME_REPOS) {
@@ -185,7 +59,7 @@ async function main() {
 
     let readme: string;
     try {
-      readme = await fetchReadme(owner, repo);
+      readme = await fetchAwesomeReadme(owner, repo);
     } catch (err) {
       console.error(`  Error: ${(err as Error).message}`);
       errors++;
@@ -201,7 +75,36 @@ async function main() {
       const normalized = normalizeUrl(tool.url);
 
       if (existingUrls.has(normalized)) {
-        skipped++;
+        const toolId = urlIndex.get(normalized);
+        if (toolId) {
+          try {
+            let githubStars: number | null = null;
+            if (tool.github) {
+              githubStars = await fetchGithubStars(tool.github);
+              await new Promise((r) => setTimeout(r, 100));
+            }
+
+            await prisma.tool.update({
+              where: { id: toolId },
+              data: {
+                source: "AWESOME_LIST",
+                sourceUrl: tool.url,
+                ...(tool.github
+                  ? {
+                      github: tool.github,
+                      isOpenSource: true,
+                      ...(githubStars != null ? { githubStars } : {}),
+                    }
+                  : {}),
+              },
+            });
+            updated++;
+          } catch {
+            errors++;
+          }
+        } else {
+          skipped++;
+        }
         continue;
       }
 
@@ -260,6 +163,7 @@ async function main() {
 
   console.log("\n=== Import Complete ===");
   console.log(`  Imported: ${imported}`);
+  console.log(`  Updated (signals): ${updated}`);
   console.log(`  Skipped (duplicate): ${skipped}`);
   console.log(`  Errors: ${errors}`);
 }
