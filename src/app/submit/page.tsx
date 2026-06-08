@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, CirclePlus } from "lucide-react";
+import { GithubStarLink } from "@/components/github-star-link";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  GITHUB_ISSUES_URL,
+  GITHUB_NEW_ISSUE_URL,
+  GITHUB_REPO_URL,
+} from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Submit a Tool",
   description: "Submit a tool to the Toools directory via GitHub Issues.",
 };
-
-const GITHUB_ISSUES_URL = "https://github.com/korbinjoe/toools/issues";
-const GITHUB_NEW_ISSUE_URL =
-  "https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml";
 
 const checklist = [
   "Tool name",
@@ -91,6 +93,24 @@ export default function SubmitPage() {
             Browse issues
             <ArrowUpRight className="h-3.5 w-3.5" />
           </a>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-border/80 bg-muted/30 p-5">
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Toools is{" "}
+          <a
+            href={GITHUB_REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground/80 hover:text-foreground underline underline-offset-2"
+          >
+            open source on GitHub
+          </a>
+          . Star the repo to support the project and stay updated on new features.
+        </p>
+        <div className="mt-4">
+          <GithubStarLink variant="button" />
         </div>
       </div>
 

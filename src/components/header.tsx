@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Search, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/logo";
+import { GithubStarLink } from "@/components/github-star-link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -51,6 +52,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
+          <GithubStarLink variant="ghost" className="hidden sm:inline-flex" />
           <Link href="/tools?focus=search">
             <Button
               variant="ghost"
@@ -93,6 +95,11 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          <GithubStarLink
+            variant="ghost"
+            className="w-full justify-start px-3 py-2.5 min-h-[44px] sm:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
         </nav>
       )}
     </header>
