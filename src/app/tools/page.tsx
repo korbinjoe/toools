@@ -17,6 +17,10 @@ interface ToolsPageProps {
     pricing?: string;
     page?: string;
     focus?: string;
+    sort?: string;
+    openSource?: string;
+    featured?: string;
+    platform?: string;
   }>;
 }
 
@@ -31,6 +35,9 @@ function buildWhere(params: {
   q?: string;
   category?: string;
   pricing?: string;
+  openSource?: string;
+  featured?: string;
+  platform?: string;
 }): Prisma.ToolWhereInput {
   const where: Prisma.ToolWhereInput = { status: "APPROVED" };
 
@@ -49,11 +56,35 @@ function buildWhere(params: {
     where.pricing = params.pricing as Prisma.EnumPricingFilter["equals"];
   }
 
+  if (params.openSource === "1") {
+    where.isOpenSource = true;
+  }
+
+  if (params.featured === "1") {
+    where.featured = true;
+  }
+
+  if (params.platform) {
+    where.platforms = { has: params.platform };
+  }
+
   return where;
+}
+
+function buildOrderBy(sort?: string): Prisma.ToolOrderByWithRelationInput[] {
+  switch (sort) {
+    case "newest":
+      return [{ createdAt: "desc" }];
+    case "clicks":
+      return [{ clickCount: "desc" }];
+    default:
+      return [{ featured: "desc" }, { viewCount: "desc" }];
+  }
 }
 
 async function getTools(
   where: Prisma.ToolWhereInput,
+  orderBy: Prisma.ToolOrderByWithRelationInput[],
   page: number,
 ) {
   const [tools, total] = await Promise.all([
@@ -63,7 +94,7 @@ async function getTools(
         category: { select: { name: true, slug: true } },
         tags: { include: { tag: { select: { name: true } } } },
       },
-      orderBy: [{ featured: "desc" }, { viewCount: "desc" }],
+      orderBy,
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
@@ -77,9 +108,10 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
   const where = buildWhere(params);
+  const orderBy = buildOrderBy(params.sort);
 
   const [{ tools, total }, categories] = await Promise.all([
-    getTools(where, page),
+    getTools(where, orderBy, page),
     getCategories(),
   ]);
 

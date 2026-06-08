@@ -98,6 +98,9 @@ export function FeaturedSection({
                   category={tool.category}
                   tags={tool.tags.map((t) => ({ name: t.tag.name }))}
                   pricing={tool.pricing}
+                  featured={tool.featured}
+                  isOpenSource={tool.isOpenSource}
+                  viewCount={tool.viewCount}
                 />
               </div>
             ))}

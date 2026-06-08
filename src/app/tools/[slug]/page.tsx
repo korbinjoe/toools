@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ToolEmbed } from "@/components/tool-embed";
 import { ToolAvatar } from "@/components/tool-avatar";
 import { ToolGrid } from "@/components/tool-grid";
+import { ToolAtAGlance } from "@/components/tool-signals";
 import { prisma } from "@/lib/db";
 
 interface ToolPageProps {
@@ -15,7 +16,7 @@ interface ToolPageProps {
 }
 
 async function getTool(slug: string) {
-  return prisma.tool.findUnique({
+  return prisma.tool.findFirst({
     where: { slug, status: "APPROVED" },
     include: {
       category: true,
@@ -117,7 +118,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <a href={tool.url} target="_blank" rel="noopener noreferrer">
+          <a href={`/api/tools/${tool.slug}/out`}>
             <Button variant="outline" size="sm" className="gap-1.5 rounded-lg border-border hover:border-border">
               Visit Website
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -134,27 +135,29 @@ export default async function ToolPage({ params }: ToolPageProps) {
         </div>
       </div>
 
+      <ToolAtAGlance
+        signals={{
+          featured: tool.featured,
+          isOpenSource: tool.isOpenSource,
+          pricing: tool.pricing,
+          viewCount: tool.viewCount,
+          clickCount: tool.clickCount,
+          phVotes: tool.phVotes,
+          githubStars: tool.githubStars,
+          github: tool.github,
+          platforms: tool.platforms,
+          embedMode: tool.embedMode,
+          updatedAt: tool.updatedAt,
+          source: tool.source,
+          sourceUrl: tool.sourceUrl,
+        }}
+      />
+
       {/* Description */}
       {tool.description && (
         <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mb-8">
           {tool.description}
         </p>
-      )}
-
-      {/* Platforms */}
-      {tool.platforms.length > 0 && (
-        <div className="mb-8 flex items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-            Platforms
-          </span>
-          <div className="flex flex-wrap gap-1">
-            {tool.platforms.map((platform) => (
-              <span key={platform} className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                {platform}
-              </span>
-            ))}
-          </div>
-        </div>
       )}
 
       {/* Embed */}

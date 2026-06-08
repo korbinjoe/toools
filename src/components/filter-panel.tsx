@@ -15,6 +15,21 @@ const pricingOptions = [
   { value: "PAID", label: "Paid" },
 ];
 
+const sortOptions = [
+  { value: "popular", label: "Popular" },
+  { value: "newest", label: "Newest" },
+  { value: "clicks", label: "Most Clicked" },
+];
+
+const platformOptions = [
+  { value: "Web", label: "Web" },
+  { value: "Mac", label: "Mac" },
+  { value: "Windows", label: "Windows" },
+  { value: "Linux", label: "Linux" },
+  { value: "iOS", label: "iOS" },
+  { value: "Android", label: "Android" },
+];
+
 function Chip({
   label,
   active,
@@ -49,6 +64,21 @@ export function FilterPanel({ categories }: FilterPanelProps) {
 
   const currentCategory = searchParams.get("category") || "";
   const currentPricing = searchParams.get("pricing") || "";
+  const currentSort = searchParams.get("sort") || "popular";
+  const currentPlatform = searchParams.get("platform") || "";
+  const openSourceActive = searchParams.get("openSource") === "1";
+  const featuredActive = searchParams.get("featured") === "1";
+
+  const pushParams = useCallback(
+    (params: URLSearchParams) => {
+      params.delete("page");
+      startTransition(() => {
+        router.push(`/tools?${params.toString()}`);
+      });
+    },
+    [router, startTransition],
+  );
+
   const setFilter = useCallback(
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -57,12 +87,35 @@ export function FilterPanel({ categories }: FilterPanelProps) {
       } else {
         params.delete(key);
       }
-      params.delete("page");
-      startTransition(() => {
-        router.push(`/tools?${params.toString()}`);
-      });
+      pushParams(params);
     },
-    [router, searchParams],
+    [searchParams, pushParams],
+  );
+
+  const toggleFilter = useCallback(
+    (key: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (params.get(key) === "1") {
+        params.delete(key);
+      } else {
+        params.set(key, "1");
+      }
+      pushParams(params);
+    },
+    [searchParams, pushParams],
+  );
+
+  const setSort = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value === "popular") {
+        params.delete("sort");
+      } else {
+        params.set("sort", value);
+      }
+      pushParams(params);
+    },
+    [searchParams, pushParams],
   );
 
   const hasActiveOutside = !expanded && categories.slice(COLLAPSED_COUNT).some((c) => c.slug === currentCategory);
@@ -71,6 +124,56 @@ export function FilterPanel({ categories }: FilterPanelProps) {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2.5">
+          Sort
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          {sortOptions.map((opt) => (
+            <Chip
+              key={opt.value}
+              label={opt.label}
+              active={currentSort === opt.value}
+              onClick={() => setSort(opt.value)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2.5">
+          Signals
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          <Chip
+            label="Open Source"
+            active={openSourceActive}
+            onClick={() => toggleFilter("openSource")}
+          />
+          <Chip
+            label="Featured"
+            active={featuredActive}
+            onClick={() => toggleFilter("featured")}
+          />
+        </div>
+      </div>
+
+      <div>
+        <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2.5">
+          Platform
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          {platformOptions.map((opt) => (
+            <Chip
+              key={opt.value}
+              label={opt.label}
+              active={currentPlatform === opt.value}
+              onClick={() => setFilter("platform", opt.value)}
+            />
+          ))}
+        </div>
+      </div>
+
       <div>
         <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2.5">
           Category

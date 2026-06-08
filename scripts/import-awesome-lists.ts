@@ -22,6 +22,8 @@ import {
   deduplicateSlug,
 } from "./lib/dedup";
 import { getGoogleFaviconUrl } from "./lib/favicon";
+import { normalizePlatforms } from "./lib/platform";
+import { fetchGithubStars } from "./lib/github";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
@@ -218,6 +220,12 @@ async function main() {
       slug = deduplicateSlug(slug, existingSlugs);
 
       try {
+        let githubStars: number | null = null;
+        if (tool.github) {
+          githubStars = await fetchGithubStars(tool.github);
+          await new Promise((r) => setTimeout(r, 100));
+        }
+
         await prisma.tool.create({
           data: {
             name: tool.name.slice(0, 100),
@@ -227,11 +235,14 @@ async function main() {
             url: tool.url,
             iconUrl: getGoogleFaviconUrl(tool.url),
             github: tool.github || null,
+            githubStars,
             isOpenSource: !!tool.github,
             categoryId,
             pricing: tool.github ? "OPEN_SOURCE" : "FREE",
-            platforms: ["Web"],
+            platforms: normalizePlatforms(["Web"]),
             status: AUTO_APPROVE ? "APPROVED" : "PENDING",
+            source: "AWESOME_LIST",
+            sourceUrl: tool.url,
           },
         });
 

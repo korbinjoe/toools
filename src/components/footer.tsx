@@ -1,5 +1,11 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Wordmark } from "@/components/logo";
+import { FooterUpdatedAt } from "@/components/footer-updated-at";
+
+function FooterUpdatedAtFallback() {
+  return <span className="text-muted-foreground/50">Loading update time…</span>;
+}
 
 export function Footer() {
   return (
@@ -33,6 +39,12 @@ export function Footer() {
               </Link>
             </div>
           </nav>
+        </div>
+        <div className="mt-8 pt-6 border-t border-border/40 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
+          <span>© {new Date().getFullYear()} Toools</span>
+          <Suspense fallback={<FooterUpdatedAtFallback />}>
+            <FooterUpdatedAt />
+          </Suspense>
         </div>
       </div>
     </footer>

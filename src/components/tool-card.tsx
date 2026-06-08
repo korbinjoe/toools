@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { ToolAvatar } from "./tool-avatar";
+import { ToolSignalBadges } from "./tool-signals";
 import type { Pricing } from "@prisma/client";
+import type { ToolSignals } from "@/lib/tool-signals";
 
 interface ToolCardProps {
   slug: string;
@@ -12,6 +14,9 @@ interface ToolCardProps {
   category: { name: string; slug: string };
   tags: { name: string }[];
   pricing: Pricing;
+  featured?: boolean;
+  isOpenSource?: boolean;
+  viewCount?: number;
 }
 
 const pricingConfig: Record<Pricing, { text: string; className: string }> = {
@@ -30,8 +35,17 @@ export function ToolCard({
   category,
   tags,
   pricing,
+  featured = false,
+  isOpenSource = false,
+  viewCount = 0,
 }: ToolCardProps) {
   const p = pricingConfig[pricing];
+  const signals: Pick<ToolSignals, "featured" | "isOpenSource" | "pricing" | "viewCount"> = {
+    featured,
+    isOpenSource,
+    pricing,
+    viewCount,
+  };
 
   return (
     <Link href={`/tools/${slug}`} className="group block h-full">
@@ -57,6 +71,7 @@ export function ToolCard({
           <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${p.className}`}>
             {p.text}
           </span>
+          <ToolSignalBadges signals={signals} />
           {tags.slice(0, 2).map((tag) => (
             <span
               key={tag.name}

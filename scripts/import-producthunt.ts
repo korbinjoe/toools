@@ -215,6 +215,9 @@ async function main() {
             platforms: ["Web"],
             status: AUTO_APPROVE ? "APPROVED" : "PENDING",
             featured: post.votesCount > 1000,
+            phVotes: post.votesCount,
+            source: "PRODUCT_HUNT",
+            sourceUrl: post.url,
           },
         });
 

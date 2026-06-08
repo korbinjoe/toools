@@ -1,5 +1,6 @@
 import { ToolCard } from "./tool-card";
 import type { Pricing } from "@prisma/client";
+import type { ToolSignals } from "@/lib/tool-signals";
 
 export interface ToolItem {
   slug: string;
@@ -10,6 +11,9 @@ export interface ToolItem {
   category: { name: string; slug: string };
   tags: { tag: { name: string } }[];
   pricing: Pricing;
+  featured?: boolean;
+  isOpenSource?: boolean;
+  viewCount?: number;
 }
 
 export function ToolGrid({ tools }: { tools: ToolItem[] }) {
@@ -42,9 +46,14 @@ export function ToolGrid({ tools }: { tools: ToolItem[] }) {
             category={tool.category}
             tags={tool.tags.map((t) => ({ name: t.tag.name }))}
             pricing={tool.pricing}
+            featured={tool.featured}
+            isOpenSource={tool.isOpenSource}
+            viewCount={tool.viewCount}
           />
         </div>
       ))}
     </div>
   );
 }
+
+export type { ToolSignals };
