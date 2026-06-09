@@ -6,7 +6,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Categories",
-  description: "Browse tools by category",
+  description:
+    "Browse tools by category, or explore curated tool stacks for complete workflows.",
 };
 
 export default async function CategoriesPage() {

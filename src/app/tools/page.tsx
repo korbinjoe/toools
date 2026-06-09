@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SearchBar } from "@/components/search-bar";
 import { FilterPanel } from "@/components/filter-panel";
@@ -7,6 +8,12 @@ import { ToolGrid } from "@/components/tool-grid";
 import { Pagination } from "@/components/pagination";
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
+
+export const metadata: Metadata = {
+  title: "Browse Tools",
+  description:
+    "Search and filter curated tools by category, pricing, platform, open-source status, and trust signals.",
+};
 
 const PAGE_SIZE = 24;
 

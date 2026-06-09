@@ -94,10 +94,6 @@ function GlanceRow({
 
 export function ToolAtAGlance({ signals }: { signals: ToolSignals }) {
   const openSource = isOpenSourceTool(signals);
-  const embedLabel =
-    signals.embedMode === "IFRAME" || signals.embedMode === "API"
-      ? "Try in-site"
-      : "External only";
 
   return (
     <section className="mb-8 rounded-2xl border border-border/80 bg-muted/30 p-5">
@@ -156,8 +152,6 @@ export function ToolAtAGlance({ signals }: { signals: ToolSignals }) {
             )}
           </GlanceRow>
         )}
-
-        <GlanceRow label="Try in-site">{embedLabel}</GlanceRow>
 
         <GlanceRow label="Last updated">
           <LocalDateTime iso={signals.updatedAt.toISOString()} />

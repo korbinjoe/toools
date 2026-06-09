@@ -4,20 +4,34 @@ import { GeistMono } from "geist/font/mono";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_OG_DESCRIPTION,
+  SITE_TITLE,
+  SITE_URL,
+} from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Toools - Discover & Use the Best Tools",
-    template: "%s | Toools",
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "A curated collection of 100+ tools you can use right here, or find the perfect alternative for your workflow.",
+  description: SITE_DESCRIPTION,
   openGraph: {
-    title: "Toools - Discover & Use the Best Tools",
-    description:
-      "Browse, search, and use the best tools directly in your browser. 100+ curated tools across 12 categories.",
+    title: SITE_TITLE,
+    description: SITE_OG_DESCRIPTION,
     type: "website",
+    siteName: SITE_NAME,
+    locale: "en_US",
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_TITLE,
+    description: SITE_OG_DESCRIPTION,
   },
 };
 

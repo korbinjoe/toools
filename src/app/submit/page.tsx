@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Submit a Tool",
-  description: "Submit a tool to the Toools directory via GitHub Issues.",
+  description:
+    "Suggest a tool for Toools via a structured GitHub Issue. Maintainers review and approve submissions.",
 };
 
 const checklist = [

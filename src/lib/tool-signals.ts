@@ -1,4 +1,4 @@
-import type { EmbedMode, Pricing, ToolSource } from "@prisma/client";
+import type { Pricing, ToolSource } from "@prisma/client";
 
 export type ToolSignals = {
   featured: boolean;
@@ -10,7 +10,6 @@ export type ToolSignals = {
   githubStars?: number | null;
   github?: string | null;
   platforms: string[];
-  embedMode: EmbedMode;
   updatedAt: Date;
   source?: ToolSource | null;
   sourceUrl?: string | null;
@@ -45,7 +44,6 @@ export const toolSignalSelect = {
   githubStars: true,
   github: true,
   platforms: true,
-  embedMode: true,
   updatedAt: true,
   source: true,
   sourceUrl: true,
