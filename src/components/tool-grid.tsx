@@ -13,7 +13,10 @@ export interface ToolItem {
   pricing: Pricing;
   featured?: boolean;
   isOpenSource?: boolean;
-  viewCount?: number;
+  viewCount?: number | null;
+  clickCount?: number | null;
+  githubStars?: number | null;
+  phVotes?: number | null;
 }
 
 export function ToolGrid({ tools }: { tools: ToolItem[] }) {
@@ -49,6 +52,9 @@ export function ToolGrid({ tools }: { tools: ToolItem[] }) {
             featured={tool.featured}
             isOpenSource={tool.isOpenSource}
             viewCount={tool.viewCount}
+            clickCount={tool.clickCount}
+            githubStars={tool.githubStars}
+            phVotes={tool.phVotes}
           />
         </div>
       ))}

@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
+export const dynamic = "force-dynamic";
+
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
 

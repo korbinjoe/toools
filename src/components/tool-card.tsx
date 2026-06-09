@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Eye, MousePointerClick, Star, Triangle, type LucideIcon } from "lucide-react";
 import { ToolAvatar } from "./tool-avatar";
 import { ToolSignalBadges } from "./tool-signals";
 import type { Pricing } from "@prisma/client";
@@ -16,7 +16,10 @@ interface ToolCardProps {
   pricing: Pricing;
   featured?: boolean;
   isOpenSource?: boolean;
-  viewCount?: number;
+  viewCount?: number | null;
+  clickCount?: number | null;
+  githubStars?: number | null;
+  phVotes?: number | null;
 }
 
 const pricingConfig: Record<Pricing, { text: string; className: string }> = {
@@ -25,6 +28,40 @@ const pricingConfig: Record<Pricing, { text: string; className: string }> = {
   PAID: { text: "Paid", className: "bg-muted text-muted-foreground" },
   OPEN_SOURCE: { text: "Open Source", className: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400" },
 };
+
+const compactNumberFormatter = new Intl.NumberFormat("en", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+function formatSignalValue(value: number) {
+  return compactNumberFormatter.format(value).replace(".0", "");
+}
+
+function MetricSignal({
+  icon: Icon,
+  label,
+  source,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  source: string;
+  value: number;
+}) {
+  return (
+    <span
+      className="inline-flex min-w-0 items-center gap-1.5 rounded-md bg-muted/70 px-2 py-1 text-[11px] font-medium text-muted-foreground ring-1 ring-border/50 transition-colors duration-200 group-hover:bg-muted group-hover:text-foreground"
+      title={`${formatSignalValue(value)} ${label}`}
+      aria-label={`${formatSignalValue(value)} ${label}`}
+    >
+      <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />
+      <span className="font-semibold leading-none text-foreground/70">{source}</span>
+      <span className="font-mono tabular-nums leading-none">{formatSignalValue(value)}</span>
+      <span className="sr-only">{label}</span>
+    </span>
+  );
+}
 
 export function ToolCard({
   slug,
@@ -38,14 +75,23 @@ export function ToolCard({
   featured = false,
   isOpenSource = false,
   viewCount = 0,
+  clickCount = 0,
+  githubStars,
+  phVotes,
 }: ToolCardProps) {
   const p = pricingConfig[pricing];
-  const signals: Pick<ToolSignals, "featured" | "isOpenSource" | "pricing" | "viewCount"> = {
+  const badgeSignals: Pick<ToolSignals, "featured" | "isOpenSource" | "pricing" | "viewCount"> = {
     featured,
     isOpenSource,
     pricing,
-    viewCount,
+    viewCount: viewCount ?? 0,
   };
+  const metricSignals = [
+    githubStars ? { key: "github", icon: Star, label: "GitHub stars", source: "GH", value: githubStars } : null,
+    phVotes ? { key: "product-hunt", icon: Triangle, label: "Product Hunt votes", source: "PH", value: phVotes } : null,
+    viewCount ? { key: "views", icon: Eye, label: "views", source: "Views", value: viewCount } : null,
+    clickCount ? { key: "clicks", icon: MousePointerClick, label: "clicks", source: "Clicks", value: clickCount } : null,
+  ].filter((signal) => signal !== null);
 
   return (
     <Link href={`/tools/${slug}`} className="group block h-full">
@@ -67,11 +113,25 @@ export function ToolCard({
           {tagline}
         </p>
 
+        {metricSignals.length > 0 && (
+          <div className="mt-3 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
+            {metricSignals.slice(0, 4).map((signal) => (
+              <MetricSignal
+                key={signal.key}
+                icon={signal.icon}
+                label={signal.label}
+                source={signal.source}
+                value={signal.value}
+              />
+            ))}
+          </div>
+        )}
+
         <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
           <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${p.className}`}>
             {p.text}
           </span>
-          <ToolSignalBadges signals={signals} />
+          <ToolSignalBadges signals={badgeSignals} />
           {tags.slice(0, 2).map((tag) => (
             <span
               key={tag.name}

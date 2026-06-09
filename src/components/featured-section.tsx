@@ -101,6 +101,9 @@ export function FeaturedSection({
                   featured={tool.featured}
                   isOpenSource={tool.isOpenSource}
                   viewCount={tool.viewCount}
+                  clickCount={tool.clickCount}
+                  githubStars={tool.githubStars}
+                  phVotes={tool.phVotes}
                 />
               </div>
             ))}

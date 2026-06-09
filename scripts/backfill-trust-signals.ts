@@ -196,7 +196,7 @@ async function backfillGithubStars() {
   let updated = 0;
   let skipped = 0;
   let errors = 0;
-  let rateLimited = false;
+  const rateLimited = false;
 
   for (const tool of tools) {
     if (!tool.github || rateLimited) break;
