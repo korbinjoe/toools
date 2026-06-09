@@ -49,11 +49,13 @@ enum ToolSource {
 
 ### 2. 信号分层展示
 
-| 层级 | 位置 | 信号 |
-|------|------|------|
-| Micro | ToolCard footer | pricing（已有）、Featured ★、Open Source、热度 tier |
-| Macro | 详情页 At a Glance | pricing、platforms、isOpenSource + githubStars、viewCount/clickCount、embedMode、updatedAt、source link |
-| Discovery | FilterPanel + sort | sort=popular\|newest、filter openSource、filter featured、filter platform |
+
+| 层级        | 位置                 | 信号                                                                                                |
+| --------- | ------------------ | ------------------------------------------------------------------------------------------------- |
+| Micro     | ToolCard footer    | pricing（已有）、Featured ★、Open Source、热度 tier                                                        |
+| Macro     | 详情页 At a Glance    | pricing、platforms、isOpenSource + githubStars、viewCount/clickCount、embedMode、updatedAt、source link |
+| Discovery | FilterPanel + sort | sort=popular|newest、filter openSource、filter featured、filter platform                             |
+
 
 **热度 tier**（卡片用，避免精确数字噪音）:
 
@@ -100,11 +102,13 @@ src/components/
 
 `/tools` 新增 query param `sort`:
 
-| value | orderBy |
-|-------|---------|
+
+| value         | orderBy                                     |
+| ------------- | ------------------------------------------- |
 | `popular`（默认） | `[{ featured: desc }, { viewCount: desc }]` |
-| `newest` | `{ createdAt: desc }` |
-| `clicks` | `{ clickCount: desc }` |
+| `newest`      | `{ createdAt: desc }`                       |
+| `clicks`      | `{ clickCount: desc }`                      |
+
 
 FilterPanel 新增 `openSource=1`（`isOpenSource: true`）、`featured=1`、`platform=web|mac|...`（`platforms: { has: value }`）。
 
@@ -127,3 +131,4 @@ FilterPanel 新增 `openSource=1`（`isOpenSource: true`）、`featured=1`、`pl
 
 - 是否在卡片上展示 platform 摘要（如 "Web · Mac"）还是仅详情页？→ **MVP 卡片不展示 platform**，避免 footer 拥挤
 - clickCount 是否在卡片展示？→ **否**，仅详情页 At a Glance
+
