@@ -47,6 +47,7 @@ next-env.d.ts
 
 # playwright cli
 .playwright-cli/
+.playwright-mcp/
 
 # skill archive
 .skill-archive/
