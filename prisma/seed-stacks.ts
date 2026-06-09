@@ -35,9 +35,9 @@ const stacks = [
         name: "Development",
         description: "Write code, manage versions, and leverage AI assistance.",
         editorNote:
-          "Cursor supercharges coding with AI. VS Code is the reliable fallback. GitHub is non-negotiable for version control.",
+          "Replit for rapid AI-assisted prototyping. VS Code Web when you need a full editor in the browser. GitHub is non-negotiable for version control.",
         sortOrder: 3,
-        tools: ["cursor", "vs-code", "github"],
+        tools: ["replit", "vs-code-web", "github"],
       },
       {
         name: "Deploy & Host",
@@ -51,17 +51,17 @@ const stacks = [
         name: "Analytics & Monitoring",
         description: "Track user behavior, monitor errors, and measure what matters.",
         editorNote:
-          "PostHog is all-in-one for product analytics. Sentry catches errors before users report them. Plausible is the ethical pick.",
+          "Mixpanel for product analytics. Hotjar for behavior insights. Grafana for infrastructure and uptime monitoring.",
         sortOrder: 5,
-        tools: ["posthog", "sentry", "plausible"],
+        tools: ["mixpanel", "hotjar", "grafana"],
       },
       {
         name: "Launch & Grow",
         description: "Get your product in front of users and build an audience.",
         editorNote:
-          "Launch on Product Hunt for day-one visibility. Build your email list early with Mailchimp. Buffer keeps your social consistent.",
+          "Build your audience with ConvertKit newsletters. Mailchimp for broader email campaigns. Buffer keeps social distribution consistent.",
         sortOrder: 6,
-        tools: ["product-hunt", "mailchimp", "buffer"],
+        tools: ["buffer", "mailchimp", "convertkit"],
       },
     ],
   },
@@ -94,25 +94,25 @@ const stacks = [
         name: "Video & Audio",
         description: "Record, edit, and produce video and audio content.",
         editorNote:
-          "Descript is magic for podcast and video editing. CapCut for quick social clips.",
+          "Descript is magic for podcast and video editing. Kapwing for quick social clips and repurposing.",
         sortOrder: 3,
-        tools: ["descript", "capcut"],
+        tools: ["descript", "kapwing"],
       },
       {
         name: "Publishing",
         description: "Distribute your content across platforms.",
         editorNote:
-          "WordPress for SEO-friendly blogs. Substack for newsletters. Buffer for social scheduling.",
+          "HackMD for collaborative markdown publishing. ConvertKit for newsletters. Buffer for social scheduling.",
         sortOrder: 4,
-        tools: ["wordpress", "substack", "buffer"],
+        tools: ["hackmd", "convertkit", "buffer"],
       },
       {
         name: "Growth & Analytics",
         description: "Track performance and grow your audience.",
         editorNote:
-          "Google Analytics for traffic insights. Mailchimp for growing your email list.",
+          "Google Search Console for organic search performance. Mailchimp for growing your email list.",
         sortOrder: 5,
-        tools: ["google-analytics", "mailchimp"],
+        tools: ["google-search-console", "mailchimp"],
       },
     ],
   },
@@ -145,9 +145,9 @@ const stacks = [
         name: "Design & Prototyping",
         description: "Design your product and create marketing assets.",
         editorNote:
-          "Figma for product design. Framer for marketing sites. Canva for quick assets.",
+          "Figma for product design. Penpot for open-source design files. Canva for quick assets.",
         sortOrder: 3,
-        tools: ["figma", "framer", "canva"],
+        tools: ["figma", "penpot", "canva"],
       },
       {
         name: "Development Infrastructure",
@@ -161,9 +161,9 @@ const stacks = [
         name: "Business Operations",
         description: "Payments, support, and day-to-day operations.",
         editorNote:
-          "Stripe for payments. Crisp for customer support chat. Google Workspace for email and docs.",
+          "Zapier connects your ops tools. Calendly for scheduling. Airtable for lightweight CRM and ops tracking.",
         sortOrder: 5,
-        tools: ["stripe", "crisp", "google-workspace"],
+        tools: ["zapier", "calendly", "airtable"],
       },
     ],
   },
@@ -180,41 +180,264 @@ const stacks = [
         name: "Code & Editor",
         description: "Write, review, and manage your codebase.",
         editorNote:
-          "GitHub is home for OSS. VS Code and Cursor for development.",
+          "GitHub is home for OSS. VS Code Web for browser editing. Replit for quick contributor sandboxes.",
         sortOrder: 1,
-        tools: ["github", "vs-code", "cursor"],
+        tools: ["github", "vs-code-web", "replit"],
       },
       {
         name: "CI/CD",
         description: "Automate testing, builds, and releases.",
         editorNote:
-          "GitHub Actions for CI pipelines. Codecov for coverage tracking.",
+          "Vercel and Netlify both offer Git-integrated deploy previews — pick the one that matches your stack.",
         sortOrder: 2,
-        tools: ["github-actions", "codecov"],
+        tools: ["vercel", "netlify"],
       },
       {
         name: "Documentation",
         description: "Write and publish project documentation.",
         editorNote:
-          "Docusaurus for feature-rich docs. Mintlify for beautiful API docs.",
+          "HackMD for collaborative docs. Typst for beautiful, version-controlled technical writing.",
         sortOrder: 3,
-        tools: ["docusaurus", "mintlify"],
+        tools: ["hackmd", "typst"],
       },
       {
         name: "Community",
         description: "Build and engage your contributor community.",
         editorNote:
-          "Discord for real-time community. GitHub Discussions for async Q&A.",
+          "Slack for day-to-day community chat. Loom for async video updates and contributor onboarding.",
         sortOrder: 4,
-        tools: ["discord", "github"],
+        tools: ["slack", "loom"],
       },
       {
         name: "Funding",
         description: "Sustain your project with sponsorships and donations.",
         editorNote:
-          "GitHub Sponsors for individual supporters. Open Collective for organizational funding.",
+          "ConvertKit to nurture supporters via email. Buffer to maintain a public presence while you build momentum.",
         sortOrder: 5,
-        tools: ["github-sponsors", "open-collective"],
+        tools: ["convertkit", "buffer"],
+      },
+    ],
+  },
+  {
+    name: "AI Product Builder",
+    slug: "ai-product-builder",
+    tagline: "Prototype, design, and ship AI-powered products faster.",
+    description:
+      "From AI-assisted ideation to browser-based prototyping, automation, and deployment — a modern stack for building AI-native products.",
+    icon: "sparkles",
+    sortOrder: 5,
+    stages: [
+      {
+        name: "AI Assistants",
+        description: "Brainstorm, research, and draft with AI copilots.",
+        editorNote:
+          "ChatGPT for broad tasks, Claude for long-form reasoning, Perplexity for research with citations.",
+        sortOrder: 1,
+        tools: ["chatgpt", "claude", "perplexity"],
+      },
+      {
+        name: "Prototyping",
+        description: "Spin up working prototypes in the browser.",
+        editorNote:
+          "Replit for full-stack experiments. StackBlitz for instant Node frontends. CodeSandbox for component sandboxes.",
+        sortOrder: 2,
+        tools: ["replit", "stackblitz", "codesandbox"],
+      },
+      {
+        name: "Design",
+        description: "Sketch flows and UI before you commit to code.",
+        editorNote:
+          "Figma for high-fidelity UI. Excalidraw for diagrams. tldraw for quick whiteboarding.",
+        sortOrder: 3,
+        tools: ["figma", "excalidraw", "tldraw"],
+      },
+      {
+        name: "Automation",
+        description: "Connect services and automate repetitive workflows.",
+        editorNote:
+          "Zapier for no-code integrations. n8n when you need open-source control. Make for visual multi-step scenarios.",
+        sortOrder: 4,
+        tools: ["zapier", "n8n", "make"],
+      },
+      {
+        name: "Deploy",
+        description: "Ship to production with modern hosting and backend.",
+        editorNote:
+          "Vercel for frontend, Railway for services, Supabase for Postgres, auth, and realtime.",
+        sortOrder: 5,
+        tools: ["vercel", "railway", "supabase"],
+      },
+    ],
+  },
+  {
+    name: "Marketing & SEO Growth",
+    slug: "marketing-seo-growth",
+    tagline: "Research keywords, create content, and measure what drives growth.",
+    description:
+      "A full-funnel marketing stack — SEO research, content production, distribution, and analytics for teams focused on organic growth.",
+    icon: "megaphone",
+    sortOrder: 6,
+    stages: [
+      {
+        name: "Keyword Research",
+        description: "Find opportunities and understand search intent.",
+        editorNote:
+          "Ahrefs for backlink and keyword depth. Semrush for competitive gaps. Ubersuggest for quick ideas on a budget.",
+        sortOrder: 1,
+        tools: ["ahrefs", "semrush", "ubersuggest"],
+      },
+      {
+        name: "Content Creation",
+        description: "Plan, write, and polish content that ranks.",
+        editorNote:
+          "Notion for briefs and calendars. Grammarly for clarity. Hemingway Editor for readable prose.",
+        sortOrder: 2,
+        tools: ["notion", "grammarly", "hemingway-editor"],
+      },
+      {
+        name: "Distribution",
+        description: "Publish across email and social channels.",
+        editorNote:
+          "Buffer for social scheduling. Mailchimp for campaigns. ConvertKit for creator-style newsletters.",
+        sortOrder: 3,
+        tools: ["buffer", "mailchimp", "convertkit"],
+      },
+      {
+        name: "Measurement",
+        description: "Track SEO performance and on-site behavior.",
+        editorNote:
+          "Google Search Console for search visibility. Mixpanel for product events. Hotjar for qualitative session insight.",
+        sortOrder: 4,
+        tools: ["google-search-console", "mixpanel", "hotjar"],
+      },
+    ],
+  },
+  {
+    name: "Data & Insights",
+    slug: "data-insights-stack",
+    tagline: "Collect, analyze, and share data that drives better decisions.",
+    description:
+      "From spreadsheets and product analytics to dashboards and stakeholder reporting — tools for data-informed teams.",
+    icon: "bar-chart",
+    sortOrder: 7,
+    stages: [
+      {
+        name: "Data Collection",
+        description: "Organize raw data in flexible tables and sheets.",
+        editorNote:
+          "Airtable for structured ops data. Google Sheets for quick collaboration. Baserow as an open-source Airtable alternative.",
+        sortOrder: 1,
+        tools: ["airtable", "google-sheets", "baserow"],
+      },
+      {
+        name: "Product Analytics",
+        description: "Understand how users behave in your product.",
+        editorNote:
+          "Mixpanel for event funnels. Hotjar for heatmaps and recordings. Search Console for acquisition trends.",
+        sortOrder: 2,
+        tools: ["mixpanel", "hotjar", "google-search-console"],
+      },
+      {
+        name: "Visualization",
+        description: "Build dashboards and explore data visually.",
+        editorNote:
+          "Metabase for self-serve BI. Grafana for metrics and alerting. Observable for interactive data notebooks.",
+        sortOrder: 3,
+        tools: ["metabase", "grafana", "observable"],
+      },
+      {
+        name: "Reporting",
+        description: "Share insights with stakeholders async.",
+        editorNote:
+          "Notion for written reports. Miro for workshop synthesis. Loom for walkthrough videos.",
+        sortOrder: 4,
+        tools: ["notion", "miro", "loom"],
+      },
+    ],
+  },
+  {
+    name: "Design Workflow",
+    slug: "design-workflow",
+    tagline: "Research, design, polish, and hand off product UI with confidence.",
+    description:
+      "End-to-end design workflow — inspiration, UI tools, asset creation, and async review for product designers.",
+    icon: "palette",
+    sortOrder: 8,
+    stages: [
+      {
+        name: "Inspiration",
+        description: "Study patterns and gather visual references.",
+        editorNote:
+          "Dribbble for visual trends. Mobbin for real app UI patterns. Unsplash for photography.",
+        sortOrder: 1,
+        tools: ["dribbble", "mobbin", "unsplash"],
+      },
+      {
+        name: "UI Design",
+        description: "Design interfaces and iterate on flows.",
+        editorNote:
+          "Figma for collaborative UI. Penpot for open-source design files. Excalidraw for low-fi wireframes.",
+        sortOrder: 2,
+        tools: ["figma", "penpot", "excalidraw"],
+      },
+      {
+        name: "Visual Assets",
+        description: "Create graphics, palettes, and cutouts.",
+        editorNote:
+          "Canva for marketing graphics. Coolors for palette exploration. Remove.bg for instant cutouts.",
+        sortOrder: 3,
+        tools: ["canva", "coolors", "remove-bg"],
+      },
+      {
+        name: "Review & Handoff",
+        description: "Align with engineers and stakeholders async.",
+        editorNote:
+          "Miro for critique sessions. Loom for annotated walkthroughs. Notion for specs and decisions.",
+        sortOrder: 4,
+        tools: ["miro", "loom", "notion"],
+      },
+    ],
+  },
+  {
+    name: "Remote Team Ops",
+    slug: "remote-team-ops",
+    tagline: "Run a distributed team with async communication and secure workflows.",
+    description:
+      "Communication, planning, knowledge sharing, and security essentials for remote and hybrid teams.",
+    icon: "users",
+    sortOrder: 9,
+    stages: [
+      {
+        name: "Communication",
+        description: "Stay connected across time zones without meeting overload.",
+        editorNote:
+          "Slack for daily chat. Loom for async video. Calendly to protect focus time.",
+        sortOrder: 1,
+        tools: ["slack", "loom", "calendly"],
+      },
+      {
+        name: "Planning",
+        description: "Track work and visualize roadmaps together.",
+        editorNote:
+          "Linear for issue tracking. Miro for roadmap workshops. Todoist for personal task clarity.",
+        sortOrder: 2,
+        tools: ["linear", "miro", "todoist"],
+      },
+      {
+        name: "Knowledge Base",
+        description: "Document decisions and make information discoverable.",
+        editorNote:
+          "Notion for team wiki. Obsidian for personal linked notes. HackMD for collaborative markdown.",
+        sortOrder: 3,
+        tools: ["notion", "obsidian", "hackmd"],
+      },
+      {
+        name: "Security",
+        description: "Protect credentials and monitor exposure.",
+        editorNote:
+          "Bitwarden for open-source password management. 1Password for team vaults. Have I Been Pwned for breach checks.",
+        sortOrder: 4,
+        tools: ["bitwarden", "1password", "have-i-been-pwned"],
       },
     ],
   },

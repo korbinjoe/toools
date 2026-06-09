@@ -186,7 +186,7 @@ prisma/
 ├── schema.prisma             # Tool, Category, Tag, Stack, Stage models
 ├── migrations/               # SQL migrations
 ├── seed.ts                   # Seed data (~100 curated tools)
-├── seed-stacks.ts            # Four curated workflows with stage recommendations
+├── seed-stacks.ts            # Nine curated workflows with stage recommendations
 └── seed-tool-enrichments.ts  # Use cases, pros, cons for select tools
 scripts/                      # Import and maintenance scripts
 openspec/                     # Design proposals and change specs

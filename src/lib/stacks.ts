@@ -7,6 +7,14 @@ export function getStackIconKey(slug: string): StackPreview["icon"] | null {
 
 export const stackTags: Record<string, string[]> = {
   "indie-developer-toolkit": ["#indie-hacker", "#saas", "#solo-dev"],
+  "content-creator-suite": ["#creator", "#content", "#newsletter"],
+  "startup-foundation": ["#startup", "#team", "#early-stage"],
+  "open-source-maintainer": ["#open-source", "#maintainer", "#community"],
+  "ai-product-builder": ["#ai", "#product", "#builder"],
+  "marketing-seo-growth": ["#marketing", "#seo", "#growth"],
+  "data-insights-stack": ["#data", "#analytics", "#insights"],
+  "design-workflow": ["#design", "#ui-ux", "#handoff"],
+  "remote-team-ops": ["#remote", "#team", "#async"],
 };
 
 export type StackListItem = {
