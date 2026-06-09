@@ -1,13 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolCard } from "./tool-card";
 import type { ToolItem } from "./tool-grid";
-
-const INTERVAL_MS = 10_000;
 
 export function FeaturedSection({
   initialTools,
@@ -17,8 +15,6 @@ export function FeaturedSection({
   const [tools, setTools] = useState(initialTools);
   const [fading, setFading] = useState(false);
   const [spinning, setSpinning] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
-  const pausedRef = useRef(false);
 
   const refresh = useCallback(async () => {
     setSpinning(true);
@@ -31,29 +27,19 @@ export function FeaturedSection({
       setTools(data);
       setFading(false);
     } catch {
-      // keep current on error, no fade
+      // keep current on error
     } finally {
       setTimeout(() => setSpinning(false), 500);
     }
   }, []);
 
-  useEffect(() => {
-    timerRef.current = setInterval(() => {
-      if (!pausedRef.current) refresh();
-    }, INTERVAL_MS);
-    return () => clearInterval(timerRef.current);
-  }, [refresh]);
-
   return (
-    <div
-      onMouseEnter={() => (pausedRef.current = true)}
-      onMouseLeave={() => (pausedRef.current = false)}
-    >
+    <div>
       <div className="flex items-center gap-2 mb-8">
         <div className="flex-1">
-          <h2 className="text-xl font-bold tracking-tight">Featured</h2>
+          <h2 className="text-xl font-bold tracking-tight">Editor&apos;s Picks</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Discover something new every moment
+            Hand-picked tools our editors recommend
           </p>
         </div>
         <button

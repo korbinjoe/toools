@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 const navLinks = [
+  { href: "/stacks", label: "Stacks" },
   { href: "/tools", label: "Browse" },
   { href: "/categories", label: "Categories" },
   { href: "/submit", label: "Submit" },

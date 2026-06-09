@@ -45,6 +45,8 @@ function buildWhere(params: {
     where.OR = [
       { name: { contains: params.q, mode: "insensitive" } },
       { tagline: { contains: params.q, mode: "insensitive" } },
+      { description: { contains: params.q, mode: "insensitive" } },
+      { tags: { some: { tag: { name: { contains: params.q, mode: "insensitive" } } } } },
     ];
   }
 

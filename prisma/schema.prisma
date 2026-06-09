@@ -41,12 +41,60 @@ model Tool {
   source      ToolSource?
   sourceUrl   String?
 
+  useCases String[] @default([])
+  pros     String[] @default([])
+  cons     String[] @default([])
+
+  stageRecommendations StageRecommendation[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([categoryId])
   @@index([status])
   @@index([featured])
+}
+
+model Stack {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  tagline     String
+  description String
+  icon        String?
+  sortOrder   Int     @default(0)
+
+  stages Stage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Stage {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  editorNote  String?
+  sortOrder   Int     @default(0)
+
+  stackId String
+  stack   Stack  @relation(fields: [stackId], references: [id], onDelete: Cascade)
+
+  recommendations StageRecommendation[]
+
+  @@index([stackId])
+}
+
+model StageRecommendation {
+  stageId   String
+  toolId    String
+  sortOrder Int    @default(0)
+
+  stage Stage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  tool  Tool  @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@id([stageId, toolId])
+  @@index([toolId])
 }
 
 model Category {
