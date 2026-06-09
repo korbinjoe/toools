@@ -31,18 +31,109 @@ export type StackStageTool = {
   color: string;
 };
 
+export type StackStage = {
+  id: string;
+  name: string;
+  description: string | null;
+  editorNote: string | null;
+  tools: StackStageTool[];
+  relatedTools: StackStageTool[];
+  relatedLabel: string | null;
+  relatedCategorySlug: string | null;
+};
+
 export type StackDetail = {
   slug: string;
   name: string;
   description: string;
-  stages: {
-    id: string;
-    name: string;
-    description: string | null;
-    editorNote: string | null;
-    tools: StackStageTool[];
-  }[];
+  stages: StackStage[];
 };
+
+const RELATED_TOOLS_LIMIT = 6;
+
+const toolSelect = {
+  slug: true,
+  name: true,
+  tagline: true,
+  pricing: true,
+  githubStars: true,
+  phVotes: true,
+  iconUrl: true,
+  url: true,
+  categoryId: true,
+  category: { select: { name: true, slug: true } },
+} as const;
+
+type ToolRow = {
+  slug: string;
+  name: string;
+  tagline: string;
+  pricing: string;
+  githubStars: number | null;
+  phVotes: number | null;
+  iconUrl: string | null;
+  url: string;
+  categoryId: string;
+  category: { name: string; slug: string };
+};
+
+function mapToolToStageTool(
+  tool: ToolRow,
+  preview?: StackPreview,
+): StackStageTool {
+  const previewTool = preview?.stages
+    .flatMap((s) => s.tools)
+    .find((t) => t.name === tool.name);
+
+  return {
+    slug: tool.slug,
+    name: tool.name,
+    tagline: tool.tagline,
+    pricing: tool.pricing,
+    githubStars: tool.githubStars,
+    phVotes: tool.phVotes,
+    iconUrl: tool.iconUrl,
+    url: tool.url,
+    initial: previewTool?.initial ?? tool.name.charAt(0).toUpperCase(),
+    color: previewTool?.color ?? "#78716C",
+  };
+}
+
+function signalScore(tool: Pick<ToolRow, "githubStars" | "phVotes">) {
+  return (tool.githubStars ?? 0) * 10 + (tool.phVotes ?? 0);
+}
+
+function relatedLabelForCategories(categories: { name: string; slug: string }[]) {
+  const unique = [...new Map(categories.map((c) => [c.slug, c])).values()];
+  if (unique.length === 1) return unique[0];
+  return null;
+}
+
+function pickRelatedTools(
+  stageTools: ToolRow[],
+  candidates: ToolRow[],
+  preview?: StackPreview,
+): {
+  tools: StackStageTool[];
+  label: string | null;
+  categorySlug: string | null;
+} {
+  const excludeSlugs = new Set(stageTools.map((t) => t.slug));
+  const categoryIds = new Set(stageTools.map((t) => t.categoryId));
+  const category = relatedLabelForCategories(stageTools.map((t) => t.category));
+
+  const related = candidates
+    .filter((t) => categoryIds.has(t.categoryId) && !excludeSlugs.has(t.slug))
+    .sort((a, b) => signalScore(b) - signalScore(a))
+    .slice(0, RELATED_TOOLS_LIMIT)
+    .map((t) => mapToolToStageTool(t, preview));
+
+  return {
+    tools: related,
+    label: category?.name ?? null,
+    categorySlug: category?.slug ?? null,
+  };
+}
 
 function previewToListItem(stack: StackPreview): StackListItem {
   const toolCount = stack.stages.reduce((sum, s) => sum + s.tools.length, 0);
@@ -78,6 +169,9 @@ function previewToDetail(stack: StackPreview): StackDetail {
         initial: tool.initial,
         color: tool.color,
       })),
+      relatedTools: [],
+      relatedLabel: null,
+      relatedCategorySlug: null,
     })),
   };
 }
@@ -125,18 +219,7 @@ export async function getStackBySlug(slug: string): Promise<StackDetail | null> 
             recommendations: {
               orderBy: { sortOrder: "asc" },
               include: {
-                tool: {
-                  select: {
-                    slug: true,
-                    name: true,
-                    tagline: true,
-                    pricing: true,
-                    githubStars: true,
-                    phVotes: true,
-                    iconUrl: true,
-                    url: true,
-                  },
-                },
+                tool: { select: toolSelect },
               },
             },
           },
@@ -148,34 +231,44 @@ export async function getStackBySlug(slug: string): Promise<StackDetail | null> 
       return preview ? previewToDetail(preview) : null;
     }
 
+    const stageToolRows = stack.stages.map((stage) =>
+      stage.recommendations.map((rec) => rec.tool),
+    );
+    const recommendedSlugs = stageToolRows.flat().map((t) => t.slug);
+    const categoryIds = [...new Set(stageToolRows.flat().map((t) => t.categoryId))];
+
+    const relatedCandidates =
+      categoryIds.length > 0
+        ? await prisma.tool.findMany({
+            where: {
+              status: "APPROVED",
+              categoryId: { in: categoryIds },
+              slug: { notIn: recommendedSlugs },
+            },
+            select: toolSelect,
+          })
+        : [];
+
     return {
       slug: stack.slug,
       name: stack.name,
       description: stack.description,
-      stages: stack.stages.map((stage) => ({
-        id: stage.id,
-        name: stage.name,
-        description: stage.description,
-        editorNote: stage.editorNote,
-        tools: stage.recommendations.map((rec) => {
-          const previewTool = preview?.stages
-            .flatMap((s) => s.tools)
-            .find((t) => t.name === rec.tool.name);
+      stages: stack.stages.map((stage, idx) => {
+        const tools = stageToolRows[idx].map((t) => mapToolToStageTool(t, preview));
+        const { tools: relatedTools, label: relatedLabel, categorySlug: relatedCategorySlug } =
+          pickRelatedTools(stageToolRows[idx], relatedCandidates, preview);
 
-          return {
-            slug: rec.tool.slug,
-            name: rec.tool.name,
-            tagline: rec.tool.tagline,
-            pricing: rec.tool.pricing,
-            githubStars: rec.tool.githubStars,
-            phVotes: rec.tool.phVotes,
-            iconUrl: rec.tool.iconUrl,
-            url: rec.tool.url,
-            initial: previewTool?.initial ?? rec.tool.name.charAt(0).toUpperCase(),
-            color: previewTool?.color ?? "#78716C",
-          };
-        }),
-      })),
+        return {
+          id: stage.id,
+          name: stage.name,
+          description: stage.description,
+          editorNote: stage.editorNote,
+          tools,
+          relatedTools,
+          relatedLabel,
+          relatedCategorySlug,
+        };
+      }),
     };
   } catch {
     return preview ? previewToDetail(preview) : null;

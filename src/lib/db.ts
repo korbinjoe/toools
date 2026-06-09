@@ -2,12 +2,13 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { unstable_noStore as noStore } from "next/cache";
+import { getDatabaseUrl } from "@/lib/database-url";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createPrismaClient() {
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL!,
+    connectionString: getDatabaseUrl(),
     connectionTimeoutMillis: 15_000,
     idleTimeoutMillis: 30_000,
     max: 5,

@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { getDatabaseUrl } from "@/lib/database-url";
 
 export const dynamic = "force-dynamic";
 
-const adapter = new PrismaPg(process.env.DATABASE_URL!);
+const adapter = new PrismaPg(getDatabaseUrl());
 const prisma = new PrismaClient({ adapter });
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://toools.dev";

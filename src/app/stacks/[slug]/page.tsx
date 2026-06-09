@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { StageToolCard } from "@/components/stage-tool-card";
+import { StageToolsSection } from "@/components/stage-tools-section";
 import { getStackBySlug, stackTags } from "@/lib/stacks";
 import { stackPreviews } from "@/lib/stacks-data";
 import { StackIcon } from "@/components/stack-icon";
@@ -132,11 +132,13 @@ export default async function StackDetailPage({ params }: StackPageProps) {
                 <p className="text-[0.8125rem] text-muted-foreground mt-0.5">{stage.description}</p>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mt-4">
-                {stage.tools.map((tool) => (
-                  <StageToolCard key={`${stage.id}-${tool.name}`} tool={tool} />
-                ))}
-              </div>
+              <StageToolsSection
+                stageId={stage.id}
+                tools={stage.tools}
+                relatedTools={stage.relatedTools}
+                relatedLabel={stage.relatedLabel}
+                relatedCategorySlug={stage.relatedCategorySlug}
+              />
 
               {stage.editorNote && (
                 <div className="mt-3.5 px-3.5 py-2.5 bg-muted/50 border-l-[3px] border-primary rounded-r-lg text-xs text-secondary-foreground leading-relaxed">
