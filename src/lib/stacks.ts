@@ -31,15 +31,20 @@ export type StackStageTool = {
   color: string;
 };
 
+export type StackStageRelatedGroup = {
+  categoryName: string;
+  categorySlug: string;
+  tools: StackStageTool[];
+};
+
 export type StackStage = {
   id: string;
   name: string;
   description: string | null;
   editorNote: string | null;
   tools: StackStageTool[];
-  relatedTools: StackStageTool[];
-  relatedLabel: string | null;
-  relatedCategorySlug: string | null;
+  browseCategories: { name: string; slug: string }[];
+  relatedGroups: StackStageRelatedGroup[];
 };
 
 export type StackDetail = {
@@ -103,36 +108,30 @@ function signalScore(tool: Pick<ToolRow, "githubStars" | "phVotes">) {
   return (tool.githubStars ?? 0) * 10 + (tool.phVotes ?? 0);
 }
 
-function relatedLabelForCategories(categories: { name: string; slug: string }[]) {
-  const unique = [...new Map(categories.map((c) => [c.slug, c])).values()];
-  if (unique.length === 1) return unique[0];
-  return null;
+function uniqueCategories(categories: { name: string; slug: string }[]) {
+  return [...new Map(categories.map((c) => [c.slug, c])).values()];
 }
 
-function pickRelatedTools(
+function pickRelatedGroups(
   stageTools: ToolRow[],
   candidates: ToolRow[],
   preview?: StackPreview,
-): {
-  tools: StackStageTool[];
-  label: string | null;
-  categorySlug: string | null;
-} {
+): StackStageRelatedGroup[] {
   const excludeSlugs = new Set(stageTools.map((t) => t.slug));
-  const categoryIds = new Set(stageTools.map((t) => t.categoryId));
-  const category = relatedLabelForCategories(stageTools.map((t) => t.category));
 
-  const related = candidates
-    .filter((t) => categoryIds.has(t.categoryId) && !excludeSlugs.has(t.slug))
-    .sort((a, b) => signalScore(b) - signalScore(a))
-    .slice(0, RELATED_TOOLS_LIMIT)
-    .map((t) => mapToolToStageTool(t, preview));
-
-  return {
-    tools: related,
-    label: category?.name ?? null,
-    categorySlug: category?.slug ?? null,
-  };
+  return uniqueCategories(stageTools.map((t) => t.category))
+    .map((category) => ({
+      categoryName: category.name,
+      categorySlug: category.slug,
+      tools: candidates
+        .filter(
+          (t) => t.category.slug === category.slug && !excludeSlugs.has(t.slug),
+        )
+        .sort((a, b) => signalScore(b) - signalScore(a))
+        .slice(0, RELATED_TOOLS_LIMIT)
+        .map((t) => mapToolToStageTool(t, preview)),
+    }))
+    .filter((group) => group.tools.length > 0);
 }
 
 function previewToListItem(stack: StackPreview): StackListItem {
@@ -169,9 +168,8 @@ function previewToDetail(stack: StackPreview): StackDetail {
         initial: tool.initial,
         color: tool.color,
       })),
-      relatedTools: [],
-      relatedLabel: null,
-      relatedCategorySlug: null,
+      relatedGroups: [],
+      browseCategories: [],
     })),
   };
 }
@@ -254,9 +252,10 @@ export async function getStackBySlug(slug: string): Promise<StackDetail | null> 
       name: stack.name,
       description: stack.description,
       stages: stack.stages.map((stage, idx) => {
-        const tools = stageToolRows[idx].map((t) => mapToolToStageTool(t, preview));
-        const { tools: relatedTools, label: relatedLabel, categorySlug: relatedCategorySlug } =
-          pickRelatedTools(stageToolRows[idx], relatedCandidates, preview);
+        const stageRows = stageToolRows[idx];
+        const tools = stageRows.map((t) => mapToolToStageTool(t, preview));
+        const browseCategories = uniqueCategories(stageRows.map((t) => t.category));
+        const relatedGroups = pickRelatedGroups(stageRows, relatedCandidates, preview);
 
         return {
           id: stage.id,
@@ -264,9 +263,8 @@ export async function getStackBySlug(slug: string): Promise<StackDetail | null> 
           description: stage.description,
           editorNote: stage.editorNote,
           tools,
-          relatedTools,
-          relatedLabel,
-          relatedCategorySlug,
+          browseCategories,
+          relatedGroups,
         };
       }),
     };

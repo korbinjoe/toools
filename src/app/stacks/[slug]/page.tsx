@@ -135,9 +135,8 @@ export default async function StackDetailPage({ params }: StackPageProps) {
               <StageToolsSection
                 stageId={stage.id}
                 tools={stage.tools}
-                relatedTools={stage.relatedTools}
-                relatedLabel={stage.relatedLabel}
-                relatedCategorySlug={stage.relatedCategorySlug}
+                browseCategories={stage.browseCategories}
+                relatedGroups={stage.relatedGroups}
               />
 
               {stage.editorNote && (
