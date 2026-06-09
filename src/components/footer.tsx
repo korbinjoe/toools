@@ -11,13 +11,13 @@ function FooterUpdatedAtFallback() {
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/60 mt-auto">
-      <div className="mx-auto max-w-6xl px-6 py-10 lg:px-8">
+    <footer className="mt-auto border-t border-border/60">
+      <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Wordmark height={20} className="text-foreground" />
-            <p className="mt-2 text-sm text-muted-foreground max-w-xs leading-relaxed">
-              A curated workspace of tools you can try right here, or find the right one for your workflow.
+            <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
+              Curated tool stacks and a growing directory of tools for indie devs, creators, and teams.
             </p>
             <div className="mt-4">
               <GithubStarLink variant="button" />
@@ -25,48 +25,37 @@ export function Footer() {
           </div>
           <nav className="flex gap-8 text-sm">
             <div className="flex flex-col gap-2.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
-                Explore
-              </span>
-              <Link href="/tools" className="text-muted-foreground hover:text-foreground transition-colors">
+              <span className="text-sm font-semibold text-foreground">Explore</span>
+              <Link href="/stacks" className="text-muted-foreground transition-colors hover:text-foreground">
+                Tool Stacks
+              </Link>
+              <Link href="/tools" className="text-muted-foreground transition-colors hover:text-foreground">
                 Browse Tools
               </Link>
-              <Link href="/categories" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/categories" className="text-muted-foreground transition-colors hover:text-foreground">
                 Categories
               </Link>
             </div>
             <div className="flex flex-col gap-2.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
-                Contribute
-              </span>
-              <Link href="/submit" className="text-muted-foreground hover:text-foreground transition-colors">
+              <span className="text-sm font-semibold text-foreground">Contribute</span>
+              <Link href="/submit" className="text-muted-foreground transition-colors hover:text-foreground">
                 Submit a Tool
               </Link>
             </div>
             <div className="flex flex-col gap-2.5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
-                Open Source
-              </span>
+              <span className="text-sm font-semibold text-foreground">Open source</span>
               <a
                 href={GITHUB_REPO_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground transition-colors hover:text-foreground"
               >
                 GitHub Repository
-              </a>
-              <a
-                href={GITHUB_REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Star on GitHub
               </a>
             </div>
           </nav>
         </div>
-        <div className="mt-8 pt-6 border-t border-border/40 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
+        <div className="mt-8 flex flex-col gap-1 border-t border-border/40 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} Toools</span>
           <Suspense fallback={<FooterUpdatedAtFallback />}>
             <FooterUpdatedAt />

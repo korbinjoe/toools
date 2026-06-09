@@ -65,6 +65,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </Button>
       </Link>
 
+      <div className="mb-6 rounded-xl border border-border/80 bg-accent/30 px-4 py-3 text-sm text-secondary-foreground">
+        Want a complete workflow?{" "}
+        <Link href="/stacks" className="font-semibold text-primary hover:text-primary/80 transition-colors">
+          Browse tool stacks &rarr;
+        </Link>
+      </div>
+
       <div className="mb-8">
         <div className="flex items-center gap-3">
           {category.icon && (

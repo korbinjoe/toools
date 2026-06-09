@@ -58,20 +58,31 @@ export function CategoryIcon({ slug, className }: { slug: string; className?: st
   return <Icon className={className} />;
 }
 
-export function HeroCategoryNav({ categories }: { categories: CategoryItem[] }) {
+export function HeroCategoryNav({
+  categories,
+  variant = "card",
+}: {
+  categories: CategoryItem[];
+  variant?: "card" | "plain";
+}) {
   const [expanded, setExpanded] = useState(false);
 
-  return (
-    <div className="rounded-2xl border border-border/50 bg-card/30 p-5 sm:p-6 shadow-sm">
+  const content = (
+    <>
       <div className="flex items-center justify-between gap-4">
-        <p className="text-sm font-semibold tracking-tight text-foreground">
-          Explore categories
-        </p>
+        <div>
+          <h2 className="text-[1.375rem] font-bold tracking-[-0.02em] text-foreground">
+            Explore categories
+          </h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Browse tools by discipline
+          </p>
+        </div>
         <Link
           href="/categories"
-          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0"
+          className="shrink-0 text-[0.8125rem] font-semibold text-primary transition-colors hover:text-primary/80"
         >
-          View all
+          View all &rarr;
         </Link>
       </div>
 
@@ -79,7 +90,7 @@ export function HeroCategoryNav({ categories }: { categories: CategoryItem[] }) 
         type="button"
         onClick={() => setExpanded((open) => !open)}
         aria-expanded={expanded}
-        className="mt-3 flex w-full items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/60 px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-background hover:text-foreground md:hidden"
+        className="mt-4 flex w-full items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/60 px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-background hover:text-foreground md:hidden"
       >
         <span>{expanded ? "Hide categories" : `${categories.length} categories`}</span>
         <ChevronDown
@@ -93,7 +104,7 @@ export function HeroCategoryNav({ categories }: { categories: CategoryItem[] }) 
       <div
         className={cn(
           "flex flex-wrap gap-2",
-          expanded ? "mt-4" : "mt-0 hidden md:flex md:mt-4",
+          expanded ? "mt-4" : "mt-0 hidden md:flex md:mt-5",
         )}
       >
         {categories.map((cat) => {
@@ -102,14 +113,14 @@ export function HeroCategoryNav({ categories }: { categories: CategoryItem[] }) 
             <Link
               key={cat.slug}
               href={`/categories/${cat.slug}`}
-              className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/60 px-3 py-1.5 text-xs font-medium whitespace-nowrap shadow-sm transition-all duration-200 hover:border-primary/35 hover:bg-background hover:shadow-md"
+              className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap shadow-warm-xs transition-all duration-200 hover:border-primary/35 hover:shadow-warm-md"
             >
-              <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors duration-200 group-hover:text-primary" />
+              <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors duration-200 group-hover:text-primary" strokeWidth={2} />
               <span className="text-foreground/90 transition-colors duration-200 group-hover:text-primary">
                 {cat.name}
               </span>
               {cat._count != null && (
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-mono tabular-nums text-muted-foreground">
+                <span className="rounded-full bg-muted px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground">
                   {cat._count.tools}
                 </span>
               )}
@@ -117,6 +128,16 @@ export function HeroCategoryNav({ categories }: { categories: CategoryItem[] }) 
           );
         })}
       </div>
+    </>
+  );
+
+  if (variant === "plain") {
+    return <div>{content}</div>;
+  }
+
+  return (
+    <div className="rounded-2xl border border-border/50 bg-card/30 p-5 shadow-warm-xs sm:p-6">
+      {content}
     </div>
   );
 }

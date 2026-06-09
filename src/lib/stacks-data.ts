@@ -18,7 +18,7 @@ export const stackPreviews: StackPreview[] = [
     slug: "indie-developer-toolkit",
     name: "Indie Developer Toolkit",
     tagline: "Ship a SaaS product as a solo developer, from idea to launch.",
-    description: "Everything you need to ship a SaaS product as a solo developer. From idea validation to launch and growth — a complete, opinionated tool chain.",
+    description: "Everything you need to ship a SaaS product as a solo developer. From idea validation to launch and growth: a complete, opinionated tool chain.",
     icon: "terminal",
     audience: "Solo developers & indie hackers",
     stages: [
@@ -34,7 +34,7 @@ export const stackPreviews: StackPreview[] = [
     slug: "content-creator-suite",
     name: "Content Creator Suite",
     tagline: "Create, publish, and grow your content across platforms.",
-    description: "Tools to create, publish, and grow your content across platforms — blogs, videos, podcasts, and newsletters.",
+    description: "Tools to create, publish, and grow your content across platforms: blogs, videos, podcasts, and newsletters.",
     icon: "pen-tool",
     audience: "Bloggers, YouTubers & podcasters",
     stages: [
@@ -49,9 +49,9 @@ export const stackPreviews: StackPreview[] = [
     slug: "startup-foundation",
     name: "Startup Foundation",
     tagline: "Essential tools to set up and run a lean startup team.",
-    description: "Essential tools to set up and run a lean startup team — communication, project management, and operations.",
+    description: "Essential tools to set up and run a lean startup team: communication, project management, and operations.",
     icon: "building",
-    audience: "Early-stage teams (2–5 people)",
+    audience: "Early-stage teams (2-5 people)",
     stages: [
       { name: "Comms", tools: [{ name: "Slack", initial: "S", color: "#4A154B" }, { name: "Notion", initial: "N", color: "#1C1917" }, { name: "Loom", initial: "L", color: "#625DF5" }] },
       { name: "Projects", tools: [{ name: "Linear", initial: "L", color: "#5E6AD2" }, { name: "GitHub", initial: "G", color: "#24292F" }] },
@@ -64,7 +64,7 @@ export const stackPreviews: StackPreview[] = [
     slug: "open-source-maintainer",
     name: "Open Source Maintainer",
     tagline: "Manage an open source project from code to community to funding.",
-    description: "The complete toolkit for managing an open source project — from code to community to funding.",
+    description: "The complete toolkit for managing an open source project: from code to community to funding.",
     icon: "git-branch",
     audience: "OSS maintainers & contributors",
     stages: [

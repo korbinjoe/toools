@@ -6,6 +6,8 @@ import type { Metadata } from "next";
 import { ArrowUpRight, ChevronRight, Star, Triangle } from "lucide-react";
 import { ToolAvatar } from "@/components/tool-avatar";
 import { prisma } from "@/lib/db";
+import { getStackIconKey } from "@/lib/stacks";
+import { StackIcon } from "@/components/stack-icon";
 
 interface ToolPageProps {
   params: Promise<{ slug: string }>;
@@ -189,16 +191,20 @@ export default async function ToolPage({ params }: ToolPageProps) {
             <section className="mt-7 mb-8">
               <h2 className="text-base font-bold tracking-[-0.01em] mb-3 pb-2 border-b border-border">Part of these Stacks</h2>
               <div className="flex flex-col gap-2">
-                {stacks.map((s) => (
+                {stacks.map((s) => {
+                  const iconKey = getStackIconKey(s.slug);
+                  return (
                   <Link
                     key={`${s.slug}-${s.stageName}`}
                     href={`/stacks/${s.slug}`}
-                    className="flex items-center gap-2.5 px-3.5 py-3 bg-muted/50 rounded-xl text-[0.8125rem] hover:bg-muted transition-colors"
+                    className="flex items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-3 text-[0.8125rem] transition-colors hover:bg-muted"
                   >
+                    {iconKey && <StackIcon icon={iconKey} size="sm" />}
                     <span className="font-semibold">{s.name}</span>
-                    <span className="text-muted-foreground ml-auto">{s.stageName} stage</span>
+                    <span className="ml-auto text-muted-foreground">{s.stageName} stage</span>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}

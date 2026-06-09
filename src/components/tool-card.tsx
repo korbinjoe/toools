@@ -115,7 +115,7 @@ export function ToolCard({
 
         {metricSignals.length > 0 && (
           <div className="mt-3 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
-            {metricSignals.slice(0, 4).map((signal) => (
+            {metricSignals.slice(0, 2).map((signal) => (
               <MetricSignal
                 key={signal.key}
                 icon={signal.icon}

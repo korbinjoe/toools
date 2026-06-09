@@ -22,8 +22,8 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6 lg:px-8">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl backdrop-saturate-150 supports-[backdrop-filter]:bg-background/80">
+      <div className="mx-auto flex h-[60px] max-w-[1200px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center group">
           <Wordmark height={24} className="text-foreground transition-transform duration-200 group-hover:scale-[1.02]" />
         </Link>

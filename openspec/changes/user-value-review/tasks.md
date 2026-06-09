@@ -5,8 +5,8 @@
 - [x] Schema 变更 — 新增 Stack / Stage / StageRecommendation model，Tool 增加 useCases / pros / cons 字段
 - [x] Prisma client generate
 - [x] 创建 seed-stacks.ts 脚本（4 个 Stack 完整数据）
-- [ ] 运行 `prisma migrate dev` 创建 migration（需数据库连接）
-- [ ] 运行 `npx tsx prisma/seed-stacks.ts` 填充数据
+- [x] 运行 `prisma migrate dev` 创建 migration（需数据库连接）
+- [x] 运行 `npx tsx prisma/seed-stacks.ts` 填充数据
 
 ## Phase 2: Core Pages（严格还原 mockup.html）
 
@@ -23,8 +23,8 @@
 
 ## Phase 4: Polish（后续）
 
-- [ ] 信任信号优化 — viewCount=0 时不显示
-- [ ] 分类页交叉引导 — 顶部 Stacks 提示
-- [ ] SEO — Stack 页面 meta + JSON-LD 结构化数据
-- [ ] 工具数据回填 — 为 30+ 工具补充 useCases / pros / cons
-- [ ] 暗色模式验证
+- [x] 信任信号优化 — viewCount=0 时不显示
+- [x] 分类页交叉引导 — 顶部 Stacks 提示
+- [x] SEO — Stack 页面 meta + JSON-LD 结构化数据
+- [x] 工具数据回填 — 为 30+ 工具补充 useCases / pros / cons
+- [x] 暗色模式验证
