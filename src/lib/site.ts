@@ -6,7 +6,7 @@ export const SITE_DESCRIPTION =
 export const SITE_OG_DESCRIPTION =
   "Scenario-first tool stacks and a searchable directory with trust signals, comparisons, and editor picks.";
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_BASE_URL || "https://toools.dev"
+  process.env.NEXT_PUBLIC_BASE_URL || "https://toools.top"
 ).replace(/\/$/, "");
 
 export const GITHUB_REPO_URL = "https://github.com/korbinjoe/toools";

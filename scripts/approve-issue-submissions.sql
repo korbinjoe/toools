@@ -1,5 +1,5 @@
 -- Apply the approved submissions from GitHub issues #1 and #2 to the live catalog.
--- Run once in the Neon SQL Editor for the database used by toools.dev.
+-- Run once in the Neon SQL Editor for the database used by toools.top.
 -- Safe to rerun: tool records are keyed by slug and tag links use ON CONFLICT.
 
 BEGIN;

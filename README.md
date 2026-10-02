@@ -2,7 +2,7 @@
 
 **Find the right tools for your entire workflow.**
 
-[Live site](https://toools.dev) · [Submit a tool](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml) · [Browse issues](https://github.com/korbinjoe/toools/issues)
+[Live site](https://toools.top) · [Submit a tool](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml) · [Browse issues](https://github.com/korbinjoe/toools/issues)
 
 Toools is an open-source **tool stack curation platform** — not just a directory. Start from a workflow (Stacks) or browse individual tools (Browse), then land on rich detail pages to compare pricing, signals, and alternatives before visiting the official site.
 
@@ -39,7 +39,7 @@ Home → Stacks (by workflow) ──→ Stack detail (stages + editor picks) ─
 
 ### Community & data
 
-- **Community submissions** — Structured GitHub Issue template and in-app guide at [toools.dev/submit](https://toools.dev/submit)
+- **Community submissions** — Structured GitHub Issue template and in-app guide at [toools.top/submit](https://toools.top/submit)
 - **Bulk import pipeline** — Scripts to seed from Product Hunt and GitHub Awesome lists, plus trust-signal backfill
 - **Dark mode** — System-aware theme toggle
 
@@ -82,7 +82,7 @@ NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `NEXT_PUBLIC_BASE_URL` | No | Public site URL (defaults to `https://toools.dev`) |
+| `NEXT_PUBLIC_BASE_URL` | No | Public site URL (defaults to `https://toools.top`) |
 
 Import and backfill scripts accept additional optional variables — see [Data import scripts](#data-import-scripts) below.
 
@@ -198,7 +198,7 @@ Site navigation: **Stacks · Browse · Categories · Submit**
 
 ### Submit a tool
 
-The easiest way to contribute is to [open a tool submission issue](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml). Fill in the template with the tool name, URL, tagline, description, category, and pricing. Maintainers review and approve submissions. You can also start from the in-app submit page at [toools.dev/submit](https://toools.dev/submit).
+The easiest way to contribute is to [open a tool submission issue](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml). Fill in the template with the tool name, URL, tagline, description, category, and pricing. Maintainers review and approve submissions. You can also start from the in-app submit page at [toools.top/submit](https://toools.top/submit).
 
 ### Contribute code
 
