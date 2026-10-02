@@ -449,6 +449,17 @@ const tools: ToolDef[] = [
     platforms: ["Web"],
     tags: ["Design", "Open Source"],
   },
+  {
+    name: "Fomrix",
+    tagline: "AI 3D generation and browser tools for 3D assets",
+    description:
+      "Fomrix turns text prompts and reference images into GLB 3D assets. Its browser tools can view GLB, STL, and OBJ files, convert GLB to STL, and inspect or repair STL meshes. AI generation uses credits, while the browser tools are free to use. Generated meshes should be checked before printing or production use.",
+    url: "https://fomrix.com/",
+    category: "design",
+    pricing: "FREEMIUM",
+    platforms: ["Web"],
+    tags: ["Design", "Generative AI"],
+  },
 
   // ===== Development =====
   {
@@ -861,6 +872,17 @@ const tools: ToolDef[] = [
     pricing: "PAID",
     platforms: ["Web"],
     tags: ["Generative AI", "AI"],
+  },
+  {
+    name: "aigeneratornsfw.com",
+    tagline: "18+ AI studio for images and short videos",
+    description:
+      "aigeneratornsfw.com is an adults-only, browser-based studio for AI image generation, reference-image editing, image animation, and short video creation. The submitter describes the service as intended for non-explicit content, with model-specific restrictions. Image creation uses daily credits; video generation requires a paid membership and sufficient credits. Adults 18+ only.",
+    url: "https://aigeneratornsfw.com/",
+    category: "image-media",
+    pricing: "FREEMIUM",
+    platforms: ["Web"],
+    tags: ["Generative AI", "Image Editing"],
   },
 
   // ===== Video & Audio =====
