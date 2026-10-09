@@ -920,6 +920,17 @@ const tools: ToolDef[] = [
     tags: ["Generative AI", "AI"],
   },
   {
+    name: "Hotel Lobby AI",
+    tagline: "Create 18+ portrait videos and orange-booth images",
+    description:
+      "Hotel Lobby AI is an adults-only browser tool for placing consenting adults' portraits into short video templates or a user-supplied video and creating orange recording-booth images. The submitter says users can choose which detected faces to replace. Use media only with permission and review AI results before sharing. The submission describes a limited trial of one image and one four-second video; credit packs are listed as coming soon.",
+    url: "https://hotellobbyaigenerator.co/",
+    category: "video-audio",
+    pricing: "FREEMIUM",
+    platforms: ["Web"],
+    tags: ["Generative AI", "Video Editing"],
+  },
+  {
     name: "Descript",
     tagline: "AI-powered video and podcast editor",
     description:
