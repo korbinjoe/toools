@@ -884,8 +884,41 @@ const tools: ToolDef[] = [
     platforms: ["Web"],
     tags: ["Generative AI", "Image Editing"],
   },
+  {
+    name: "PicCollages",
+    tagline: "Free browser-based photo collages and image tools",
+    description:
+      "PicCollages offers free browser-based photo collage layouts, vertical and horizontal image stitching, and a free-layout editor. Users can add text, stickers, backgrounds, borders, and filters, then export PNG or JPG files. The site says selected photos are processed locally in the browser and that advertising supports the free tools.",
+    url: "https://piccollages.com/",
+    category: "image-media",
+    pricing: "FREE",
+    platforms: ["Web"],
+    tags: ["Image Editing", "Design"],
+  },
+  {
+    name: "Describe Image",
+    tagline: "AI descriptions, alt text, and OCR for images and videos",
+    description:
+      "Describe Image analyzes images and videos to draft descriptions, alt text, extracted text, visual prompts, and video summaries. Guests can try two image generations per day; paid plans provide more credits and advanced features. AI outputs should be reviewed before reuse, especially for accessibility or factual content.",
+    url: "https://describeimage.io/",
+    category: "image-media",
+    pricing: "FREEMIUM",
+    platforms: ["Web"],
+    tags: ["AI"],
+  },
 
   // ===== Video & Audio =====
+  {
+    name: "BabyVideo.ai",
+    tagline: "Create playful baby portraits and short videos from photos",
+    description:
+      "BabyVideo.ai creates entertainment-only future-baby portraits from one or two parent photos and offers tools to animate baby photos into talking, singing, or dancing clips. Results are creative previews, not medical or genetic predictions. Signed-in users can earn limited daily check-in credits; paid packs and plans are also available.",
+    url: "https://babyvideo.ai/",
+    category: "video-audio",
+    pricing: "FREEMIUM",
+    platforms: ["Web"],
+    tags: ["Generative AI", "AI"],
+  },
   {
     name: "Descript",
     tagline: "AI-powered video and podcast editor",
