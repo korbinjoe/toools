@@ -2,8 +2,14 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { after } from "next/server";
+import { getToolExternalLinks } from "@/lib/tool-links";
+import { toolMetricQuery } from "@/lib/tool-metrics";
+import { ToolEngagement } from "@/components/tool-engagement";
+import { ToolWebsiteLink } from "@/components/tool-website-link";
+import { GitHubIcon } from "@/components/github-icon";
 import type { Metadata } from "next";
-import { ArrowUpRight, ChevronRight, Star, Triangle } from "lucide-react";
+import { ArrowUpRight, ChevronRight, ExternalLink, Star, Triangle } from "lucide-react";
 import { ToolAvatar } from "@/components/tool-avatar";
 import { prisma } from "@/lib/db";
 import { getStackIconKey } from "@/lib/stacks";
@@ -73,15 +79,17 @@ const pricingLabels: Record<string, string> = {
 };
 
 const compactNumber = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
+const countNumber = new Intl.NumberFormat("en");
 
 export default async function ToolPage({ params }: ToolPageProps) {
   const { slug } = await params;
   const tool = await getTool(slug);
   if (!tool) notFound();
 
-  prisma.tool
-    .update({ where: { id: tool.id }, data: { viewCount: { increment: 1 } } })
-    .catch(() => {});
+  after(() => prisma.$executeRaw(toolMetricQuery(tool.id, "view")).catch((error) => {
+    console.error("Tool view counter failed", error);
+  }));
+  const externalLinks = getToolExternalLinks(tool);
 
   const alternatives = await getAlternatives(tool.categoryId, tool.slug);
 
@@ -120,6 +128,18 @@ export default async function ToolPage({ params }: ToolPageProps) {
                   </span>
                 ))}
               </div>
+              <ToolEngagement viewCount={tool.viewCount} clickCount={tool.clickCount} className="mt-3" />
+              {externalLinks.length > 0 && (
+                <nav aria-label={`${tool.name} external links`} className="mt-3 flex flex-wrap gap-2">
+                  {externalLinks.map((link) => (
+                    <ToolWebsiteLink key={link.destination} slug={tool.slug} destination={link.destination} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                      {link.kind === "github" ? <GitHubIcon className="h-3.5 w-3.5" /> : link.kind === "product-hunt" ? <Triangle className="h-3.5 w-3.5" aria-hidden="true" /> : <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />}
+                      {link.label}
+                      <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+                    </ToolWebsiteLink>
+                  ))}
+                </nav>
+              )}
             </div>
           </div>
 
@@ -255,13 +275,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-20 self-start flex flex-col gap-4">
           {/* CTA button */}
-          <a
-            href={`/api/tools/${tool.slug}/out`}
+          <ToolWebsiteLink
+            slug={tool.slug}
             className="flex items-center justify-center gap-1.5 w-full h-10 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[0.8125rem] transition-all shadow-sm hover:shadow-md"
           >
             Visit Website
             <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
+          </ToolWebsiteLink>
 
           {/* At a Glance card */}
           <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
@@ -269,6 +289,14 @@ export default async function ToolPage({ params }: ToolPageProps) {
               At a Glance
             </h3>
             <div className="flex flex-col">
+              <div className="flex justify-between items-center py-2 border-b border-muted text-[0.8125rem]" title="Visits to this tool's detail page on Toools">
+                <span className="text-muted-foreground">Views</span>
+                <span className="font-semibold font-mono tabular-nums">{countNumber.format(tool.viewCount)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-muted text-[0.8125rem]" title="Tracked outbound clicks from Toools">
+                <span className="text-muted-foreground">Clicks</span>
+                <span className="font-semibold font-mono tabular-nums">{countNumber.format(tool.clickCount)}</span>
+              </div>
               {tool.phVotes != null && (
                 <div className="flex justify-between items-center py-2 border-b border-muted text-[0.8125rem]">
                   <span className="text-muted-foreground">PH Votes</span>
