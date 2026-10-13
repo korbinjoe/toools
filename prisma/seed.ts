@@ -909,6 +909,18 @@ const tools: ToolDef[] = [
 
   // ===== Video & Audio =====
   {
+    name: "Voice Prompter",
+    tagline: "Free browser teleprompter with speech tracking and local scripts",
+    description:
+      "According to its maker's submission, Voice Prompter is a free browser teleprompter for rehearsing and reading scripts alongside a separate recording app. It offers manual and automatic scrolling, speech tracking, mirrored text, adjustable typography, a local script library, text export, and a floating script window in supported desktop browsers. No account or credit card is required. It does not record video, generate scripts, or sync scripts to the cloud. Speech recognition depends on the browser, language, and service; audio may be processed by the browser's speech provider. The publicly viewable code has no open-source license.",
+    url: "https://teleprompter.dev/",
+    category: "video-audio",
+    pricing: "FREE",
+    platforms: ["Web"],
+    isOpenSource: false,
+    tags: ["Writing", "Audio"],
+  },
+  {
     name: "BabyVideo.ai",
     tagline: "Create playful baby portraits and short videos from photos",
     description:
