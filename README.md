@@ -25,9 +25,10 @@ Source links appear on detail pages where saved. Awesome imports currently save 
 
 | Surface | Current selection rule |
 |---------|------------------------|
-| Recently Added | Six newest approved entries, preferring at most two per category before filling gaps. Category variety stays within 30 days of the newest entry, and selected tools remain newest first. Dates refer to addition to Toools. |
-| Hero discovery | Up to six candidates from the newest featured pool, excluding recent entries; approved tools provide a fallback. The opening pick rotates daily in Asia/Shanghai time, with manual cycling via “Another pick”. |
-| Editor's Picks | Up to four remaining featured tools, newest first, excluding tools reserved for recent additions and Hero discovery. |
+| Recently Added | Three tools beside the Hero, rotating through up to 36 newest approved entries within 30 days of the newest record. Each batch prefers at most two per category before filling gaps and remains newest first. Dates refer to addition to Toools. |
+| Daily batches | Recent additions, featured picks, workflows, and category shortcuts rotate at midnight in Asia/Shanghai time. Default sets stay stable within a day while candidates are unchanged. “Another batch” switches immediately; fully displayed pools have no additional batch. This is discovery rotation, not personalization or a quality ranking. |
+| Editor's Picks | Four tools rotate through up to 24 newest approved featured records, excluding the tools currently visible in Recently Added, even after either section changes batches. |
+| Homepage workflows and categories | Three workflows per batch from all curated workflows; eight category shortcuts per batch from all categories. “View all” always opens the complete collection. |
 | Browse | Default: featured first, then views. Other sorts: newest additions or outbound clicks. Category, pricing, platform, and open-source filters apply before sorting. |
 | Other category tools | Automatic suggestions from the current tool's category, ordered by GitHub stars, then Product Hunt votes, then views. Category membership does not establish equivalent capabilities. |
 | Workflow stages | Maintainer-defined tool choices and editor notes for a specific task. Related tools are selected from the stage's categories and ordered by `GitHub stars × 10 + Product Hunt votes`. |

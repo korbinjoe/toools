@@ -33,15 +33,15 @@ const sources = [
 const selections = [
   {
     name: "Recently Added",
-    description: "The newest approved records, with a preference for no more than two tools per category. We fill remaining spaces when needed and keep the newest-first order. Category variety stays within 30 days of the newest record; added dates describe entry into Toools, not product launch dates.",
+    description: "Three tools beside the Hero, selected from up to 36 newest approved records within 30 days of the newest entry. Each batch prefers no more than two tools per category before filling gaps, and keeps the selected tools newest first. Added dates describe entry into Toools, not product launch dates.",
   },
   {
-    name: "Hero discovery",
-    description: "Up to six featured candidates, excluding the recent section. The opening pick changes daily in Asia/Shanghai time; “Another pick” cycles through the candidates. Approved tools provide a fallback when featured candidates are unavailable.",
+    name: "Daily batches",
+    description: "Recent additions, featured picks, workflows, and category shortcuts rotate daily at midnight in Asia/Shanghai time. The default selection stays stable within a day while the candidate pool is unchanged. “Another batch” changes the visible selection immediately. When all available items fit, there is no additional batch.",
   },
   {
     name: "Editor's Picks",
-    description: "Up to four remaining featured tools, newest additions first. Tools already reserved for the recent section or Hero discovery are excluded, so the homepage offers different options in each section.",
+    description: "Four tools rotate through up to 24 newest approved featured records. Tools currently visible in Recently Added are excluded, including after either section changes batches. This is transparent discovery rotation, not a personalized recommendation or a quality ranking.",
   },
   {
     name: "Browse tools",
@@ -53,7 +53,7 @@ const selections = [
   },
   {
     name: "Workflow recommendations",
-    description: "Maintainers choose tools for specific stages of a task and record editor notes. “Explore more” offers other tools from those categories, ordered by a popularity score of GitHub stars × 10 + Product Hunt votes.",
+    description: "The homepage shows three workflows per batch, rotating through all curated workflows. Maintainers choose tools for specific stages of a task and record editor notes. “Explore more” offers other tools from those categories, ordered by a popularity score of GitHub stars × 10 + Product Hunt votes.",
   },
 ];
 

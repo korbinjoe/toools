@@ -1,72 +1,124 @@
-interface DiscoveryTool {
+interface Identified {
   slug: string;
+}
+interface RecentTool extends Identified {
   category: { slug: string };
-  createdAt: Date;
+  createdAt: Date | string;
 }
 
-/** Prefer category variety without leaving gaps when the collection is small. */
-export function selectRecentTools<T extends DiscoveryTool>(
-  tools: T[],
-  limit = 6,
+/** One shared daily seed keeps server rendering and hydration consistent. */
+export function getEditorialDay(now = new Date()): number {
+  return Math.floor((now.getTime() + 8 * 60 * 60 * 1000) / 86_400_000);
+}
+
+function unique<T extends Identified>(items: T[]): T[] {
+  return [...new Map(items.map((item) => [item.slug, item])).values()];
+}
+
+/** Recent means the latest cohort, never older records added for variety. */
+export function selectRecentPool<T extends RecentTool>(items: T[]): T[] {
+  const sorted = unique(items).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+  const newest = sorted[0] ? new Date(sorted[0].createdAt).getTime() : 0;
+  return sorted.filter(
+    (item) => new Date(item.createdAt).getTime() >= newest - 30 * 86_400_000,
+  );
+}
+
+/** Circular batches fill trailing slots without repeating an item in a batch. */
+export function selectBatch<T extends Identified>(
+  items: T[],
+  size: number,
+  offset: number,
 ): T[] {
-  // Do not pull months-old entries into the recent list just for category variety.
-  const newest = tools[0]?.createdAt.getTime() ?? 0;
-  const recentPool = tools.filter(
-    (tool) => tool.createdAt.getTime() >= newest - 30 * 86_400_000,
+  const pool = unique(items);
+  if (!pool.length || size <= 0) return [];
+  const start = ((offset % pool.length) + pool.length) % pool.length;
+  return Array.from(
+    { length: Math.min(size, pool.length) },
+    (_, index) => pool[(start + index) % pool.length],
   );
+}
+
+export function selectRecentBatch<T extends RecentTool>(
+  items: T[],
+  offset: number,
+  size = 3,
+): T[] {
+  const pool = selectRecentPool(items);
+  const rotated = selectBatch(pool, pool.length, offset);
   const selected = new Set<string>();
-  const counts = new Map<string, number>();
-
-  for (const tool of recentPool) {
-    if (selected.size >= limit) break;
-    const count = counts.get(tool.category.slug) ?? 0;
-    if (count >= 2 || selected.has(tool.slug)) continue;
+  const categories = new Map<string, number>();
+  for (const tool of rotated) {
+    if (selected.size >= size) break;
+    const count = categories.get(tool.category.slug) ?? 0;
+    if (count >= 2) continue;
     selected.add(tool.slug);
-    counts.set(tool.category.slug, count + 1);
+    categories.set(tool.category.slug, count + 1);
   }
-
-  for (const tool of recentPool) {
-    if (selected.size >= limit) break;
+  for (const tool of rotated) {
+    if (selected.size >= size) break;
     selected.add(tool.slug);
   }
-
-  // Keep the original newest-first order after selecting a varied set.
-  const seen = new Set<string>();
-  return recentPool.filter((tool) => {
-    if (!selected.has(tool.slug) || seen.has(tool.slug)) return false;
-    seen.add(tool.slug);
-    return true;
-  });
+  // Within each selected batch, retain the actual newest-first ordering.
+  return pool.filter((tool) => selected.has(tool.slug));
 }
 
-export function selectHomeDiscovery<T extends DiscoveryTool>(
+export function selectFeaturedBatch<T extends Identified>(
   featured: T[],
-  recentPool: T[],
-) {
-  const recent = selectRecentTools(recentPool);
-  const recentSlugs = new Set(recent.map((tool) => tool.slug));
-  const available = featured.filter((tool) => !recentSlugs.has(tool.slug));
-  const candidates =
-    available.length > 0
-      ? available
-      : recentPool.filter((tool) => !recentSlugs.has(tool.slug));
-  const discoveryCount = Math.min(
-    6,
-    Math.max(2, Math.ceil(candidates.length / 2)),
+  recent: Identified[],
+  offset: number,
+  size = 4,
+): T[] {
+  const excluded = new Set(recent.map((tool) => tool.slug));
+  return selectBatch(
+    featured.filter((tool) => !excluded.has(tool.slug)),
+    size,
+    offset,
   );
-  const discoveries = candidates.slice(0, discoveryCount);
-  const reserved = new Set([
-    ...recentSlugs,
-    ...discoveries.map((tool) => tool.slug),
-  ]);
-  const picks = featured.filter((tool) => !reserved.has(tool.slug)).slice(0, 4);
-
-  return { recent, discoveries, picks };
 }
 
-/** A stable daily slot, using the site's editorial day in Asia/Shanghai. */
-export function getDiscoveryIndex(count: number, now = new Date()): number {
-  if (count <= 0) return 0;
-  const day = Math.floor((now.getTime() + 8 * 60 * 60 * 1000) / 86_400_000);
-  return ((day % count) + count) % count;
+/** Skip offsets producing the same set (e.g. category-variety constraints). */
+export function nextBatchOffset<T extends Identified>(
+  offset: number,
+  size: number,
+  poolSize: number,
+  select: (offset: number) => T[],
+): number | null {
+  const signature = (items: T[]) =>
+    items
+      .map((item) => item.slug)
+      .sort()
+      .join("\0");
+  const current = signature(select(offset));
+  for (let step = 0; step < poolSize; step++) {
+    const next = offset + size + step;
+    if (signature(select(next)) !== current) return next;
+  }
+  return null;
+}
+
+/** Distinct daily sets even when category constraints collapse several offsets. */
+export function getDailyBatchOffset<T extends Identified>(
+  day: number,
+  size: number,
+  poolSize: number,
+  select: (offset: number) => T[],
+): number {
+  if (!poolSize || size <= 0) return 0;
+  const signatures = new Set<string>();
+  const offsets: number[] = [];
+  const add = (offset: number) => {
+    const signature = select(offset)
+      .map((item) => item.slug)
+      .sort()
+      .join("\0");
+    if (signatures.has(signature)) return;
+    signatures.add(signature);
+    offsets.push(offset);
+  };
+  for (let index = 0; index < poolSize; index++) add((index * size) % poolSize);
+  for (let index = 0; index < poolSize; index++) add(index);
+  return offsets[((day % offsets.length) + offsets.length) % offsets.length];
 }

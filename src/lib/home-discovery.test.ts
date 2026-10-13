@@ -1,97 +1,169 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  getDiscoveryIndex,
-  selectHomeDiscovery,
-  selectRecentTools,
+  getDailyBatchOffset,
+  getEditorialDay,
+  nextBatchOffset,
+  selectBatch,
+  selectFeaturedBatch,
+  selectRecentBatch,
+  selectRecentPool,
 } from "./home-discovery";
 
-const tool = (slug: string, category = "video") => ({
+const tool = (slug: string, category = "video", age = 0) => ({
   slug,
   category: { slug: category },
-  createdAt: new Date("2026-10-13T00:00:00+08:00"),
+  createdAt: new Date(Date.UTC(2026, 9, 13) - age * 86_400_000),
+});
+const signature = (items: { slug: string }[]) =>
+  items
+    .map((item) => item.slug)
+    .sort()
+    .join(",");
+
+test("the editorial day is stable until midnight in Shanghai", () => {
+  const morning = getEditorialDay(new Date("2026-10-13T00:00:00+08:00"));
+  const evening = getEditorialDay(new Date("2026-10-13T23:59:59+08:00"));
+  const tomorrow = getEditorialDay(new Date("2026-10-14T00:00:00+08:00"));
+  assert.equal(morning, evening);
+  assert.equal(tomorrow, evening + 1);
 });
 
-test("category variety never promotes months-old tools into recent additions", () => {
-  const current = Array.from({ length: 7 }, (_, index) => tool("new" + index));
-  const old = { ...tool("old", "design"), createdAt: new Date("2026-05-28") };
-  assert.deepEqual(selectRecentTools([...current, old]), current.slice(0, 6));
+test("recent candidates stay within 30 days of the newest approved entry", () => {
+  const newest = tool("newest");
+  const edge = tool("edge", "design", 30);
+  const old = tool("old", "ai", 31);
+  assert.deepEqual(selectRecentPool([old, edge, newest, newest]), [
+    newest,
+    edge,
+  ]);
+  assert.deepEqual(
+    selectRecentPool([
+      { ...newest, createdAt: newest.createdAt.toISOString() },
+    ]).map((item) => item.slug),
+    ["newest"],
+  );
 });
 
-test("recent tools keep the newest entries while making room for other categories", () => {
+test("recent batches prefer category variety and retain actual date ordering", () => {
   const pool = [
-    tool("v1"),
-    tool("v2"),
-    tool("v3"),
-    tool("v4"),
-    tool("a1", "ai"),
-    tool("a2", "ai"),
-    tool("d1", "design"),
-    tool("d2", "design"),
+    tool("a1"),
+    tool("a2", "video", 1),
+    tool("a3", "video", 2),
+    tool("b1", "ai", 3),
+    tool("b2", "ai", 4),
   ];
   assert.deepEqual(
-    selectRecentTools(pool).map((t) => t.slug),
-    ["v1", "v2", "a1", "a2", "d1", "d2"],
+    selectRecentBatch(pool, 0).map((item) => item.slug),
+    ["a1", "a2", "b1"],
   );
-});
-
-test("a single category still fills the available recent slots in date order", () => {
-  const pool = Array.from({ length: 8 }, (_, index) => tool(String(index)));
-  assert.deepEqual(selectRecentTools(pool), pool.slice(0, 6));
-});
-
-test("sparse and empty collections have no invented or repeated entries", () => {
-  assert.deepEqual(selectRecentTools([]), []);
   assert.deepEqual(
-    selectRecentTools([tool("a"), tool("a"), tool("b")]).map((t) => t.slug),
-    ["a", "b"],
+    selectRecentBatch(pool, 3).map((item) => item.slug),
+    ["a1", "b1", "b2"],
   );
-  assert.deepEqual(selectHomeDiscovery([], []), {
-    recent: [],
-    discoveries: [],
-    picks: [],
-  });
 });
 
-test("all discovery alternatives are reserved so switching cannot duplicate another module", () => {
-  const featured = Array.from({ length: 12 }, (_, index) =>
-    tool("f" + index, "ai"),
+test("a single recent category still fills three slots without duplicates", () => {
+  const pool = Array.from({ length: 7 }, (_, index) =>
+    tool(String(index), "video", index),
   );
-  const recentPool = [
-    featured[0],
-    ...Array.from({ length: 6 }, (_, index) => tool("r" + index)),
-  ];
-  const { recent, discoveries, picks } = selectHomeDiscovery(
-    featured,
-    recentPool,
-  );
-  const slugs = [...recent, ...discoveries, ...picks].map((t) => t.slug);
-  assert.equal(new Set(slugs).size, slugs.length);
-  assert.equal(recent.length, 6);
-  assert.equal(discoveries.length, 6);
-  assert.equal(picks.length, 4);
-});
-
-test("discovery can use the collection when editorial candidates are exhausted", () => {
-  const recentPool = Array.from({ length: 9 }, (_, index) => tool("r" + index));
-  const { recent, discoveries, picks } = selectHomeDiscovery([], recentPool);
-  assert.equal(recent.length, 6);
+  assert.deepEqual(selectRecentBatch(pool, 0), pool.slice(0, 3));
   assert.deepEqual(
-    discoveries.map((t) => t.slug),
-    ["r6", "r7"],
+    selectRecentBatch(pool, 6).map((item) => item.slug),
+    ["0", "1", "6"],
   );
-  assert.deepEqual(picks, []);
 });
 
-test("the default discovery stays stable within an editorial day and changes at midnight", () => {
-  const morning = new Date("2026-10-13T00:00:00+08:00");
-  const evening = new Date("2026-10-13T23:59:59+08:00");
-  const tomorrow = new Date("2026-10-14T00:00:00+08:00");
-  assert.equal(getDiscoveryIndex(6, morning), getDiscoveryIndex(6, evening));
-  assert.equal(
-    getDiscoveryIndex(6, tomorrow),
-    (getDiscoveryIndex(6, evening) + 1) % 6,
+test("circular batches wrap and handle negative offsets and sparse collections", () => {
+  const pool = [tool("a"), tool("b"), tool("c")];
+  assert.deepEqual(
+    selectBatch(pool, 2, 2).map((item) => item.slug),
+    ["c", "a"],
   );
-  assert.equal(getDiscoveryIndex(0, morning), 0);
-  assert.equal(getDiscoveryIndex(1, morning), 0);
+  assert.deepEqual(
+    selectBatch(pool, 2, -1).map((item) => item.slug),
+    ["c", "a"],
+  );
+  assert.deepEqual(
+    selectBatch([pool[0], pool[0], pool[1]], 4, 8),
+    pool.slice(0, 2),
+  );
+  assert.deepEqual(selectRecentBatch([], 0), []);
+  assert.deepEqual(selectBatch(pool, 0, 0), []);
+});
+
+test("daily batches differ even when category constraints collapse several offsets", () => {
+  const pool = [tool("a1"), tool("a2"), tool("a3"), tool("b1", "ai")];
+  const select = (offset: number) => selectRecentBatch(pool, offset);
+  // Offsets 0 and 3 produce the same set, so simple day * batch-size is insufficient.
+  assert.equal(signature(select(0)), signature(select(3)));
+  const seen = new Set<string>();
+  for (let day = 0; day < 12; day++) {
+    const today = getDailyBatchOffset(day, 3, pool.length, select);
+    const tomorrow = getDailyBatchOffset(day + 1, 3, pool.length, select);
+    assert.notEqual(signature(select(today)), signature(select(tomorrow)));
+    assert.equal(today, getDailyBatchOffset(day, 3, pool.length, select));
+    seen.add(signature(select(today)));
+  }
+  assert.equal(seen.size, 3);
+});
+
+test("daily workflow and category rotation covers every candidate", () => {
+  for (const [count, size] of [
+    [9, 3],
+    [17, 8],
+  ]) {
+    const pool = Array.from({ length: count }, (_, index) => ({
+      slug: String(index),
+    }));
+    const select = (offset: number) => selectBatch(pool, size, offset);
+    const seen = new Set<string>();
+    for (let day = 0; day < count; day++) {
+      const offset = getDailyBatchOffset(day, size, count, select);
+      const nextOffset = getDailyBatchOffset(day + 1, size, count, select);
+      assert.notEqual(signature(select(offset)), signature(select(nextOffset)));
+      select(offset).forEach((item) => seen.add(item.slug));
+    }
+    assert.equal(seen.size, count);
+  }
+});
+
+test("another batch skips identical selections and cycles through the pool", () => {
+  const pool = [tool("a1"), tool("a2"), tool("a3"), tool("b1", "ai")];
+  const select = (offset: number) => selectRecentBatch(pool, offset);
+  let offset = 0;
+  const seen = new Set<string>();
+  for (let click = 0; click < 8; click++) {
+    const next = nextBatchOffset(offset, 3, pool.length, select);
+    assert.notEqual(next, null);
+    assert.notEqual(signature(select(offset)), signature(select(next!)));
+    select(next!).forEach((item) => seen.add(item.slug));
+    offset = next!;
+  }
+  assert.equal(seen.size, pool.length);
+});
+
+test("empty and fully displayed collections have no pretend next batch", () => {
+  for (const pool of [[], [tool("a")], [tool("a"), tool("a"), tool("b")]]) {
+    const select = (offset: number) => selectBatch(pool, 4, offset);
+    assert.equal(nextBatchOffset(0, 4, pool.length, select), null);
+    assert.equal(getDailyBatchOffset(22, 4, pool.length, select), 0);
+  }
+});
+
+test("featured batches exclude visible recent tools after every batch change", () => {
+  const pool = Array.from({ length: 12 }, (_, index) =>
+    tool(String(index), String(index % 3), index),
+  );
+  for (let recentOffset = 0; recentOffset < pool.length; recentOffset++) {
+    const recent = selectRecentBatch(pool, recentOffset);
+    for (let picksOffset = 0; picksOffset < pool.length; picksOffset++) {
+      const picks = selectFeaturedBatch(pool, recent, picksOffset);
+      assert.equal(picks.length, 4);
+      assert.equal(
+        new Set([...recent, ...picks].map((item) => item.slug)).size,
+        7,
+      );
+    }
+  }
 });
