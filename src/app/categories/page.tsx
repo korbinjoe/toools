@@ -2,13 +2,13 @@ export const dynamic = "force-dynamic";
 
 import { CategoryGrid } from "@/components/category-nav";
 import { prisma } from "@/lib/db";
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Categories",
-  description:
-    "Browse tools by category, or explore curated tool stacks for complete workflows.",
-};
+export const metadata = pageMetadata(
+  "Categories",
+  "Browse tools by category, or explore curated tool stacks for complete workflows.",
+  "/categories",
+);
 
 export default async function CategoriesPage() {
   const categories = await prisma.category.findMany({

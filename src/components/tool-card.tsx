@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowUpRight, Eye, MousePointerClick, Star, Triangle, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Star, Triangle, type LucideIcon } from "lucide-react";
 import { ToolAvatar } from "./tool-avatar";
+import { ToolEngagement } from "./tool-engagement";
 import { ToolSignalBadges } from "./tool-signals";
 import type { Pricing } from "@prisma/client";
 import type { ToolSignals } from "@/lib/tool-signals";
@@ -89,8 +90,6 @@ export function ToolCard({
   const metricSignals = [
     githubStars ? { key: "github", icon: Star, label: "GitHub stars", source: "GH", value: githubStars } : null,
     phVotes ? { key: "product-hunt", icon: Triangle, label: "Product Hunt votes", source: "PH", value: phVotes } : null,
-    viewCount ? { key: "views", icon: Eye, label: "views", source: "Views", value: viewCount } : null,
-    clickCount ? { key: "clicks", icon: MousePointerClick, label: "clicks", source: "Clicks", value: clickCount } : null,
   ].filter((signal) => signal !== null);
 
   return (
@@ -115,7 +114,7 @@ export function ToolCard({
 
         {metricSignals.length > 0 && (
           <div className="mt-3 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
-            {metricSignals.slice(0, 2).map((signal) => (
+            {metricSignals.map((signal) => (
               <MetricSignal
                 key={signal.key}
                 icon={signal.icon}
@@ -126,6 +125,8 @@ export function ToolCard({
             ))}
           </div>
         )}
+
+        <ToolEngagement viewCount={viewCount} clickCount={clickCount} className="mt-3" />
 
         <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
           <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${p.className}`}>

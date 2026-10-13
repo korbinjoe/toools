@@ -2,9 +2,19 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getApprovedTool as getTool } from "@/lib/tools";
+import { after } from "next/server";
+import { JsonLd } from "@/components/json-ld";
+import { breadcrumbData, pageMetadata, siteUrl } from "@/lib/seo";
+import { toolEditorial } from "@/lib/tool-editorial";
+import { toolMetricQuery } from "@/lib/tool-metrics";
+import { getToolExternalLinks } from "@/lib/tool-links";
 import type { Metadata } from "next";
-import { ArrowUpRight, ChevronRight, Star, Triangle } from "lucide-react";
+import { ArrowUpRight, ChevronRight, ExternalLink, Star, Triangle } from "lucide-react";
+import { GitHubIcon } from "@/components/github-icon";
 import { ToolAvatar } from "@/components/tool-avatar";
+import { ToolEngagement } from "@/components/tool-engagement";
+import { ToolWebsiteLink } from "@/components/tool-website-link";
 import { prisma } from "@/lib/db";
 import { getStackIconKey } from "@/lib/stacks";
 import { StackIcon } from "@/components/stack-icon";
@@ -13,29 +23,14 @@ interface ToolPageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getTool(slug: string) {
-  return prisma.tool.findFirst({
-    where: { slug, status: "APPROVED" },
-    include: {
-      category: true,
-      tags: { include: { tag: true } },
-      stageRecommendations: {
-        include: {
-          stage: {
-            include: { stack: { select: { name: true, slug: true } } },
-          },
-        },
-      },
-    },
-  });
-}
-
 async function getAlternatives(categoryId: string, excludeSlug: string) {
-  return prisma.tool.findMany({
+  const editorial = toolEditorial[excludeSlug];
+  const slugs = editorial?.alternatives.map((alternative) => alternative.slug) ?? [];
+  const tools = await prisma.tool.findMany({
     where: {
-      categoryId,
+      ...(slugs.length ? { slug: { in: slugs } } : { categoryId }),
       status: "APPROVED",
-      slug: { not: excludeSlug },
+      NOT: { slug: excludeSlug },
     },
     include: {
       category: { select: { name: true, slug: true } },
@@ -48,21 +43,19 @@ async function getAlternatives(categoryId: string, excludeSlug: string) {
       { viewCount: "desc" },
     ],
   });
+  return slugs.length ? tools.sort((a, b) => slugs.indexOf(a.slug) - slugs.indexOf(b.slug)) : tools;
 }
 
 export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
   const { slug } = await params;
   const tool = await getTool(slug);
-  if (!tool) return { title: "Tool Not Found" };
-  return {
-    title: `${tool.name} - Toools`,
-    description: tool.tagline,
-    openGraph: {
-      title: tool.name,
-      description: tool.tagline,
-      ...(tool.screenshotUrl ? { images: [tool.screenshotUrl] } : {}),
-    },
-  };
+  if (!tool) notFound();
+  return pageMetadata(
+    `${tool.name}: Use Cases & Alternatives`,
+    toolEditorial[slug]?.summary || tool.tagline,
+    `/tools/${tool.slug}`,
+    { image: tool.screenshotUrl || undefined },
+  );
 }
 
 const pricingLabels: Record<string, string> = {
@@ -73,15 +66,18 @@ const pricingLabels: Record<string, string> = {
 };
 
 const compactNumber = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
+const countNumber = new Intl.NumberFormat("en");
 
 export default async function ToolPage({ params }: ToolPageProps) {
   const { slug } = await params;
   const tool = await getTool(slug);
   if (!tool) notFound();
 
-  prisma.tool
-    .update({ where: { id: tool.id }, data: { viewCount: { increment: 1 } } })
-    .catch(() => {});
+  after(() => prisma.$executeRaw(toolMetricQuery(tool.id, "view")).catch((error) => {
+    console.error("Tool view counter failed", error);
+  }));
+  const editorial = toolEditorial[slug];
+  const externalLinks = getToolExternalLinks(tool);
 
   const alternatives = await getAlternatives(tool.categoryId, tool.slug);
 
@@ -93,6 +89,8 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
+      <JsonLd data={breadcrumbData([{ name: "Home", path: "/" }, { name: "Tools", path: "/tools" }, { name: tool.name, path: `/tools/${tool.slug}` }])} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "SoftwareApplication", "@id": `${siteUrl(`/tools/${tool.slug}`)}#software`, name: tool.name, description: editorial?.summary || tool.description, url: tool.url, applicationCategory: tool.category.name, ...(tool.platforms.length ? { operatingSystem: tool.platforms.join(", ") } : {}), mainEntityOfPage: siteUrl(`/tools/${tool.slug}`), ...(tool.github ? { sameAs: [tool.github] } : {}) }} />
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted-foreground pt-5 mb-5">
         <Link href="/tools" className="hover:text-foreground transition-colors">Tools</Link>
@@ -120,6 +118,18 @@ export default async function ToolPage({ params }: ToolPageProps) {
                   </span>
                 ))}
               </div>
+              <ToolEngagement viewCount={tool.viewCount} clickCount={tool.clickCount} className="mt-3" />
+              {externalLinks.length > 0 && (
+                <nav aria-label={`${tool.name} external links`} className="mt-3 flex flex-wrap gap-2">
+                  {externalLinks.map((link) => (
+                    <ToolWebsiteLink key={link.destination} slug={tool.slug} destination={link.destination} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                      {link.kind === "github" ? <GitHubIcon className="h-3.5 w-3.5" /> : link.kind === "product-hunt" ? <Triangle className="h-3.5 w-3.5" aria-hidden="true" /> : <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />}
+                      {link.label}
+                      <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+                    </ToolWebsiteLink>
+                  ))}
+                </nav>
+              )}
             </div>
           </div>
 
@@ -128,10 +138,25 @@ export default async function ToolPage({ params }: ToolPageProps) {
             <section className="mb-8">
               <h2 className="text-base font-bold tracking-[-0.01em] mb-3 pb-2 border-b border-border">About</h2>
               <p className="text-sm text-secondary-foreground max-w-[60ch] leading-[1.7]">
-                {tool.description}
+                {editorial?.summary || tool.description}
               </p>
             </section>
           )}
+
+          {editorial && (
+            <section className="mb-8 rounded-xl border border-border bg-muted/30 p-5">
+              <h2 className="text-base font-bold mb-3">When to choose {tool.name}</h2>
+              <p className="text-sm leading-relaxed text-secondary-foreground">{editorial.bestFor}</p>
+              <h3 className="text-sm font-semibold mt-4 mb-1">Before you commit</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">{editorial.checkBeforeChoosing}</p>
+              {editorial.licenseNote && <p className="text-sm leading-relaxed mt-3">{editorial.licenseNote}</p>}
+              <p className="text-xs text-muted-foreground mt-4">Editorial guidance by <Link href="/about" className="underline">Toools maintainers</Link>. Documentation reviewed <time dateTime={editorial.reviewedOn}>{editorial.reviewedOn}</time>.</p>
+              <ul className="flex flex-wrap gap-x-4 gap-y-2 mt-3 text-xs">
+                {editorial.sources.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer" className="text-primary underline">{source.label}</a></li>)}
+              </ul>
+            </section>
+          )}
+          {!editorial && tool.sourceUrl && <p className="mb-8 text-xs text-muted-foreground">Listing source: <a href={tool.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">Original source</a>. <Link href="/editorial-policy" className="underline">How we curate tools</Link>.</p>}
 
           {/* Use Cases */}
           {tool.useCases.length > 0 && (
@@ -216,7 +241,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
           {alternatives.length > 0 && (
             <section className="mt-7">
               <h2 className="text-base font-bold tracking-[-0.01em] mb-3 pb-2 border-b border-border">
-                Alternatives to {tool.name}
+                {editorial?.alternatives.length ? `Alternatives to ${tool.name}` : `More ${tool.category.name} tools`}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {alternatives.map((alt) => (
@@ -225,7 +250,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
                       <ToolAvatar name={alt.name} url={alt.url} iconUrl={alt.iconUrl} className="h-10 w-10" />
                       <div>
                         <div className="text-[0.8125rem] font-semibold group-hover:text-primary transition-colors">{alt.name}</div>
-                        <div className="text-[0.6875rem] text-muted-foreground mt-0.5 line-clamp-1">{alt.tagline}</div>
+                        <p className="text-[0.6875rem] text-muted-foreground mt-1 leading-relaxed">{editorial?.alternatives.find((alternative) => alternative.slug === alt.slug)?.reason || alt.tagline}</p>
                       </div>
                       <div className="flex gap-1.5 flex-wrap mt-auto">
                         <span className="inline-flex rounded-full bg-accent px-2 py-0.5 text-[0.6875rem] font-medium text-accent-foreground">
@@ -244,6 +269,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
                           </span>
                         )}
                       </div>
+                      <ToolEngagement viewCount={alt.viewCount} clickCount={alt.clickCount} />
                     </article>
                   </Link>
                 ))}
@@ -255,13 +281,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-20 self-start flex flex-col gap-4">
           {/* CTA button */}
-          <a
-            href={`/api/tools/${tool.slug}/out`}
+          <ToolWebsiteLink
+            slug={tool.slug}
             className="flex items-center justify-center gap-1.5 w-full h-10 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[0.8125rem] transition-all shadow-sm hover:shadow-md"
           >
             Visit Website
             <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
+          </ToolWebsiteLink>
 
           {/* At a Glance card */}
           <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-sm">
@@ -269,6 +295,14 @@ export default async function ToolPage({ params }: ToolPageProps) {
               At a Glance
             </h3>
             <div className="flex flex-col">
+              <div className="flex justify-between items-center py-2 border-b border-muted text-[0.8125rem]" title="Visits to this tool's detail page on Toools">
+                <span className="text-muted-foreground">Views</span>
+                <span className="font-semibold font-mono tabular-nums">{countNumber.format(tool.viewCount)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-muted text-[0.8125rem]" title="Tracked outbound clicks from Toools">
+                <span className="text-muted-foreground">Clicks</span>
+                <span className="font-semibold font-mono tabular-nums">{countNumber.format(tool.clickCount)}</span>
+              </div>
               {tool.phVotes != null && (
                 <div className="flex justify-between items-center py-2 border-b border-muted text-[0.8125rem]">
                   <span className="text-muted-foreground">PH Votes</span>
@@ -289,7 +323,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
               )}
               <div className="flex justify-between items-center py-2 border-b border-muted text-[0.8125rem]">
                 <span className="text-muted-foreground">Pricing</span>
-                <span className="font-semibold font-mono">{pricingLabels[tool.pricing]}</span>
+                <span className="font-semibold font-mono">{editorial?.licenseNote ? "Self-hosted / Cloud" : pricingLabels[tool.pricing]}</span>
               </div>
               {tool.platforms.length > 0 && (
                 <div className="flex justify-between items-center py-2 text-[0.8125rem]">

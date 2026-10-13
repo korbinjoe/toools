@@ -4,7 +4,38 @@
 
 [Live site](https://toools.top) · [Submit a tool](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml) · [Browse issues](https://github.com/korbinjoe/toools/issues)
 
-Toools is an open-source **tool stack curation platform** — not just a directory. Start from a workflow (Stacks) or browse individual tools (Browse), then land on rich detail pages to compare pricing, signals, and alternatives before visiting the official site.
+Toools is an open-source **tool discovery and workflow curation platform**. It brings together GitHub Awesome lists, Product Hunt launches, maintainer selections, and community submissions. Explore recent additions, follow a workflow, or compare tools with visible source and popularity signals.
+
+## Where the tools come from
+
+| Source | What Toools collects | Public reference |
+|--------|----------------------|------------------|
+| GitHub Awesome lists | Linked tools, descriptions, categories, and available repository stars | [Source collections](scripts/lib/awesome.ts), [importer](scripts/import-awesome-lists.ts) |
+| Product Hunt | Products by topic, descriptions, launch-page links, and vote counts | [Importer](scripts/import-producthunt.ts) |
+| Maintainer selections | Initial tool collection, featured flags, workflow stages, and editor notes | [Tool seeds](prisma/seed.ts), [workflow seeds](prisma/seed-stacks.ts) |
+| Community submissions | Tools and corrections suggested by makers and users through GitHub Issues | [Submit a tool](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml) |
+
+Imports normalize URLs and avoid duplicates before assigning categories. New imports default to `PENDING`; `PH_AUTO_APPROVE=true` or `AWESOME_AUTO_APPROVE=true` explicitly enables automatic approval. Public directory queries include only `APPROVED` records. Approval does not establish that each product has been individually tested.
+
+Source links appear on detail pages where saved. Awesome imports currently save the linked tool URL, which may be the provider or repository rather than the original list section. Stars and votes are snapshots from import or backfill runs; there is no continuous refresh guarantee.
+
+## How recommendations are selected
+
+**Featured is a discovery flag.** Maintainers can set it in curated data. The Product Hunt importer and backfill also set it for products with **more than 1,000 votes**. A featured badge alone does not mean hands-on testing or an independent quality score.
+
+| Surface | Current selection rule |
+|---------|------------------------|
+| Recently Added | Three tools beside the Hero, rotating through up to 36 newest approved entries within 30 days of the newest record. Each batch prefers at most two per category before filling gaps and remains newest first. Dates refer to addition to Toools. |
+| Daily batches | Recent additions, featured picks, workflows, and category shortcuts rotate at midnight in Asia/Shanghai time. Default sets stay stable within a day while candidates are unchanged. “Another batch” switches immediately; fully displayed pools have no additional batch. This is discovery rotation, not personalization or a quality ranking. |
+| Editor's Picks | Four tools rotate through up to 24 newest approved featured records, excluding the tools currently visible in Recently Added, even after either section changes batches. |
+| Homepage workflows and categories | Three workflows per batch from all curated workflows; eight category shortcuts per batch from all categories. “View all” always opens the complete collection. |
+| Browse | Default: featured first, then views. Other sorts: newest additions or outbound clicks. Category, pricing, platform, and open-source filters apply before sorting. |
+| Other category tools | Automatic suggestions from the current tool's category, ordered by GitHub stars, then Product Hunt votes, then views. Category membership does not establish equivalent capabilities. |
+| Workflow stages | Maintainer-defined tool choices and editor notes for a specific task. Related tools are selected from the stage's categories and ordered by `GitHub stars × 10 + Product Hunt votes`. |
+
+GitHub stars, Product Hunt votes, views, and clicks provide popularity and activity context. **They are not quality ratings.** Views count tool-detail visits; clicks count tracked outbound visits, not unique users. Evaluate workflow fit and check current provider pricing, features, and licensing before choosing.
+
+The homepage selector is public in [home-discovery.ts](src/lib/home-discovery.ts); browse ordering lives in [tools/page.tsx](src/app/tools/page.tsx), and workflow selection in [stacks.ts](src/lib/stacks.ts). Visitors can read the same explanation at [Sources & Selection](https://toools.top/how-we-curate).
 
 ## What makes Toools different
 
@@ -32,9 +63,9 @@ Home → Stacks (by workflow) ──→ Stack detail (stages + editor picks) ─
 ### Browse & decide
 
 - **Search & filters** — Name, description, tags, category, pricing, platform, open-source, and featured status; sort by popularity, recency, or clicks
-- **Editor's Picks** — Hand-curated featured tools ranked by GitHub stars, Product Hunt votes, and views
+- **Editor's Picks** — Featured tools selected by recency, with duplicates removed across homepage sections
 - **Rich tool pages** — About, use cases, pros & cons, alternatives, and an *At a Glance* sidebar (pricing, platforms, open source, signals, freshness)
-- **Trust signals** — GitHub stars, Product Hunt votes, featured badges, view/click counts, and source links on cards and detail pages
+- **Visible signals** — GitHub stars, Product Hunt votes, featured badges, and view/click counts on cards; saved source links on detail pages
 - **Click tracking** — Outbound visits go through `/api/tools/[slug]/out` to increment click counts before redirecting
 
 ### Community & data
@@ -174,7 +205,8 @@ npx tsx prisma/seed-tool-enrichments.ts  # Seed use cases, pros, and cons
 ```
 src/
 ├── app/
-│   ├── page.tsx              # Home — hero, Popular Stacks, Editor's Picks, Recently Added
+│   ├── page.tsx              # Home — daily discovery, Recently Added, workflows, Editor's Picks
+│   ├── how-we-curate/        # Public data sources and recommendation rules
 │   ├── stacks/               # Workflow listing and stage-based stack detail
 │   ├── tools/                # Browse listing (search, filters) and decision-focused detail
 │   ├── categories/           # Category browse (with Stacks cross-links)
@@ -222,6 +254,40 @@ DATABASE_URL="postgresql://..." npx tsx prisma/seed-tool-enrichments.ts
 
 See `openspec/changes/vercel-deployment/` for detailed deployment notes.
 
+### Web Analytics
+
+Vercel Web Analytics is mounted once in `src/app/layout.tsx` using
+`@vercel/analytics/next`, covering page views and client-side navigation across
+the site. No analytics API key or additional environment variable is required.
+
+1. Open the [Toools Analytics dashboard](https://vercel.com/korbinzhaos-projects/toools/analytics) and enable Web Analytics if it is not already enabled.
+2. Deploy this version to the existing Toools Vercel project.
+3. Visit the deployed site, then check the dashboard for visitors, page views, and traffic sources.
+
+Development mode logs analytics events locally without sending them to Vercel.
+This integration adds page-view analytics; the existing tool view/click counters
+remain separate. Tool-detail website clicks emit `tool_website_click` with the tool slug and source; verify custom-event availability and ingestion in the deployed Analytics dashboard.
+
+See the [Vercel Web Analytics setup guide](https://vercel.com/docs/analytics/quickstart) for deployment and verification details.
+
+
+### SEO and AI search visibility
+
+Every primary route declares its canonical URL and social metadata. Normal tool-list pagination is crawlable; search and filter combinations use `noindex, follow`. The sitemap includes approved tools, populated categories, workflow pages, editorial information, and the automation comparison. Counters do not alter content timestamps, and the sitemap omits unreliable historical modification dates.
+
+Three core workflows include source-linked selection guides. Tool editorial configuration, curated alternatives, and reference review dates are kept in `src/lib/tool-editorial.ts`; approved records display that guidance automatically. No database migration is needed.
+
+Optional ownership-verification environment variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `GOOGLE_SITE_VERIFICATION` | Google Search Console HTML verification token |
+| `BING_SITE_VERIFICATION` | Bing Webmaster Tools HTML verification token |
+
+Set `NEXT_PUBLIC_BASE_URL=https://toools.top` for the production build. See [SEO/GEO implementation and measurement](docs/seo-geo-implementation.md) for rollout checks, regression commands, and a fixed AI citation observation set.
+
 ## License
 
 This project is open source. See the repository for license details.
+
+SEO / GEO production rollout: [2026-10-13 release verification](docs/seo-geo-release-2026-10-13.md). Google sitemap read succeeded; Bing submission is processing.

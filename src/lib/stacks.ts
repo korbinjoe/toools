@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { cache } from "react";
 import { stackPreviews, type StackPreview } from "@/lib/stacks-data";
 
 export function getStackIconKey(slug: string): StackPreview["icon"] | null {
@@ -31,6 +32,8 @@ export type StackStageTool = {
   name: string;
   tagline: string;
   pricing: string | null;
+  viewCount: number | null;
+  clickCount: number | null;
   githubStars: number | null;
   phVotes: number | null;
   iconUrl: string | null;
@@ -65,10 +68,13 @@ export type StackDetail = {
 const RELATED_TOOLS_LIMIT = 6;
 
 const toolSelect = {
+  status: true,
   slug: true,
   name: true,
   tagline: true,
   pricing: true,
+  viewCount: true,
+  clickCount: true,
   githubStars: true,
   phVotes: true,
   iconUrl: true,
@@ -82,6 +88,8 @@ type ToolRow = {
   name: string;
   tagline: string;
   pricing: string;
+  viewCount: number;
+  clickCount: number;
   githubStars: number | null;
   phVotes: number | null;
   iconUrl: string | null;
@@ -103,6 +111,8 @@ function mapToolToStageTool(
     name: tool.name,
     tagline: tool.tagline,
     pricing: tool.pricing,
+    viewCount: tool.viewCount,
+    clickCount: tool.clickCount,
     githubStars: tool.githubStars,
     phVotes: tool.phVotes,
     iconUrl: tool.iconUrl,
@@ -169,6 +179,8 @@ function previewToDetail(stack: StackPreview): StackDetail {
         name: tool.name,
         tagline: "",
         pricing: "FREEMIUM",
+        viewCount: null,
+        clickCount: null,
         githubStars: null,
         phVotes: null,
         iconUrl: null,
@@ -212,7 +224,7 @@ export async function getStacksForList(): Promise<StackListItem[]> {
   }
 }
 
-export async function getStackBySlug(slug: string): Promise<StackDetail | null> {
+export const getStackBySlug = cache(async (slug: string): Promise<StackDetail | null> => {
   const preview = stackPreviews.find((s) => s.slug === slug);
 
   try {
@@ -238,7 +250,7 @@ export async function getStackBySlug(slug: string): Promise<StackDetail | null> 
     }
 
     const stageToolRows = stack.stages.map((stage) =>
-      stage.recommendations.map((rec) => rec.tool),
+      stage.recommendations.filter((rec) => rec.tool.status === "APPROVED").map((rec) => rec.tool),
     );
     const recommendedSlugs = stageToolRows.flat().map((t) => t.slug);
     const categoryIds = [...new Set(stageToolRows.flat().map((t) => t.categoryId))];
@@ -279,4 +291,4 @@ export async function getStackBySlug(slug: string): Promise<StackDetail | null> 
   } catch {
     return preview ? previewToDetail(preview) : null;
   }
-}
+});

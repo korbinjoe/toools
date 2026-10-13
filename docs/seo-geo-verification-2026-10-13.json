@@ -1,0 +1,111 @@
+{
+  "cases": [
+    {
+      "path": "/",
+      "status": 200,
+      "index": true,
+      "title": "Toools — Find the Right Tools for Your Entire Workflow"
+    },
+    {
+      "path": "/tools",
+      "status": 200,
+      "index": true,
+      "title": "Browse Tools | Toools"
+    },
+    {
+      "path": "/tools?page=2",
+      "status": 200,
+      "index": true,
+      "title": "Browse Tools — Page 2 | Toools"
+    },
+    {
+      "path": "/tools?q=AI",
+      "status": 200,
+      "index": false,
+      "title": "Browse Tools | Toools"
+    },
+    {
+      "path": "/tools?pricing=INVALID",
+      "status": 200,
+      "index": false,
+      "title": "Browse Tools | Toools"
+    },
+    {
+      "path": "/tools?sort=clicks",
+      "status": 200,
+      "index": false,
+      "title": "Browse Tools | Toools"
+    },
+    {
+      "path": "/categories/development",
+      "status": 200,
+      "index": true,
+      "title": "Development Tools | Toools"
+    },
+    {
+      "path": "/categories/empty",
+      "status": 200,
+      "index": false,
+      "title": "Empty category Tools | Toools"
+    },
+    {
+      "path": "/tools/cursor",
+      "status": 200,
+      "index": true,
+      "title": "Cursor: Use Cases & Alternatives | Toools"
+    },
+    {
+      "path": "/tools/n8n",
+      "status": 200,
+      "index": true,
+      "title": "n8n: Use Cases & Alternatives | Toools"
+    },
+    {
+      "path": "/stacks/ai-product-builder",
+      "status": 200,
+      "index": true,
+      "title": "AI Product Development Stack | Toools"
+    },
+    {
+      "path": "/stacks/indie-developer-toolkit",
+      "status": 200,
+      "index": true,
+      "title": "Indie Developer Toolkit for Building a SaaS | Toools"
+    },
+    {
+      "path": "/stacks/content-creator-suite",
+      "status": 200,
+      "index": true,
+      "title": "Content Creator Workflow and Tool Stack | Toools"
+    },
+    {
+      "path": "/about",
+      "status": 200,
+      "index": true,
+      "title": "About Toools | Toools"
+    },
+    {
+      "path": "/editorial-policy",
+      "status": 200,
+      "index": true,
+      "title": "Editorial Standards | Toools"
+    },
+    {
+      "path": "/compare/n8n-vs-make-vs-zapier",
+      "status": 200,
+      "index": true,
+      "title": "n8n vs Make vs Zapier: How to Choose | Toools"
+    }
+  ],
+  "metricTimestamp": "2025-12-31T16:00:00.000Z",
+  "pagination": "native links verified",
+  "sitemap": "approved and nonempty content only",
+  "mobile": "no document overflow",
+  "environment": "Production build against isolated local PostgreSQL fixtures, not the production database",
+  "unitTestsPassed": 15,
+  "productionBuild": "passed",
+  "lint": "passed with 2 existing warnings",
+  "crawlerMetadata": "OAI-SearchBot canonical and Open Graph tags verified in head",
+  "crawler404": "missing tool and out-of-range pagination returned HTTP 404",
+  "fixtureCleanup": "all temporary databases removed"
+}

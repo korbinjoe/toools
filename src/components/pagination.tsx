@@ -1,55 +1,32 @@
-"use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { toolsPageHref } from "@/lib/seo";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useTransition } from "react";
 import { cn } from "@/lib/utils";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
+  searchParams: Record<string, string>;
 }
 
-export function Pagination({ currentPage, totalPages }: PaginationProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-
-  const goToPage = useCallback(
-    (page: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (page <= 1) {
-        params.delete("page");
-      } else {
-        params.set("page", String(page));
-      }
-      startTransition(() => {
-        router.push(`/tools?${params.toString()}`);
-      });
-    },
-    [router, searchParams],
-  );
-
+export function Pagination({ currentPage, totalPages, searchParams }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const pages = getPageNumbers(currentPage, totalPages);
 
   return (
     <nav
-      className={cn(
-        "flex items-center justify-center gap-1 pt-8",
-        isPending && "opacity-50 pointer-events-none",
-      )}
+      className="flex items-center justify-center gap-1 pt-8"
       aria-label="Pagination"
     >
-      <button
-        onClick={() => goToPage(currentPage - 1)}
-        disabled={currentPage <= 1}
+      {currentPage > 1 ? <Link
+        href={toolsPageHref(searchParams, currentPage - 1)}
+        prefetch={false}
         aria-label="Previous page"
         className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
       >
         <ChevronLeft className="h-4 w-4" />
-      </button>
+      </Link> : <span aria-hidden="true" className="inline-flex h-9 w-9 items-center justify-center opacity-30"><ChevronLeft className="h-4 w-4" /></span>}
 
       {pages.map((p, i) =>
         p === "..." ? (
@@ -60,9 +37,10 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
             ...
           </span>
         ) : (
-          <button
+          <Link
             key={p}
-            onClick={() => goToPage(p)}
+            href={toolsPageHref(searchParams, p)}
+            prefetch={false}
             aria-label={`Page ${p}`}
             aria-current={p === currentPage ? "page" : undefined}
             className={cn(
@@ -73,18 +51,18 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
             )}
           >
             {p}
-          </button>
+          </Link>
         ),
       )}
 
-      <button
-        onClick={() => goToPage(currentPage + 1)}
-        disabled={currentPage >= totalPages}
+      {currentPage < totalPages ? <Link
+        href={toolsPageHref(searchParams, currentPage + 1)}
+        prefetch={false}
         aria-label="Next page"
         className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
       >
         <ChevronRight className="h-4 w-4" />
-      </button>
+      </Link> : <span aria-hidden="true" className="inline-flex h-9 w-9 items-center justify-center opacity-30"><ChevronRight className="h-4 w-4" /></span>}
     </nav>
   );
 }

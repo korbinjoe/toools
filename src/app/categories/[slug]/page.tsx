@@ -3,6 +3,9 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { cache } from "react";
+import { JsonLd } from "@/components/json-ld";
+import { breadcrumbData, pageMetadata } from "@/lib/seo";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolGrid } from "@/components/tool-grid";
@@ -12,11 +15,12 @@ interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getCategory(slug: string) {
+const getCategory = cache(async (slug: string) => {
   return prisma.category.findUnique({
     where: { slug },
+    include: { _count: { select: { tools: { where: { status: "APPROVED" } } } } },
   });
-}
+});
 
 async function getCategoryTools(slug: string) {
   return prisma.tool.findMany({
@@ -37,14 +41,14 @@ export async function generateMetadata({
 }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategory(slug);
-  if (!category) return { title: "Category Not Found" };
+  if (!category) notFound();
 
-  return {
-    title: `${category.name} Tools - Toools`,
-    description:
-      category.description ||
-      `Browse the best ${category.name} tools on Toools.`,
-  };
+  return pageMetadata(
+    `${category.name} Tools`,
+    category.description || `Browse ${category.name} tools and compare options on Toools.`,
+    `/categories/${category.slug}`,
+    { index: category._count.tools > 0 },
+  );
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
@@ -58,6 +62,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12">
+      <JsonLd data={breadcrumbData([{ name: "Home", path: "/" }, { name: "Categories", path: "/categories" }, { name: category.name, path: `/categories/${category.slug}` }])} />
       <Link href="/categories">
         <Button variant="ghost" size="sm" className="gap-1.5 mb-6 -ml-2 text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" />

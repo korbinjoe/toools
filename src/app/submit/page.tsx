@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowUpRight, CirclePlus } from "lucide-react";
 import { GithubStarLink } from "@/components/github-star-link";
@@ -10,11 +10,11 @@ import {
 } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Submit a Tool",
-  description:
-    "Suggest a tool for Toools via a structured GitHub Issue. Maintainers review and approve submissions.",
-};
+export const metadata = pageMetadata(
+  "Submit a Tool",
+  "Suggest a tool for Toools via a structured GitHub Issue. Maintainers review and approve submissions.",
+  "/submit",
+);
 
 const checklist = [
   "Tool name",

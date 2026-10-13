@@ -1,0 +1,290 @@
+{
+  "host": "toools.top",
+  "checkedAt": "2026-10-13T08:54:27.742Z",
+  "pages": [
+    {
+      "path": "/tools?page=2",
+      "status": 200,
+      "canonical": "https://toools.top/tools?page=2",
+      "index": true,
+      "jsonLdTypes": []
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "canonical": "https://toools.top",
+      "index": true,
+      "jsonLdTypes": [
+        "@graph"
+      ]
+    },
+    {
+      "path": "/tools",
+      "status": 200,
+      "canonical": "https://toools.top/tools",
+      "index": true,
+      "jsonLdTypes": []
+    },
+    {
+      "path": "/tools?q=AI",
+      "status": 200,
+      "canonical": "https://toools.top/tools?q=AI",
+      "index": false,
+      "jsonLdTypes": []
+    },
+    {
+      "path": "/tools/cursor",
+      "status": 200,
+      "canonical": "https://toools.top/tools/cursor",
+      "index": true,
+      "jsonLdTypes": [
+        "BreadcrumbList",
+        "SoftwareApplication"
+      ]
+    },
+    {
+      "path": "/categories/ai-assistants",
+      "status": 200,
+      "canonical": "https://toools.top/categories/ai-assistants",
+      "index": true,
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "path": "/stacks/content-creator-suite",
+      "status": 200,
+      "canonical": "https://toools.top/stacks/content-creator-suite",
+      "index": true,
+      "jsonLdTypes": [
+        "BreadcrumbList",
+        "CollectionPage"
+      ]
+    },
+    {
+      "path": "/stacks/ai-product-builder",
+      "status": 200,
+      "canonical": "https://toools.top/stacks/ai-product-builder",
+      "index": true,
+      "jsonLdTypes": [
+        "BreadcrumbList",
+        "CollectionPage"
+      ]
+    },
+    {
+      "path": "/stacks/indie-developer-toolkit",
+      "status": 200,
+      "canonical": "https://toools.top/stacks/indie-developer-toolkit",
+      "index": true,
+      "jsonLdTypes": [
+        "BreadcrumbList",
+        "CollectionPage"
+      ]
+    },
+    {
+      "path": "/about",
+      "status": 200,
+      "canonical": "https://toools.top/about",
+      "index": true,
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "path": "/how-we-curate",
+      "status": 200,
+      "canonical": "https://toools.top/how-we-curate",
+      "index": true,
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "path": "/editorial-policy",
+      "status": 200,
+      "canonical": "https://toools.top/editorial-policy",
+      "index": true,
+      "jsonLdTypes": [
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "path": "/compare/n8n-vs-make-vs-zapier",
+      "status": 200,
+      "canonical": "https://toools.top/compare/n8n-vs-make-vs-zapier",
+      "index": true,
+      "jsonLdTypes": [
+        "BreadcrumbList",
+        "Article"
+      ]
+    },
+    {
+      "path": "/tools/does-not-exist-seo-validation",
+      "status": 404
+    },
+    {
+      "path": "/tools?page=999999",
+      "status": 404
+    },
+    {
+      "path": "/categories/does-not-exist-seo-validation",
+      "status": 404
+    },
+    {
+      "path": "/stacks/does-not-exist-seo-validation",
+      "status": 404
+    }
+  ],
+  "assets": [
+    {
+      "path": "/opengraph-image",
+      "status": 200,
+      "bytes": 45549
+    }
+  ],
+  "analytics": [],
+  "sitemap": {
+    "count": 5585,
+    "allCanonical": true,
+    "containsNewPages": true
+  },
+  "tool": "/tools/cursor",
+  "robots": "User-Agent: *\nUser-Agent: OAI-SearchBot\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://toools.top/sitemap.xml\n",
+  "editorialVisible": true,
+  "outbound": {
+    "status": 302
+  },
+  "customEventReceipt": null,
+  "passed": true,
+  "deployment": {
+    "id": "dpl_JAsXRr3ugFwYME2EAACSB695hdPp",
+    "url": "https://toools-hyfdytswq-korbinzhaos-projects.vercel.app",
+    "productionDomain": "https://toools.top",
+    "sourceSnapshotAt": "2026-10-13T08:50:46.634Z",
+    "sourceFiles": 179,
+    "domainAliasVerified": {
+      "checkedAt": "2026-10-13T08:54:38.093Z",
+      "alias": "toools.top",
+      "deployment": {
+        "id": "dpl_JAsXRr3ugFwYME2EAACSB695hdPp",
+        "url": "toools-hyfdytswq-korbinzhaos-projects.vercel.app"
+      },
+      "projectId": "prj_i5dVke5BWWP4MXdfRBROeTYlbvkm"
+    },
+    "previousProduction": "https://toools-og9nws0pk-korbinzhaos-projects.vercel.app",
+    "initialSEORelease": "dpl_CgjuT2LiPjkW2JqFZuU7xqieqHM4",
+    "scope": "final release preserves concurrent project updates and completes Sources & Selection metadata and sitemap entry"
+  },
+  "verificationMethod": {
+    "publicPages": "Anonymous requests over TLS with public DNS resolution scoped to verification, no deployment bypass header on production domain",
+    "crawler": "OAI-SearchBot user-agent verifies rendered head metadata; not a verified crawler identity",
+    "browser": "Playwright at 390px width"
+  },
+  "analyticsLimit": {
+    "plan": "Hobby",
+    "webAnalyticsEnabled": true,
+    "customEventsSupported": false,
+    "dashboardConfirmed": true,
+    "firstPartyClickCounterVerified": true,
+    "scriptDelivery": {
+      "webAnalytics": 200,
+      "speedInsights": 200,
+      "servedThrough": "Vercel-generated same-origin hashed script paths",
+      "collectorReceiptCaptured": false,
+      "scope": "automated browser delivery check; scripts loaded without application errors, dashboard baseline recorded separately"
+    }
+  },
+  "googleSearchConsole": {
+    "property": "https://toools.top/",
+    "ownership": "verified via production HTML tag",
+    "sitemap": "https://toools.top/sitemap.xml",
+    "submissionDate": "2026-10-13",
+    "lastReadDate": "2026-10-13",
+    "status": "Success",
+    "discoveredPages": 5584,
+    "performance": "Processing data; Google dashboard asks to check again in approximately one day",
+    "inspections": [
+      {
+        "url": "https://toools.top/",
+        "source": "Google URL Inspection indexed report",
+        "status": "URL is on Google",
+        "indexed": true,
+        "https": true,
+        "liveTest": {
+          "testedAt": "2026-10-13 16:41 Asia/Shanghai",
+          "status": "URL is available to Google",
+          "indexEligible": true
+        }
+      },
+      {
+        "url": "https://toools.top/categories/ai-assistants",
+        "source": "Google URL Inspection indexed report",
+        "indexed": false,
+        "status": "URL is not on Google",
+        "reason": "URL is unknown to Google",
+        "lastCrawl": null,
+        "googleCanonical": null
+      },
+      {
+        "url": "https://toools.top/tools/cursor",
+        "source": "Google URL Inspection indexed report",
+        "indexed": false,
+        "status": "URL is not on Google",
+        "reason": "URL is unknown to Google",
+        "lastCrawl": null,
+        "googleCanonical": null
+      },
+      {
+        "url": "https://toools.top/stacks/ai-product-builder",
+        "source": "Google URL Inspection indexed report",
+        "indexed": false,
+        "status": "Discovered - currently not indexed",
+        "reason": "Google now references submitted sitemap and links from homepage and /tools/chatgpt",
+        "lastCrawl": null,
+        "googleCanonical": null
+      },
+      {
+        "url": "https://toools.top/compare/n8n-vs-make-vs-zapier",
+        "source": "Google URL Inspection indexed report",
+        "indexed": false,
+        "status": "URL is not on Google",
+        "reason": "URL is unknown to Google",
+        "lastCrawl": null,
+        "googleCanonical": null
+      }
+    ],
+    "priorityIndexingRequests": [
+      {
+        "url": "https://toools.top/compare/n8n-vs-make-vs-zapier",
+        "accepted": true
+      },
+      {
+        "url": "https://toools.top/stacks/ai-product-builder",
+        "accepted": true
+      },
+      {
+        "url": "https://toools.top/stacks/indie-developer-toolkit",
+        "accepted": true
+      },
+      {
+        "url": "https://toools.top/stacks/content-creator-suite",
+        "accepted": true
+      }
+    ],
+    "sitemapResubmittedAfterFinalPatch": true,
+    "finalSitemapUrlCount": 5585
+  },
+  "bingWebmasterTools": {
+    "property": "https://toools.top/",
+    "propertyAccessible": true,
+    "sitemap": "https://toools.top/sitemap.xml",
+    "submissionDate": "2026-10-13",
+    "submissionConfirmed": true,
+    "processingStatus": "Processing",
+    "knownSitemaps": 1,
+    "sitemapErrors": 0,
+    "sitemapWarnings": 0,
+    "discoveredUrls": 0,
+    "scope": "Bing reports newly submitted sitemap processing; zero discovered URLs is not final crawl coverage"
+  }
+}

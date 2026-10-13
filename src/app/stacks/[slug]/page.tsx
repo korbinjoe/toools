@@ -5,6 +5,10 @@ import { StageToolsSection } from "@/components/stage-tools-section";
 import { getStackBySlug, stackTags } from "@/lib/stacks";
 import { stackPreviews } from "@/lib/stacks-data";
 import { StackIcon } from "@/components/stack-icon";
+import { JsonLd } from "@/components/json-ld";
+import { StackGuide } from "@/components/stack-guide";
+import { stackGuides } from "@/lib/stack-guides";
+import { breadcrumbData, pageMetadata, siteUrl } from "@/lib/seo";
 
 interface StackPageProps {
   params: Promise<{ slug: string }>;
@@ -17,44 +21,22 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: StackPageProps): Promise<Metadata> {
   const { slug } = await params;
   const stack = await getStackBySlug(slug);
-  if (!stack) return { title: "Stack Not Found" };
-  return {
-    title: `${stack.name} - Tool Stacks | Toools`,
-    description: stack.description,
-    openGraph: {
-      title: stack.name,
-      description: stack.description,
-      type: "website",
-    },
-  };
+  if (!stack) notFound();
+  const guide = stackGuides[slug];
+  return pageMetadata(guide?.title || `${stack.name} — Tool Stack`, guide?.description || stack.description, `/stacks/${stack.slug}`);
 }
 
-function StackJsonLd({ stack }: { stack: Awaited<ReturnType<typeof getStackBySlug>> }) {
-  if (!stack) return null;
-
-  const toolNames = [
-    ...new Set(stack.stages.flatMap((stage) => stage.tools.map((t) => t.name))),
-  ];
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: stack.name,
-    description: stack.description,
-    numberOfItems: toolNames.length,
-    itemListElement: toolNames.map((name, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name,
-    })),
-  };
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  );
+function StackJsonLd({ stack }: { stack: NonNullable<Awaited<ReturnType<typeof getStackBySlug>>> }) {
+  const tools = [...new Map(stack.stages.flatMap((stage) => stage.tools).map((tool) => [tool.slug || tool.name, tool])).values()];
+  const guide = stackGuides[stack.slug];
+  const url = siteUrl(`/stacks/${stack.slug}`);
+  return <>
+    <JsonLd data={breadcrumbData([{ name: "Home", path: "/" }, { name: "Tool Stacks", path: "/stacks" }, { name: stack.name, path: `/stacks/${stack.slug}` }])} />
+    <JsonLd data={{ "@context": "https://schema.org", "@type": "CollectionPage", url, name: guide?.title || stack.name, description: guide?.description || stack.description,
+      mainEntity: { "@type": "ItemList", numberOfItems: tools.length, itemListElement: tools.map((tool, index) => ({ "@type": "ListItem", position: index + 1, name: tool.name, ...(tool.slug ? { url: siteUrl(`/tools/${tool.slug}`) } : tool.url ? { url: tool.url } : {}) })) },
+      ...(guide ? { hasPart: { "@type": "Article", "@id": `${url}#selection-guide`, headline: guide.title, description: guide.description, dateModified: guide.reviewedOn, inLanguage: "en", author: { "@type": "Organization", name: "Toools maintainers", url: siteUrl("/about") }, publisher: { "@id": `${siteUrl()}#publisher` } } } : {}),
+    }} />
+  </>;
 }
 
 export default async function StackDetailPage({ params }: StackPageProps) {
@@ -62,6 +44,7 @@ export default async function StackDetailPage({ params }: StackPageProps) {
   const stack = await getStackBySlug(slug);
   if (!stack) notFound();
 
+  const guide = stackGuides[slug];
   const tags = stackTags[slug] ?? [];
   const stackMeta = stackPreviews.find((s) => s.slug === slug);
 
@@ -80,10 +63,10 @@ export default async function StackDetailPage({ params }: StackPageProps) {
             {stackMeta && <StackIcon icon={stackMeta.icon} size="lg" className="mt-1" />}
             <div>
               <h1 className="text-[clamp(1.5rem,3.5vw,2.25rem)] font-extrabold tracking-[-0.03em]">
-                {stack.name}
+                {guide?.title || stack.name}
               </h1>
               <p className="mt-2 max-w-[60ch] text-base leading-relaxed text-muted-foreground">
-                {stack.description}
+                {guide?.description || stack.description}
               </p>
             </div>
           </div>
@@ -100,6 +83,8 @@ export default async function StackDetailPage({ params }: StackPageProps) {
             </div>
           )}
         </div>
+
+        {guide && <StackGuide guide={guide} stack={stack} />}
 
         <div className="flex border border-border rounded-2xl overflow-hidden bg-card shadow-sm mb-10">
           {stack.stages.map((stage, idx) => (

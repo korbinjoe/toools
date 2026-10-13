@@ -1,0 +1,130 @@
+{
+  "previousDeploymentId": "dpl_JAsXRr3ugFwYME2EAACSB695hdPp",
+  "productionUrl": "https://toools.top",
+  "files": {
+    "src/app/tools/[slug]/page.tsx": "aee0c66d93f007c70ab2153aa36d6fb8632972638417c315872173e3c98881d9",
+    "src/app/api/tools/[slug]/out/route.ts": "9af2d18fbfdeb79ced2de4b96ccfad30fc8c708dfb153b1ed5b1dc5709bf98b4",
+    "src/components/tool-website-link.tsx": "bdf4abbcc82d1174345475bd65e53f02f9287925eb3fcaa1f60a36882b7d734d",
+    "src/lib/tool-links.ts": "a242741518dd8be4bb67564719e577eff1b3597ad5d92bb847c6d986b73e9214",
+    "src/lib/tool-links.test.ts": "e06c847d350d78d00a030a231eef945d0bae71678ec9fc924d137e9958d4425c"
+  },
+  "deploymentId": "dpl_EKE6fyQjFA5ahe2myheFzscU7k5a",
+  "deploymentUrl": "https://toools-3brie6j9n-korbinzhaos-projects.vercel.app",
+  "status": "READY",
+  "promoted": true,
+  "productionAliasVerified": true,
+  "impactScope": [
+    "tool detail pages",
+    "stored external link redirects and outbound counters"
+  ],
+  "databaseMigration": false,
+  "checks": {
+    "localBuild": "passed",
+    "vercelBuild": "passed",
+    "targetedLint": "passed",
+    "regressionsPassed": 12,
+    "isolatedBrowserViewports": [
+      1440,
+      390
+    ]
+  },
+  "candidateVerification": {
+    "host": "toools-3brie6j9n-korbinzhaos-projects.vercel.app",
+    "checkedAt": "2026-10-13T09:42:22.017Z",
+    "pages": [
+      {
+        "slug": "james",
+        "status": 200,
+        "savedLinksAndCounts": true
+      },
+      {
+        "slug": "hustla-to-do-lists-tasks",
+        "status": 200,
+        "savedLinksAndCounts": true
+      }
+    ],
+    "redirects": [
+      {
+        "slug": "james",
+        "destination": "website",
+        "status": 302,
+        "location": "https://github.com/james-proxy/james"
+      },
+      {
+        "slug": "james",
+        "destination": "github",
+        "status": 302,
+        "location": "https://github.com/james-proxy/james"
+      },
+      {
+        "slug": "hustla-to-do-lists-tasks",
+        "destination": "source",
+        "status": 302,
+        "location": "https://www.producthunt.com/products/hustla-to-do-lists-tasks/launches/hustla-to-do-lists-tasks?utm_campaign=producthunt-api&utm_medium=api-v2&utm_source=Application%3A+toools+%28ID%3A+287457%29"
+      }
+    ],
+    "pageErrors": [],
+    "metrics": {
+      "before": 8,
+      "after": 10,
+      "expectedMinimumIncrease": 2,
+      "updatedAtPreserved": true
+    },
+    "productHuntMetrics": {
+      "before": 4,
+      "after": 5,
+      "updatedAtPreserved": true
+    },
+    "passed": true
+  },
+  "productionVerification": {
+    "host": "toools.top",
+    "checkedAt": "2026-10-13T09:43:26.774Z",
+    "pages": [
+      {
+        "slug": "james",
+        "status": 200,
+        "savedLinksAndCounts": true
+      },
+      {
+        "slug": "graphbit-prflow",
+        "status": 200,
+        "savedLinksAndCounts": true
+      }
+    ],
+    "redirects": [
+      {
+        "slug": "james",
+        "destination": "website",
+        "status": 302,
+        "location": "https://github.com/james-proxy/james"
+      },
+      {
+        "slug": "james",
+        "destination": "github",
+        "status": 302,
+        "location": "https://github.com/james-proxy/james"
+      },
+      {
+        "slug": "graphbit-prflow",
+        "destination": "source",
+        "status": 302,
+        "location": "https://www.producthunt.com/products/graphbit/launches/graphbit-prflow?utm_campaign=producthunt-api&utm_medium=api-v2&utm_source=Application%3A+toools+%28ID%3A+287457%29"
+      }
+    ],
+    "pageErrors": [],
+    "metrics": {
+      "before": 10,
+      "after": 12,
+      "expectedMinimumIncrease": 2,
+      "updatedAtPreserved": true
+    },
+    "productHuntMetrics": {
+      "before": 6,
+      "after": 7,
+      "updatedAtPreserved": true
+    },
+    "passed": true
+  },
+  "verificationTraffic": "Page visits and outbound requests incremented real counters; no bulk data changes."
+}

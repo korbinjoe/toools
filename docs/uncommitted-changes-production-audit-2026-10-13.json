@@ -1,0 +1,382 @@
+{
+  "deploymentId": "dpl_EKE6fyQjFA5ahe2myheFzscU7k5a",
+  "productionSourceFiles": 180,
+  "files": [
+    {
+      "path": "README.md",
+      "status": "matches-current-production-source",
+      "sha256": "40ffc7c7f9cac88fc69d0c1a85bf8a07dd3369612a4216939aba40f2b79b51d0",
+      "productionSourceSha1": "147c882f4da159d2a3a79ad4aebded2905156b39"
+    },
+    {
+      "path": "next.config.ts",
+      "status": "matches-current-production-source",
+      "sha256": "e2cbab80424191f9f456c7eb23784497c711d5b16ee6f75975b90687a7366bda",
+      "productionSourceSha1": "8bbfac0345295be685e96579fd1ca0433fb0ba61"
+    },
+    {
+      "path": "package-lock.json",
+      "status": "matches-current-production-source",
+      "sha256": "2a6a1e677073eafc722e60cc97f88ffcb39256bb06e7c72908fd507644fae563",
+      "productionSourceSha1": "88a810a45831048187c7f0ce0ef500afe1e331ae"
+    },
+    {
+      "path": "package.json",
+      "status": "matches-current-production-source",
+      "sha256": "38501007437a0d90663946c2438ca3debbcb21078d37d4b47d0d5ea5a5e717a7",
+      "productionSourceSha1": "4d26d2d1865bb4b99cb36b5b9f22028ba9776c72"
+    },
+    {
+      "path": "src/app/api/tools/[slug]/out/route.ts",
+      "status": "matches-current-production-source",
+      "sha256": "9af2d18fbfdeb79ced2de4b96ccfad30fc8c708dfb153b1ed5b1dc5709bf98b4",
+      "productionSourceSha1": "ec8f323737526a1771bb9204a34630d9a9e0d109"
+    },
+    {
+      "path": "src/app/categories/[slug]/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "55409c07166d7cebf9cf690cd04a16d07682cd1c967f931e9afc7386793a0d2b",
+      "productionSourceSha1": "3dd753b6d28f04e22705cd80b318eb95a476bd1b"
+    },
+    {
+      "path": "src/app/categories/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "6bd38edc981ca41033a339b1fef6bdeaf4c206c3ff8fb31d41c01bb4e7a79890",
+      "productionSourceSha1": "85be6691c0c5a61016bb1d9f5788435e09a03ae4"
+    },
+    {
+      "path": "src/app/globals.css",
+      "status": "matches-current-production-source",
+      "sha256": "36c97351d65e06b0cbfd7205ac3d7fd098765289968cc981fdfa672509b980a8",
+      "productionSourceSha1": "af9613bee8f37b3b062765ecf5f12358754dc591"
+    },
+    {
+      "path": "src/app/layout.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "f7c63fc77a0ca55721038205638f211ea04be6c65f8d565911673079a83e66e0",
+      "productionSourceSha1": "f5723fd455e20b95083f42f099d661648f7c84d0"
+    },
+    {
+      "path": "src/app/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "f865eb959354733fbea3b321bb19c630c84f419a1db394ec1b95d285779a10b7",
+      "productionSourceSha1": "546cae12440b3e9b70a693c04c2c7b176b3960fb"
+    },
+    {
+      "path": "src/app/robots.ts",
+      "status": "matches-current-production-source",
+      "sha256": "eb8b45096435064951e34e9232b9b01a5def21af862b3faa27ae601543abaddd",
+      "productionSourceSha1": "bd4b6272a1dd99702bcf5484196676b09d144c77"
+    },
+    {
+      "path": "src/app/sitemap.ts",
+      "status": "matches-current-production-source",
+      "sha256": "b1dff62bf3aeb7b8f71c8ac7d2b19bd972547b304c5062ddb96dfbc81d1cad14",
+      "productionSourceSha1": "397a7beb9572ef64b33abd4c0f0817b7ef8edf17"
+    },
+    {
+      "path": "src/app/stacks/[slug]/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "fd2f18fcee1b9a51468057812291aac3c0ef744f808cfddc929878b250a0566b",
+      "productionSourceSha1": "945d621b2acd64df62486a7f5050bde0d0e84607"
+    },
+    {
+      "path": "src/app/stacks/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "8f5891f6ba9af51bb4ae904957be9ff992af083e5228976828b38871105acbc7",
+      "productionSourceSha1": "67357ebb181f0dc97caf48c0cc05510d4c737316"
+    },
+    {
+      "path": "src/app/submit/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "076e6af09b29064ca204f1baaaec09466a8a60f100260abebb411853cc38972e",
+      "productionSourceSha1": "54ad86d17b10882084b38d8f5f86b746f9b43a77"
+    },
+    {
+      "path": "src/app/tools/[slug]/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "aee0c66d93f007c70ab2153aa36d6fb8632972638417c315872173e3c98881d9",
+      "productionSourceSha1": "1ebd509076a3edbffab921e9990f8a183fb4b9c5"
+    },
+    {
+      "path": "src/app/tools/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "5261f2e19df3a3c8f5dfbcc3333da7be86548214756d468873c82ac32a2bb3ce",
+      "productionSourceSha1": "f0f15859ee84f00a2b88f886a7d334d80e2f35c1"
+    },
+    {
+      "path": "src/components/footer.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "37d0a45d2286fabe5b0f4656817b62611addfe0de019c984b184448e6dd792f5",
+      "productionSourceSha1": "e9a73cde9784e0e20ab41a9e9649d251cb8b37b4"
+    },
+    {
+      "path": "src/components/pagination.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "9ba5f45e225fd05e5db97f4ac02359fe41691b65eca239b04cea7e400420457b",
+      "productionSourceSha1": "9097d116e2bc82cb8a471f37fe8dafaa79a7f062"
+    },
+    {
+      "path": "src/components/stage-tool-card.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "f8142f67e875b456ae2778b7d0939a4268cdb5d502cb21dcfa17d652b4bb4a80",
+      "productionSourceSha1": "fa8e6e44238f52ab74c03369f83f339057de7867"
+    },
+    {
+      "path": "src/components/tool-card.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "d8ffcbd17b56cf166308c2dae8e8b68056849a006329b68ac063ec3b00aa1d48",
+      "productionSourceSha1": "e5c1598fea4045ac513c74dbb7695fb6adb24891"
+    },
+    {
+      "path": "src/lib/site.ts",
+      "status": "matches-current-production-source",
+      "sha256": "6a8081831e2ecc57d2c3127ddf5b2589933b6821a83c574d6e3a2e8587680b1e",
+      "productionSourceSha1": "ee675cd1d33ce88c6cffb79ca5b97d76cb8e4937"
+    },
+    {
+      "path": "src/lib/stacks.ts",
+      "status": "matches-current-production-source",
+      "sha256": "d5fe72a49f7c5fee943c92147ddb9857089900289e222b4e46422c0fb68648f5",
+      "productionSourceSha1": "83cd70d6a93e6e26856f0a34425dc70badfdf977"
+    },
+    {
+      "path": "docs/local-dev-performance-analysis-2026-10-13.md",
+      "status": "matches-current-production-source",
+      "sha256": "4f724704e9d36f00e172882176d57df0252300b943017fef7c92a45ac061d6ba",
+      "productionSourceSha1": "e591e36c00fd2a4794ff874beb89fca6189c04cc"
+    },
+    {
+      "path": "docs/seo-geo-baseline-2026-10-13.json",
+      "status": "matches-current-production-source",
+      "sha256": "37f093b2d053aba299f0a52ffae7d0763faeb315e2eab0f741b2e6abcdf749ec",
+      "productionSourceSha1": "045260743639cc8ad430be78bc12a5c4bc78241a"
+    },
+    {
+      "path": "docs/seo-geo-implementation.md",
+      "status": "matches-current-production-source",
+      "sha256": "c8a2c829b4db4efd8a4b402837b12b030f9aec885a917c16dca256ffbf128798",
+      "productionSourceSha1": "33c7fa848cc7fc16bb334499d7dd35a84b233640"
+    },
+    {
+      "path": "docs/seo-geo-production-click-verification-2026-10-13.json",
+      "status": "source-differs",
+      "sha256": "166afe12c7cada631db858e0fade59337c8f072fa65b1301397ac50638b1efb1",
+      "productionSourceSha1": "63fc21b68cd56369d9819a8af9ee25b734b892e6"
+    },
+    {
+      "path": "docs/seo-geo-production-verification-2026-10-13.json",
+      "status": "source-differs",
+      "sha256": "174977ac871a180f73984f899ce59e30f3ebcaae5afc59ead5db699687e7df9d",
+      "productionSourceSha1": "22531596fd32113da1c51a10fb7f7a990ef14a0b"
+    },
+    {
+      "path": "docs/seo-geo-release-2026-10-13.md",
+      "status": "source-differs",
+      "sha256": "f5e82b8c7b1614d8e001cf83cc915a650e7e5f210112feb9000a80a0d800e6a4",
+      "productionSourceSha1": "dc9d487b5d647b4c7c31141ae61fc61e267a365f"
+    },
+    {
+      "path": "docs/seo-geo-release-source-manifest-2026-10-13.json",
+      "status": "source-differs",
+      "sha256": "3ded576aeeddcf756411f27f6c0419a31eceb1dc802bbbbd13467053da3ddf9d",
+      "productionSourceSha1": "e4e37225c3f62e7b736b751bdcd6cb2d77adf8d2"
+    },
+    {
+      "path": "docs/seo-geo-verification-2026-10-13.json",
+      "status": "matches-current-production-source",
+      "sha256": "745212eda8d3fe31b921c2e614baae82f5763953994d93f38efd3f4756bbd65a",
+      "productionSourceSha1": "4cff8d36951d5f5a5b5c197c40d91eb026738213"
+    },
+    {
+      "path": "docs/tool-detail-links-release-2026-10-13.json",
+      "status": "not-in-production-upload",
+      "sha256": "4edd1e6649607b658cd8a720becdd06fd668079e9620f2c43c188df196024cb9",
+      "productionSourceSha1": null
+    },
+    {
+      "path": "docs/user-behavior-analytics-plan.md",
+      "status": "matches-current-production-source",
+      "sha256": "1ab4a21a111de7b875253b33887652ed1b3136ba7cf9273a276cac05f016a6f4",
+      "productionSourceSha1": "fbad66f0bc5df789f7ce69fe4237706a2824388f"
+    },
+    {
+      "path": "docs/user-experience-review-2026-10-13.md",
+      "status": "matches-current-production-source",
+      "sha256": "5b2fc279b2ae07fee07ad345a9d67b8c68ab847e2601ac1d647896c90699408e",
+      "productionSourceSha1": "db67329f514a2697602e104b44941cf0b3cd1d8c"
+    },
+    {
+      "path": "openspec/changes/user-value-review/proposal.md",
+      "status": "matches-current-production-source",
+      "sha256": "13dc42c367dcb145de9c6e1b71f58518ab12ac4e7a72f3c586a0b3920f467c17",
+      "productionSourceSha1": "29852da89e73af9b9339199f66151bc675181b6d"
+    },
+    {
+      "path": "src/app/about/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "054af5e96e8317a44e8b2a67376ab8f6cb356eb477d1a98b08f24bd415e4adc0",
+      "productionSourceSha1": "232cba50e7f70f89b8737c128dddf36275cea907"
+    },
+    {
+      "path": "src/app/compare/n8n-vs-make-vs-zapier/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "bfaa1970ab46edd188d84b29374638cd839532bd5bf011e6ae20783eee987119",
+      "productionSourceSha1": "c5a66ab85f2e0f564143036d21268ba35b1452dc"
+    },
+    {
+      "path": "src/app/editorial-policy/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "6ba4f22db44ac05d05a0add6a3d9fa460f29c757a0dda3fdc41584bce16b4605",
+      "productionSourceSha1": "6545c6a713ae8ded33afb9af6f2238240c9c432f"
+    },
+    {
+      "path": "src/app/how-we-curate/page.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "da82bffd45c390ff39ecdd7b25a2388ca28c3d4fb790275e5bb012aabe9e6dae",
+      "productionSourceSha1": "ad86081e87bae1f221b241b164ec85c018d2d469"
+    },
+    {
+      "path": "src/app/opengraph-image.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "fbd3e7ccc64ad376bbfa312a6ce806c961cd4616128f3239d1caedb99ed61ff3",
+      "productionSourceSha1": "2b11f5132f6c38294e88694f50e032587ec9f201"
+    },
+    {
+      "path": "src/app/tools/[slug]/layout.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "f84d136de008b208e5b030804bb7d90fa8c61a8c13892b728543f07df4475580",
+      "productionSourceSha1": "120a4ef527293dc12376db8e4bcf26363876d072"
+    },
+    {
+      "path": "src/components/home-discovery-sections.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "80cde4e5f4eb185c7badea1979a44c02bf6a632eee544bc960610584af1ebd77",
+      "productionSourceSha1": "0e013c36ac82081aa1374c5f0df733882d41114e"
+    },
+    {
+      "path": "src/components/json-ld.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "cf240e0a50e3dcb38aeae4643cdd40150441fa9085aeb5d39983d43975538692",
+      "productionSourceSha1": "f697b4bf77a53aa6996018d3a29822b390b392fc"
+    },
+    {
+      "path": "src/components/stack-guide.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "85815c141769ad8a94e4e955f474e6229efe54394f77042e1ad7f6a69a88922e",
+      "productionSourceSha1": "a94ae3729f803dccce9085b7142a9d2dd2c847a8"
+    },
+    {
+      "path": "src/components/tool-engagement.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "366e39eb463b2813d1273135d9528cf221d54652f41be54393c70ae58e578863",
+      "productionSourceSha1": "dcff421384b000d05a6336a87c46591ab78765f7"
+    },
+    {
+      "path": "src/components/tool-website-link.tsx",
+      "status": "matches-current-production-source",
+      "sha256": "bdf4abbcc82d1174345475bd65e53f02f9287925eb3fcaa1f60a36882b7d734d",
+      "productionSourceSha1": "4dc2bf6c555055195922b695e953dd4272356b09"
+    },
+    {
+      "path": "src/lib/crawlers.ts",
+      "status": "matches-current-production-source",
+      "sha256": "69c846e1134fc9c0a27c8e62de93ee73761a594152959fa65857c7e98f7e8d0d",
+      "productionSourceSha1": "27029c5ea18027b6d94814c0536ed57f6b461537"
+    },
+    {
+      "path": "src/lib/home-discovery.test.ts",
+      "status": "matches-current-production-source",
+      "sha256": "443ce63066ba7c73612c319da6baf7449f6b1662b68943f72aa58682e497a336",
+      "productionSourceSha1": "c5063f2ab6647a0e6c039de0b8bfbc9aa4ecc311"
+    },
+    {
+      "path": "src/lib/home-discovery.ts",
+      "status": "matches-current-production-source",
+      "sha256": "59c495aed16a528a6bf353b3dd9a5368394685c2001a87dc6707cc495ea5dc2f",
+      "productionSourceSha1": "073209723bf9dd94085ddf77de2361e12f5fc402"
+    },
+    {
+      "path": "src/lib/seo-sitemap.ts",
+      "status": "matches-current-production-source",
+      "sha256": "5db3952c7843eba0e26d3e072b28e39f86deb3f9149f5453aed354f26052780d",
+      "productionSourceSha1": "704766843018b680341b6dfec69d13a028508f40"
+    },
+    {
+      "path": "src/lib/seo.test.ts",
+      "status": "matches-current-production-source",
+      "sha256": "921b11887292cd27e964190d68d4c4ecee9d48dce7c21b462eed6f07256553bd",
+      "productionSourceSha1": "27ad90c1ddd8826cb99d53db504fac4511e9c931"
+    },
+    {
+      "path": "src/lib/seo.ts",
+      "status": "matches-current-production-source",
+      "sha256": "8fc77107578f97c938b4d882d5d4c112f039eea6213fa5e13e2ee5093f4c2569",
+      "productionSourceSha1": "f6dedeb9c818b05d5519a7d59647a12b28a0a60d"
+    },
+    {
+      "path": "src/lib/stack-guides.ts",
+      "status": "matches-current-production-source",
+      "sha256": "438d6998f0e82a2923d0e11ba4d94ac658441b0bbcd8a746c849fbb0f27c38fc",
+      "productionSourceSha1": "1b6f6c1565bb4cdf0faf620245591d3d64665240"
+    },
+    {
+      "path": "src/lib/tool-editorial.ts",
+      "status": "matches-current-production-source",
+      "sha256": "1120a06b9e526c855f10896b69a9c2a2d051b5914c85168f47a3a83c377bc838",
+      "productionSourceSha1": "9bf8e6f949f0ad80f6e972c900b832fb71eb30ae"
+    },
+    {
+      "path": "src/lib/tool-links.test.ts",
+      "status": "matches-current-production-source",
+      "sha256": "e06c847d350d78d00a030a231eef945d0bae71678ec9fc924d137e9958d4425c",
+      "productionSourceSha1": "17f91133f3395615a4e86025d9b52a09f776c451"
+    },
+    {
+      "path": "src/lib/tool-links.ts",
+      "status": "matches-current-production-source",
+      "sha256": "a242741518dd8be4bb67564719e577eff1b3597ad5d92bb847c6d986b73e9214",
+      "productionSourceSha1": "a22af3b457acb78343e4e413991865931a05e621"
+    },
+    {
+      "path": "src/lib/tool-metrics.ts",
+      "status": "matches-current-production-source",
+      "sha256": "87a5c62884216107e6f9dd199394b5ed939713cd987884820e297315750e8ae5",
+      "productionSourceSha1": "04a3a263de3e48eaf4626034a582a3259eb0754a"
+    },
+    {
+      "path": "src/lib/tools.ts",
+      "status": "matches-current-production-source",
+      "sha256": "6b2b703b1b9dd139e068cf934af29357aae65ee7fc944e0352aa57aa3c86efb0",
+      "productionSourceSha1": "e466faa73a1999dc939f54725bf0833358a43b52"
+    }
+  ],
+  "checkedAt": "2026-10-13T15:17:54.104183+00:00",
+  "productionUrl": "https://toools.top",
+  "productionAliasVerified": true,
+  "comparisonMethod": "Compare local SHA-1 to the source file UIDs returned by Vercel deployment files API; local SHA-256 retained for commit verification.",
+  "allApplicationChangesDeployed": true,
+  "postReleaseDocumentationOnly": [
+    "docs/seo-geo-production-click-verification-2026-10-13.json",
+    "docs/seo-geo-production-verification-2026-10-13.json",
+    "docs/seo-geo-release-2026-10-13.md",
+    "docs/seo-geo-release-source-manifest-2026-10-13.json",
+    "docs/tool-detail-links-release-2026-10-13.json"
+  ],
+  "checks": {
+    "regressionsPassed": 22,
+    "eslintErrors": 0,
+    "existingEslintWarnings": 2,
+    "diffWhitespace": "Passed with existing Markdown hard breaks and one published final blank line retained; production-matching source bytes preserved.",
+    "productionBuild": "existing READY deployment with identical application source"
+  },
+  "scope": [
+    "homepage discovery and daily batches",
+    "sources and selection guide",
+    "SEO, canonical URLs, crawler metadata, sitemap and social previews",
+    "tool details, external links, engagement counts and analytics",
+    "categories, pagination, workflow guidance and related editorial pages",
+    "release evidence and operational documentation"
+  ],
+  "redeploymentNeeded": false
+}

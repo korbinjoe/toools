@@ -1,0 +1,205 @@
+{
+  "measuredAt": "2026-10-13T08:05:08.200Z",
+  "scope": "existing production database, read-only cumulative counters, includes crawler and test requests",
+  "totals": {
+    "approvedTools": 5550,
+    "views": "197215",
+    "outboundClicks": "32243",
+    "addedLast28Days": 7
+  },
+  "editorialCoverage": 20,
+  "missingEditorialSlugs": [],
+  "editorial": [
+    {
+      "slug": "buffer",
+      "name": "Buffer",
+      "viewCount": 71,
+      "clickCount": 16
+    },
+    {
+      "slug": "canva",
+      "name": "Canva",
+      "viewCount": 73,
+      "clickCount": 19
+    },
+    {
+      "slug": "chatgpt",
+      "name": "ChatGPT",
+      "viewCount": 167,
+      "clickCount": 25
+    },
+    {
+      "slug": "claude",
+      "name": "Claude",
+      "viewCount": 164,
+      "clickCount": 20
+    },
+    {
+      "slug": "cursor",
+      "name": "Cursor",
+      "viewCount": 71,
+      "clickCount": 10
+    },
+    {
+      "slug": "descript",
+      "name": "Descript",
+      "viewCount": 70,
+      "clickCount": 16
+    },
+    {
+      "slug": "excalidraw",
+      "name": "Excalidraw",
+      "viewCount": 181,
+      "clickCount": 17
+    },
+    {
+      "slug": "figma",
+      "name": "Figma",
+      "viewCount": 190,
+      "clickCount": 20
+    },
+    {
+      "slug": "github",
+      "name": "GitHub",
+      "viewCount": 86,
+      "clickCount": 14
+    },
+    {
+      "slug": "make",
+      "name": "Make",
+      "viewCount": 64,
+      "clickCount": 12
+    },
+    {
+      "slug": "n8n",
+      "name": "n8n",
+      "viewCount": 179,
+      "clickCount": 16
+    },
+    {
+      "slug": "notion",
+      "name": "Notion",
+      "viewCount": 83,
+      "clickCount": 14
+    },
+    {
+      "slug": "perplexity",
+      "name": "Perplexity",
+      "viewCount": 77,
+      "clickCount": 12
+    },
+    {
+      "slug": "posthog",
+      "name": "PostHog",
+      "viewCount": 62,
+      "clickCount": 8
+    },
+    {
+      "slug": "railway",
+      "name": "Railway",
+      "viewCount": 66,
+      "clickCount": 13
+    },
+    {
+      "slug": "replit",
+      "name": "Replit",
+      "viewCount": 71,
+      "clickCount": 12
+    },
+    {
+      "slug": "stackblitz",
+      "name": "StackBlitz",
+      "viewCount": 62,
+      "clickCount": 9
+    },
+    {
+      "slug": "supabase",
+      "name": "Supabase",
+      "viewCount": 110,
+      "clickCount": 15
+    },
+    {
+      "slug": "vercel",
+      "name": "Vercel",
+      "viewCount": 173,
+      "clickCount": 13
+    },
+    {
+      "slug": "zapier",
+      "name": "Zapier",
+      "viewCount": 72,
+      "clickCount": 14
+    }
+  ],
+  "stacks": [
+    {
+      "slug": "ai-product-builder"
+    },
+    {
+      "slug": "content-creator-suite"
+    },
+    {
+      "slug": "data-insights-stack"
+    },
+    {
+      "slug": "design-workflow"
+    },
+    {
+      "slug": "indie-developer-toolkit"
+    },
+    {
+      "slug": "marketing-seo-growth"
+    },
+    {
+      "slug": "open-source-maintainer"
+    },
+    {
+      "slug": "remote-team-ops"
+    },
+    {
+      "slug": "startup-foundation"
+    }
+  ],
+  "webAnalytics": {
+    "observedAt": "2026-10-13T08:05:00Z",
+    "window": {
+      "from": "2026-10-06",
+      "to": "2026-10-13"
+    },
+    "visitors": 9,
+    "pageViews": 39,
+    "bounceRatePercent": 56,
+    "referrers": [
+      {
+        "domain": "bing.com",
+        "visitors": 1
+      }
+    ],
+    "plan": "Hobby",
+    "customEventsSupported": false,
+    "scope": "dashboard default range, includes multiple project hostnames; analytics enabled today, not a complete 28-day history"
+  },
+  "comparisonWindow": {
+    "from": "2026-10-14",
+    "to": "2026-11-10",
+    "status": "future window; not measured"
+  },
+  "googleSearchConsole": {
+    "ownership": "verified",
+    "performance": "processing",
+    "sitemapPagesDiscovered": 5584,
+    "indexedPageCount": null
+  },
+  "bingAIReport": {
+    "observedAt": "2026-10-13",
+    "sources": "Microsoft Copilots and Partners",
+    "shownRange": {
+      "from": "2026-07-13",
+      "to": "2026-10-12"
+    },
+    "totalCitations": 0,
+    "averageCitedPages": 0,
+    "rows": 0,
+    "scope": "newly accessible property; dashboard has no citation rows, not a benchmark across all AI search products"
+  }
+}

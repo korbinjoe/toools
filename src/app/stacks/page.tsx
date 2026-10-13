@@ -1,12 +1,13 @@
 import Link from "next/link";
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { StackListCard } from "@/components/stack-list-card";
 import { getStacksForList } from "@/lib/stacks";
 
-export const metadata: Metadata = {
-  title: "Tool Stacks - Toools",
-  description: "Complete tool chains curated for specific roles and workflows. Pick your scenario, get the whole toolkit.",
-};
+export const metadata = pageMetadata(
+  "Tool Stacks",
+  "Complete tool chains curated for specific roles and workflows. Pick your scenario, get the whole toolkit.",
+  "/stacks",
+);
 
 export default async function StacksListPage() {
   const stacks = await getStacksForList();

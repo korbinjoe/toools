@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-13T08:19:37.709Z",
+  "redirect": {
+    "status": 302,
+    "target": "https://cursor.com/"
+  },
+  "clickCountIncreased": true,
+  "deltaClicks": 1,
+  "contentTimestampPreserved": true,
+  "scope": "one measured validation outbound request; additional crawl and outbound checks also add test traffic"
+}

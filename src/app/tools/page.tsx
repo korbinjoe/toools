@@ -1,34 +1,29 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { cache, Suspense } from "react";
 import { SearchBar } from "@/components/search-bar";
 import { FilterPanel } from "@/components/filter-panel";
 import { ToolGrid } from "@/components/tool-grid";
 import { Pagination } from "@/components/pagination";
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
-
-export const metadata: Metadata = {
-  title: "Browse Tools",
-  description:
-    "Search and filter curated tools by category, pricing, platform, open-source status, and trust signals.",
-};
-
-const PAGE_SIZE = 24;
+import { notFound } from "next/navigation";
+import { pageMetadata, toolsSearchPolicy, TOOLS_PAGE_SIZE, type ToolsSearchParams } from "@/lib/seo";
 
 interface ToolsPageProps {
-  searchParams: Promise<{
-    q?: string;
-    category?: string;
-    pricing?: string;
-    page?: string;
-    focus?: string;
-    sort?: string;
-    openSource?: string;
-    featured?: string;
-    platform?: string;
-  }>;
+  searchParams: Promise<ToolsSearchParams>;
+}
+
+export async function generateMetadata({ searchParams }: ToolsPageProps): Promise<Metadata> {
+  const policy = toolsSearchPolicy(await searchParams);
+  if (policy.page > 1) {
+    const total = await getToolsTotal(JSON.stringify(buildWhere(policy.params)));
+    if (policy.page > Math.max(1, Math.ceil(total / TOOLS_PAGE_SIZE))) notFound();
+  }
+  return pageMetadata(policy.page > 1 ? `Browse Tools — Page ${policy.page}` : "Browse Tools",
+    "Search and filter curated tools by category, pricing, platform, open-source status, and trust signals.",
+    policy.path, { index: policy.index });
 }
 
 async function getCategories() {
@@ -83,11 +78,11 @@ function buildWhere(params: {
 function buildOrderBy(sort?: string): Prisma.ToolOrderByWithRelationInput[] {
   switch (sort) {
     case "newest":
-      return [{ createdAt: "desc" }];
+      return [{ createdAt: "desc" }, { slug: "asc" }];
     case "clicks":
-      return [{ clickCount: "desc" }];
+      return [{ clickCount: "desc" }, { slug: "asc" }];
     default:
-      return [{ featured: "desc" }, { viewCount: "desc" }];
+      return [{ featured: "desc" }, { viewCount: "desc" }, { slug: "asc" }];
   }
 }
 
@@ -104,18 +99,21 @@ async function getTools(
         tags: { include: { tag: { select: { name: true } } } },
       },
       orderBy,
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
+      skip: (page - 1) * TOOLS_PAGE_SIZE,
+      take: TOOLS_PAGE_SIZE,
     }),
-    prisma.tool.count({ where }),
+    getToolsTotal(JSON.stringify(where)),
   ]);
 
   return { tools, total };
 }
 
+const getToolsTotal = cache((serializedWhere: string) =>
+  prisma.tool.count({ where: JSON.parse(serializedWhere) as Prisma.ToolWhereInput }),
+);
+
 export default async function ToolsPage({ searchParams }: ToolsPageProps) {
-  const params = await searchParams;
-  const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
+  const { params, page } = toolsSearchPolicy(await searchParams);
   const where = buildWhere(params);
   const orderBy = buildOrderBy(params.sort);
 
@@ -124,7 +122,8 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
     getCategories(),
   ]);
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / TOOLS_PAGE_SIZE);
+  if (page > Math.max(1, totalPages)) notFound();
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12">
@@ -150,7 +149,7 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
 
         <div className="pt-2">
           <ToolGrid tools={tools} />
-          <Pagination currentPage={page} totalPages={totalPages} />
+          <Pagination currentPage={page} totalPages={totalPages} searchParams={params} />
         </div>
       </div>
     </div>
