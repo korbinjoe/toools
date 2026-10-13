@@ -17,7 +17,7 @@ export function Footer() {
           <div>
             <Wordmark height={20} className="text-foreground" />
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Curated tool stacks and a growing directory of tools for indie devs, creators, and teams.
+              Tools from Product Hunt, GitHub Awesome lists, and our community, organized into practical workflows.
             </p>
             <div className="mt-4">
               <GithubStarLink variant="button" />
@@ -40,6 +40,9 @@ export function Footer() {
               <span className="text-sm font-semibold text-foreground">Contribute</span>
               <Link href="/submit" className="text-muted-foreground transition-colors hover:text-foreground">
                 Submit a Tool
+              </Link>
+              <Link href="/how-we-curate" className="text-muted-foreground transition-colors hover:text-foreground">
+                Sources & Selection
               </Link>
             </div>
             <div className="flex flex-col gap-2.5">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowUpRight, ChevronRight, Star, Triangle } from "lucide-react";
 import { ToolAvatar } from "@/components/tool-avatar";
+import { ToolEngagement } from "@/components/tool-engagement";
 import { prisma } from "@/lib/db";
 import { getStackIconKey } from "@/lib/stacks";
 import { StackIcon } from "@/components/stack-icon";
@@ -120,6 +121,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
                   </span>
                 ))}
               </div>
+              <ToolEngagement viewCount={tool.viewCount} clickCount={tool.clickCount} className="mt-3" />
             </div>
           </div>
 
@@ -244,6 +246,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
                           </span>
                         )}
                       </div>
+                      <ToolEngagement viewCount={alt.viewCount} clickCount={alt.clickCount} />
                     </article>
                   </Link>
                 ))}

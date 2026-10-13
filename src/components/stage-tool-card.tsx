@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Star, Triangle } from "lucide-react";
 import { ToolAvatar } from "@/components/tool-avatar";
+import { ToolEngagement } from "@/components/tool-engagement";
 import type { StackStageTool } from "@/lib/stacks";
 
 const pricingLabels: Record<string, string> = {
@@ -28,7 +29,7 @@ export function StageToolCard({ tool }: { tool: StackStageTool }) {
           {tool.initial}
         </div>
       )}
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="text-[0.8125rem] font-semibold">{tool.name}</div>
         {tool.tagline && (
           <div className="text-[0.6875rem] text-muted-foreground mt-0.5 truncate">{tool.tagline}</div>
@@ -52,6 +53,7 @@ export function StageToolCard({ tool }: { tool: StackStageTool }) {
             </span>
           )}
         </div>
+        <ToolEngagement viewCount={tool.viewCount} clickCount={tool.clickCount} className="mt-2" />
       </div>
     </>
   );

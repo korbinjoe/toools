@@ -2,9 +2,9 @@ export const SITE_NAME = "Toools";
 export const SITE_TAGLINE = "Find the right tools for your entire workflow.";
 export const SITE_TITLE = "Toools — Find the Right Tools for Your Entire Workflow";
 export const SITE_DESCRIPTION =
-  "Curated tool stacks for indie devs, creators, and startups. Browse 100+ tools with trust signals, or follow a complete workflow from idea to launch.";
+  "Discover tools from Product Hunt, GitHub Awesome lists, and community submissions, with workflow recommendations and transparent selection rules.";
 export const SITE_OG_DESCRIPTION =
-  "Scenario-first tool stacks and a searchable directory with trust signals, comparisons, and editor picks.";
+  "Tools from Product Hunt, GitHub Awesome lists, and our community. Explore workflow picks with transparent sources and selection rules.";
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_BASE_URL || "https://toools.top"
 ).replace(/\/$/, "");

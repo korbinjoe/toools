@@ -31,6 +31,8 @@ export type StackStageTool = {
   name: string;
   tagline: string;
   pricing: string | null;
+  viewCount: number | null;
+  clickCount: number | null;
   githubStars: number | null;
   phVotes: number | null;
   iconUrl: string | null;
@@ -69,6 +71,8 @@ const toolSelect = {
   name: true,
   tagline: true,
   pricing: true,
+  viewCount: true,
+  clickCount: true,
   githubStars: true,
   phVotes: true,
   iconUrl: true,
@@ -82,6 +86,8 @@ type ToolRow = {
   name: string;
   tagline: string;
   pricing: string;
+  viewCount: number;
+  clickCount: number;
   githubStars: number | null;
   phVotes: number | null;
   iconUrl: string | null;
@@ -103,6 +109,8 @@ function mapToolToStageTool(
     name: tool.name,
     tagline: tool.tagline,
     pricing: tool.pricing,
+    viewCount: tool.viewCount,
+    clickCount: tool.clickCount,
     githubStars: tool.githubStars,
     phVotes: tool.phVotes,
     iconUrl: tool.iconUrl,
@@ -169,6 +177,8 @@ function previewToDetail(stack: StackPreview): StackDetail {
         name: tool.name,
         tagline: "",
         pricing: "FREEMIUM",
+        viewCount: null,
+        clickCount: null,
         githubStars: null,
         phVotes: null,
         iconUrl: null,
