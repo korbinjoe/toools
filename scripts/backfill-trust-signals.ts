@@ -30,9 +30,21 @@ import {
 } from "./lib/awesome";
 import { PH_TOPIC_MAP } from "./lib/category-matcher";
 import { getProductHuntToken } from "./lib/producthunt-auth";
+import { ImportStore } from "./lib/import-store";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
+let importStore: ImportStore;
+
+async function recordBackfill(id: string, data: { source: "AWESOME_LIST" | "PRODUCT_HUNT"; sourceUrl: string; github?: string; phVotes?: number }) {
+  const tool = await prisma.tool.findUniqueOrThrow({ where: { id }, include: { category: { select: { slug: true } } } });
+  return importStore.ingest({
+    name: tool.name, url: tool.url, description: tool.description,
+    categoryHints: [tool.category.slug], categorySlug: tool.category.slug,
+    github: data.github, phVotes: data.phVotes,
+    discovery: { source: data.source, method: "signal-backfill", sourceKey: data.sourceUrl, sourceUrl: data.sourceUrl, metadata: { backfill: true } },
+  });
+}
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
@@ -92,7 +104,7 @@ async function applyUpdates(updates: SignalUpdate[]) {
 
     const results = await Promise.allSettled(
       batch.map(({ id, data }) =>
-        prisma.tool.update({ where: { id }, data }),
+        recordBackfill(id, data),
       ),
     );
 
@@ -137,12 +149,11 @@ async function backfillAwesome(urlIndex: Map<string, string>) {
 
       const data: SignalUpdate["data"] = {
         source: "AWESOME_LIST",
-        sourceUrl: tool.url,
+        sourceUrl: `https://github.com/${owner}/${repo}#readme`,
       };
 
       if (tool.github) {
         data.github = tool.github;
-        data.isOpenSource = true;
       }
 
       pending.push({ id: toolId, data });
@@ -151,14 +162,13 @@ async function backfillAwesome(urlIndex: Map<string, string>) {
     await new Promise((r) => setTimeout(r, 300));
   }
 
-  // Deduplicate by tool id — last awesome-list entry wins
-  const byId = new Map<string, SignalUpdate["data"]>();
+  // Preserve every matching directory instead of choosing the last source.
+  const byId = new Map<string, SignalUpdate>();
   for (const { id, data } of pending) {
-    const prev = byId.get(id);
-    byId.set(id, prev ? { ...prev, ...data } : data);
+    byId.set(`${id}:${data.sourceUrl}`, { id, data });
   }
 
-  const uniqueUpdates = [...byId.entries()].map(([id, data]) => ({ id, data }));
+  const uniqueUpdates = [...byId.values()];
   console.log(`\n  Applying ${uniqueUpdates.length} updates...`);
 
   try {
@@ -341,15 +351,16 @@ async function backfillProductHunt(urlIndex: Map<string, string>) {
     }
   }
 
-  const byId = new Map<string, (typeof pending)[0]["data"]>();
+  const byId = new Map<string, (typeof pending)[0]>();
   for (const { id, data } of pending) {
-    const prev = byId.get(id);
-    if (!prev || data.phVotes > prev.phVotes) {
-      byId.set(id, data);
+    const key = `${id}:${data.sourceUrl}`;
+    const prev = byId.get(key);
+    if (!prev || data.phVotes > prev.data.phVotes) {
+      byId.set(key, { id, data });
     }
   }
 
-  const uniqueUpdates = [...byId.entries()].map(([id, data]) => ({ id, data }));
+  const uniqueUpdates = [...byId.values()];
   console.log(`\n  Applying ${uniqueUpdates.length} PH updates...`);
 
   const CONCURRENCY = 15;
@@ -361,7 +372,7 @@ async function backfillProductHunt(urlIndex: Map<string, string>) {
     }
     const results = await Promise.allSettled(
       batch.map(({ id, data }) =>
-        prisma.tool.update({ where: { id }, data }),
+        recordBackfill(id, data),
       ),
     );
     updated += results.filter((r) => r.status === "fulfilled").length;
@@ -399,6 +410,7 @@ async function main() {
   if (dryRun) console.log("  (dry-run mode — no writes)\n");
 
   const urlIndex = await getUrlIndex(prisma);
+  importStore = await ImportStore.connect(prisma);
   console.log(`Loaded ${urlIndex.size} tools by URL index`);
 
   if (!skipAwesome) {

@@ -1,0 +1,138 @@
+{
+  "minStars": 50,
+  "excludeTopics": [
+    "awesome-list",
+    "tutorial",
+    "tutorials",
+    "example",
+    "examples",
+    "sdk",
+    "dataset"
+  ],
+  "topics": [
+    {
+      "topic": "productivity",
+      "categoryHint": "productivity"
+    },
+    {
+      "topic": "automation",
+      "categoryHint": "automation"
+    },
+    {
+      "topic": "self-hosted"
+    },
+    {
+      "topic": "cli",
+      "categoryHint": "development"
+    },
+    {
+      "topic": "note-taking",
+      "categoryHint": "writing-notes"
+    },
+    {
+      "topic": "ai-agent",
+      "categoryHint": "ai-assistants"
+    }
+  ],
+  "keywords": [
+    {
+      "query": "\"note taking\" in:name,description,readme",
+      "categoryHint": "writing-notes"
+    },
+    {
+      "query": "\"workflow automation\" in:name,description",
+      "categoryHint": "automation"
+    },
+    {
+      "query": "\"developer tools\" in:name,description",
+      "categoryHint": "development"
+    }
+  ],
+  "organizations": [
+    {
+      "owner": "microsoft"
+    },
+    {
+      "owner": "vercel",
+      "categoryHint": "development"
+    },
+    {
+      "owner": "anthropics",
+      "categoryHint": "ai-assistants"
+    }
+  ],
+  "directories": [
+    {
+      "owner": "awesome-selfhosted",
+      "repo": "awesome-selfhosted",
+      "path": "README.md",
+      "source": "AWESOME_LIST"
+    },
+    {
+      "owner": "jaywcjlove",
+      "repo": "awesome-mac",
+      "path": "README.md",
+      "categoryHint": "productivity",
+      "source": "AWESOME_LIST"
+    },
+    {
+      "owner": "goabstract",
+      "repo": "Awesome-Design-Tools",
+      "path": "README.md",
+      "categoryHint": "design",
+      "source": "AWESOME_LIST"
+    },
+    {
+      "owner": "bradtraversy",
+      "repo": "design-resources-for-developers",
+      "path": "readme.md",
+      "categoryHint": "design"
+    },
+    {
+      "owner": "agarrharr",
+      "repo": "awesome-cli-apps",
+      "path": "readme.md",
+      "categoryHint": "development",
+      "source": "AWESOME_LIST"
+    },
+    {
+      "owner": "rothgar",
+      "repo": "awesome-tuis",
+      "path": "README.md",
+      "categoryHint": "development",
+      "source": "AWESOME_LIST"
+    },
+    {
+      "owner": "analysis-tools-dev",
+      "repo": "static-analysis",
+      "path": "README.md",
+      "categoryHint": "development"
+    },
+    {
+      "owner": "trimstray",
+      "repo": "the-book-of-secret-knowledge",
+      "path": "README.md",
+      "categoryHint": "security-privacy"
+    },
+    {
+      "owner": "kahun",
+      "repo": "awesome-sysadmin",
+      "path": "README.md",
+      "categoryHint": "deploy-hosting",
+      "source": "AWESOME_LIST"
+    },
+    {
+      "owner": "n1trux",
+      "repo": "awesome-sysadmin",
+      "path": "README.md",
+      "categoryHint": "deploy-hosting",
+      "source": "AWESOME_LIST"
+    },
+    {
+      "owner": "maguowei",
+      "repo": "starred",
+      "path": "README.md",
+      "categoryHint": "development"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 {
   "name": "toools",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "postinstall": "prisma generate",
@@ -9,7 +10,10 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "backfill:signals": "tsx scripts/backfill-trust-signals.ts"
+    "backfill:signals": "tsx scripts/backfill-trust-signals.ts",
+    "import:github": "tsx scripts/import-github.ts",
+    "sources:inspect": "tsx scripts/inspect-tool-sources.ts",
+    "test:imports": "tsx --test scripts/lib/*.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

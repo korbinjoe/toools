@@ -75,6 +75,8 @@ const sourceLabels: Record<NonNullable<ToolSignals["source"]>, string> = {
   MANUAL: "Manual submission",
   PRODUCT_HUNT: "Product Hunt",
   AWESOME_LIST: "Awesome List",
+  GITHUB_REPOSITORY: "GitHub repository",
+  GITHUB_DIRECTORY: "GitHub directory",
 };
 
 function GlanceRow({

@@ -51,3 +51,6 @@ next-env.d.ts
 
 # skill archive
 .skill-archive/
+
+# Local importer run reports
+/reports/imports/

@@ -10,22 +10,14 @@
  *
  * Options (via env):
  *   PH_POSTS_PER_TOPIC - Number of posts to fetch per topic (default: 100)
- *   PH_AUTO_APPROVE - Set to "true" to mark imports as APPROVED (default: PENDING)
+ *   All new tools are PENDING; auto-approval is intentionally unsupported.
  */
 
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PH_TOPIC_MAP } from "./lib/category-matcher";
-import {
-  normalizeUrl,
-  generateSlug,
-  getExistingUrls,
-  getExistingSlugs,
-  deduplicateSlug,
-} from "./lib/dedup";
-import { getGoogleFaviconUrl } from "./lib/favicon";
-import { getUrlIndex } from "./lib/url-index";
+import { ImportStore } from "./lib/import-store";
 import { getProductHuntToken } from "./lib/producthunt-auth";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
@@ -33,7 +25,6 @@ const prisma = new PrismaClient({ adapter });
 
 const PH_API = "https://api.producthunt.com/v2/api/graphql";
 const POSTS_PER_TOPIC = parseInt(process.env.PH_POSTS_PER_TOPIC || "100", 10);
-const AUTO_APPROVE = process.env.PH_AUTO_APPROVE === "true";
 
 interface PHPost {
   id: string;
@@ -163,14 +154,10 @@ async function main() {
 
   console.log("=== Product Hunt Import ===\n");
   console.log(`Posts per topic: ${POSTS_PER_TOPIC}`);
-  console.log(`Auto approve: ${AUTO_APPROVE}`);
+  console.log("New tools: PENDING (no auto-approval)");
   console.log(`Topics to scrape: ${Object.keys(PH_TOPIC_MAP).length}\n`);
 
-  // Load existing data for dedup
-  const existingUrls = await getExistingUrls(prisma);
-  const existingSlugs = await getExistingSlugs(prisma);
-  const urlIndex = await getUrlIndex(prisma);
-  console.log(`Existing tools in DB: ${existingUrls.size}\n`);
+  const store = await ImportStore.connect(prisma);
 
   // Load category map
   const categories = await prisma.category.findMany();
@@ -189,6 +176,7 @@ async function main() {
 
     if (!categoryId) {
       console.warn(`  Category "${categorySlug}" not found in DB, skipping topic "${topic}"`);
+      skipped++;
       continue;
     }
 
@@ -207,57 +195,23 @@ async function main() {
 
     for (const post of posts) {
       const toolUrl = post.website || post.url;
-      const normalized = normalizeUrl(toolUrl);
-
-      if (existingUrls.has(normalized)) {
-        const toolId = urlIndex.get(normalized);
-        if (toolId) {
-          try {
-            await prisma.tool.update({
-              where: { id: toolId },
-              data: {
-                phVotes: post.votesCount,
-                source: "PRODUCT_HUNT",
-                sourceUrl: post.url,
-                featured: post.votesCount > 1000,
-              },
-            });
-            updated++;
-          } catch {
-            errors++;
-          }
-        } else {
-          skipped++;
-        }
-        continue;
-      }
-
-      let slug = generateSlug(post.name);
-      slug = deduplicateSlug(slug, existingSlugs);
-
       try {
-        await prisma.tool.create({
-          data: {
-            name: post.name,
-            slug,
-            tagline: post.tagline.slice(0, 200),
-            description: post.description || post.tagline,
-            url: toolUrl,
-            iconUrl: getGoogleFaviconUrl(toolUrl),
-            categoryId,
-            pricing: "FREEMIUM",
-            platforms: ["Web"],
-            status: AUTO_APPROVE ? "APPROVED" : "PENDING",
-            featured: post.votesCount > 1000,
-            phVotes: post.votesCount,
-            source: "PRODUCT_HUNT",
-            sourceUrl: post.url,
+        const result = await store.ingest({
+          name: post.name,
+          tagline: post.tagline,
+          description: post.description || post.tagline,
+          url: toolUrl,
+          categoryHints: [categorySlug], categorySlug,
+          pricing: "FREEMIUM", platforms: ["Web"],
+          featured: post.votesCount > 1000, phVotes: post.votesCount,
+          discovery: {
+            source: "PRODUCT_HUNT", method: "product-hunt-topic",
+            sourceKey: `${post.id}:${topic}`, sourceUrl: post.url,
+            metadata: { postId: post.id, topic, pricingNeedsReview: true },
           },
         });
-
-        existingUrls.add(normalized);
-        existingSlugs.add(slug);
-        imported++;
+        if (result.action === "created") imported++;
+        else updated++;
       } catch (err) {
         console.error(`  Error importing "${post.name}":`, (err as Error).message);
         errors++;
@@ -270,6 +224,7 @@ async function main() {
   console.log(`  Updated (signals): ${updated}`);
   console.log(`  Skipped (duplicate): ${skipped}`);
   console.log(`  Errors: ${errors}`);
+  if (errors) process.exitCode = 1;
 }
 
 main()

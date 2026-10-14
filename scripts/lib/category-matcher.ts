@@ -84,8 +84,8 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
 
 export function matchCategory(hints: string[]): string {
   const normalizedHints = hints.map((h) =>
-    h.toLowerCase().replace(/[^a-z0-9-]/g, "-")
-  );
+    h.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-")
+  ).filter(Boolean);
 
   let bestMatch = "utilities";
   let bestScore = 0;

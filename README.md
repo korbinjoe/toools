@@ -1,99 +1,43 @@
 # Toools
 
+**English** · [简体中文](docs/i18n/README.zh-CN.md) · [日本語](docs/i18n/README.ja.md) · [한국어](docs/i18n/README.ko.md) · [Español](docs/i18n/README.es.md) · [Français](docs/i18n/README.fr.md) · [Deutsch](docs/i18n/README.de.md) · [Português (Brasil)](docs/i18n/README.pt-BR.md)
+
 **Find the right tools for your entire workflow.**
 
-[Live site](https://toools.top) · [Submit a tool](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml) · [Browse issues](https://github.com/korbinjoe/toools/issues)
+[Live site](https://toools.top) · [Submit a tool](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml) · [Sources & selection](https://toools.top/how-we-curate)
 
-Toools is an open-source **tool discovery and workflow curation platform**. It brings together GitHub Awesome lists, Product Hunt launches, maintainer selections, and community submissions. Explore recent additions, follow a workflow, or compare tools with visible source and popularity signals.
+Toools is an open-source tool discovery and workflow curation platform. Discover tools from GitHub Awesome lists, Product Hunt, maintainer selections, and community submissions — then choose tools that fit each stage of your work.
 
-## Where the tools come from
+Choose a README language above. English is the reference version; these translations cover repository documentation, while the current website interface is in English.
 
-| Source | What Toools collects | Public reference |
-|--------|----------------------|------------------|
-| GitHub Awesome lists | Linked tools, descriptions, categories, and available repository stars | [Source collections](scripts/lib/awesome.ts), [importer](scripts/import-awesome-lists.ts) |
-| Product Hunt | Products by topic, descriptions, launch-page links, and vote counts | [Importer](scripts/import-producthunt.ts) |
-| Maintainer selections | Initial tool collection, featured flags, workflow stages, and editor notes | [Tool seeds](prisma/seed.ts), [workflow seeds](prisma/seed-stacks.ts) |
-| Community submissions | Tools and corrections suggested by makers and users through GitHub Issues | [Submit a tool](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml) |
+## What you can do
 
-Imports normalize URLs and avoid duplicates before assigning categories. New imports default to `PENDING`; `PH_AUTO_APPROVE=true` or `AWESOME_AUTO_APPROVE=true` explicitly enables automatic approval. Public directory queries include only `APPROVED` records. Approval does not establish that each product has been individually tested.
+- **Explore Tool Stacks** — Follow curated workflows for indie developers, creators, startups, and open-source maintainers, with stage recommendations and editor notes.
+- **Browse and compare** — Search by name, description, or tags; filter by category, pricing, platform, open-source status, and featured status.
+- **Make informed decisions** — Read use cases, pros and cons, alternatives, source links, GitHub stars, and Product Hunt votes on tool pages.
+- **Discover daily picks** — Explore recent additions, featured tools, workflows, and categories with daily rotation and an “Another batch” control.
+- **Contribute and import** — Submit tools through GitHub Issues or import collections with URL normalization and duplicate handling.
+- **Use light or dark mode** — Follow your system theme or switch manually.
 
-Source links appear on detail pages where saved. Awesome imports currently save the linked tool URL, which may be the provider or repository rather than the original list section. Stars and votes are snapshots from import or backfill runs; there is no continuous refresh guarantee.
+## Sources and selection
 
-## How recommendations are selected
+All new imports remain `PENDING`; automatic approval is disabled, including when legacy `PH_AUTO_APPROVE` or `AWESOME_AUTO_APPROVE` variables are set. Featured flags can come from maintainer curation or Product Hunt products with more than 1,000 votes. Approval and featured status do not establish hands-on testing. Stars, votes, views, and clicks are activity signals, not quality ratings; stars and votes are snapshots rather than continuously refreshed counts.
 
-**Featured is a discovery flag.** Maintainers can set it in curated data. The Product Hunt importer and backfill also set it for products with **more than 1,000 votes**. A featured badge alone does not mean hands-on testing or an independent quality score.
+See the [selection policy](https://toools.top/how-we-curate) and [project guide](docs/project-guide.md) for detailed rules and source limitations.
 
-| Surface | Current selection rule |
-|---------|------------------------|
-| Recently Added | Three tools beside the Hero, rotating through up to 36 newest approved entries within 30 days of the newest record. Each batch prefers at most two per category before filling gaps and remains newest first. Dates refer to addition to Toools. |
-| Daily batches | Recent additions, featured picks, workflows, and category shortcuts rotate at midnight in Asia/Shanghai time. Default sets stay stable within a day while candidates are unchanged. “Another batch” switches immediately; fully displayed pools have no additional batch. This is discovery rotation, not personalization or a quality ranking. |
-| Editor's Picks | Four tools rotate through up to 24 newest approved featured records, excluding the tools currently visible in Recently Added, even after either section changes batches. |
-| Homepage workflows and categories | Three workflows per batch from all curated workflows; eight category shortcuts per batch from all categories. “View all” always opens the complete collection. |
-| Browse | Default: featured first, then views. Other sorts: newest additions or outbound clicks. Category, pricing, platform, and open-source filters apply before sorting. |
-| Other category tools | Automatic suggestions from the current tool's category, ordered by GitHub stars, then Product Hunt votes, then views. Category membership does not establish equivalent capabilities. |
-| Workflow stages | Maintainer-defined tool choices and editor notes for a specific task. Related tools are selected from the stage's categories and ordered by `GitHub stars × 10 + Product Hunt votes`. |
+## Tech stack
 
-GitHub stars, Product Hunt votes, views, and clicks provide popularity and activity context. **They are not quality ratings.** Views count tool-detail visits; clicks count tracked outbound visits, not unique users. Evaluate workflow fit and check current provider pricing, features, and licensing before choosing.
+| Layer | Technology |
+| --- | --- |
+| Framework | Next.js 16 (App Router) + TypeScript |
+| UI | React 19 + Base UI + shadcn/ui + Lucide + Geist |
+| Database | PostgreSQL + Prisma 7 |
+| Styling | Tailwind CSS 4 + next-themes |
+| Analytics | Vercel Web Analytics + Speed Insights |
 
-The homepage selector is public in [home-discovery.ts](src/lib/home-discovery.ts); browse ordering lives in [tools/page.tsx](src/app/tools/page.tsx), and workflow selection in [stacks.ts](src/lib/stacks.ts). Visitors can read the same explanation at [Sources & Selection](https://toools.top/how-we-curate).
+## Run locally
 
-## What makes Toools different
-
-Two entry points, one decision loop:
-
-```
-Home → Stacks (by workflow) ──→ Stack detail (stages + editor picks) ──┐
-     → Browse (by tool)      ──→ Tool listing (search + filters)      ──┤
-                                                                        ▼
-                                                          Tool detail (decision hub)
-                                                          → Visit website via tracked link
-```
-
-**Scenario first, tools second.** Popular Stacks like *Indie Developer Toolkit* and *Content Creator Suite* map each stage of a workflow to curated recommendations with editor notes — so you pick a path before picking individual apps.
-
-## Features
-
-### Tool Stacks (core)
-
-- **Curated workflows** — Multi-stage tool chains for indie devs, creators, startups, and open-source maintainers
-- **Stage recommendations** — Each stage links to approved tools with pricing and trust signals
-- **Editor notes** — Short rationale for why specific tools fit a stage
-- **Cross-linking** — Tool detail pages show *Part of these Stacks*; category pages nudge users toward full workflows
-
-### Browse & decide
-
-- **Search & filters** — Name, description, tags, category, pricing, platform, open-source, and featured status; sort by popularity, recency, or clicks
-- **Editor's Picks** — Featured tools selected by recency, with duplicates removed across homepage sections
-- **Rich tool pages** — About, use cases, pros & cons, alternatives, and an *At a Glance* sidebar (pricing, platforms, open source, signals, freshness)
-- **Visible signals** — GitHub stars, Product Hunt votes, featured badges, and view/click counts on cards; saved source links on detail pages
-- **Click tracking** — Outbound visits go through `/api/tools/[slug]/out` to increment click counts before redirecting
-
-### Community & data
-
-- **Community submissions** — Structured GitHub Issue template and in-app guide at [toools.top/submit](https://toools.top/submit)
-- **Bulk import pipeline** — Scripts to seed from Product Hunt and GitHub Awesome lists, plus trust-signal backfill
-- **Dark mode** — System-aware theme toggle
-
-## Tech Stack
-
-| Layer | Choices |
-|-------|---------|
-| Framework | [Next.js 16](https://nextjs.org) (App Router) |
-| UI | [React 19](https://react.dev) + [Base UI](https://base-ui.com) + [shadcn/ui](https://ui.shadcn.com) |
-| Language | TypeScript |
-| Database | PostgreSQL via [Prisma 7](https://www.prisma.io) |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com) |
-| Typography | [Geist](https://vercel.com/font) Sans & Mono |
-| Icons | [Lucide](https://lucide.dev) |
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- A PostgreSQL database (e.g. [Neon](https://neon.tech), local Postgres, or Vercel Postgres)
-
-### 1. Clone and install
+Requirements: npm, PostgreSQL, and Node.js 20.19+ (20.x), 22.12+ (22.x), or 24+, as required by Prisma 7.
 
 ```bash
 git clone https://github.com/korbinjoe/toools.git
@@ -101,193 +45,74 @@ cd toools
 npm install
 ```
 
-### 2. Configure environment
-
-Create a `.env` file in the project root:
+Create `.env` in the repository root:
 
 ```env
-DATABASE_URL="postgresql://user:password@host:5432/toools"
+DATABASE_URL="postgresql://user:password@localhost:5432/toools"
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 ```
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `NEXT_PUBLIC_BASE_URL` | No | Public site URL (defaults to `https://toools.top`) |
+`DATABASE_URL` is required. `NEXT_PUBLIC_BASE_URL` is optional and defaults to `https://toools.top`; set it to your local URL for development. Keep credentials out of version control.
 
-Import and backfill scripts accept additional optional variables — see [Data import scripts](#data-import-scripts) below.
-
-### 3. Set up the database
+Apply migrations, seed tools before workflows, and start the development server:
 
 ```bash
 npx prisma migrate deploy
 npx prisma db seed
 npx tsx prisma/seed-stacks.ts
-```
-
-Recommended for the full product experience (Stacks pages and cross-links):
-
-```bash
-npx tsx prisma/seed-tool-enrichments.ts   # use cases, pros, cons on select tools
-```
-
-### 4. Run the dev server
-
-```bash
+npx tsx prisma/seed-tool-enrichments.ts
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [localhost:3000](http://localhost:3000).
 
-## Scripts
+## Useful commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run dev:webpack` | Start dev server with Webpack (instead of Turbopack) |
+| Command | Purpose |
+| --- | --- |
+| `npm run import:github -- --dry-run` | Import candidates without a database |
+| `npm run sources:inspect -- --slug TOOL_SLUG` | Inspect all sources for a tool |
+| `npm run dev` | Start development with Turbopack |
+| `npm run dev:webpack` | Start development with Webpack |
 | `npm run build` | Generate Prisma client and build for production |
-| `npm run start` | Start production server |
+| `npm run start` | Start the production server after a build |
 | `npm run lint` | Run ESLint |
-| `npm run backfill:signals` | Backfill trust signals (PH votes, GitHub stars, sources) |
-| `npx prisma db seed` | Seed the database with curated tools |
-| `npx prisma studio` | Open Prisma's database GUI |
+| `npm run backfill:signals` | Backfill source and popularity signals |
+| `npx prisma studio` | Open Prisma Studio |
 
-### Data import scripts
+## Import data
 
-These scripts live in `scripts/` (and `prisma/` for stack seeds) and require `DATABASE_URL` in your environment.
+### GitHub imports
 
-**Product Hunt import**
+The GitHub importer supports Topics, keyword searches, an organization allowlist, and generic Markdown/JSON directories. Edit [github-sources.json](scripts/config/github-sources.json) to choose sources. Run migrations before a database import; seed categories first. `--dry-run` makes no database connection and only detects duplicates within the current run. Database imports also match existing tools by website, repository URL, and GitHub repository ID, preserve moderation and editorial fields, and append source records with first/last discovery times. Conflicting identities are reported instead of merged.
 
 ```bash
-npx tsx scripts/import-producthunt.ts
+npm run import:github -- --dry-run --limit 20
+npx prisma migrate deploy
+npm run import:github -- --new-limit 500
+npm run sources:inspect -- --slug TOOL_SLUG
 ```
 
-Authentication — set one of:
-
-- `PRODUCTHUNT_TOKEN` — bearer token from [producthunt.com/v2/oauth/applications](https://www.producthunt.com/v2/oauth/applications)
-- `PRODUCTHUNT_API_KEY` + `PRODUCTHUNT_API_SECRET` — client credentials (token fetched automatically)
-
-Optional: `PH_POSTS_PER_TOPIC` (default `100`), `PH_AUTO_APPROVE=true`.
-
-**GitHub Awesome lists import**
+Use `GITHUB_TOKEN` for higher API limits and `DATABASE_URL` for actual imports. Legacy Awesome and Product Hunt commands use the same identity/provenance store and keep new tools pending. See the [GitHub import guide](docs/github-import.md) for configuration, limits, reports, tests, and source inspection.
 
 ```bash
 npx tsx scripts/import-awesome-lists.ts
+npx tsx scripts/import-producthunt.ts
 ```
 
-Optional: `GITHUB_TOKEN` for higher API rate limits, `AWESOME_AUTO_APPROVE=true` to auto-approve imports.
+Both importers require `DATABASE_URL`. Awesome imports optionally use `GITHUB_TOKEN` for higher rate limits. Product Hunt requires `PRODUCTHUNT_TOKEN` or both `PRODUCTHUNT_API_KEY` and `PRODUCTHUNT_API_SECRET`. See the [project guide](docs/project-guide.md#data-import-scripts) for options, backfill flags, and maintenance utilities.
 
-**Trust signal backfill**
+## Documentation
 
-For tools imported before trust-signal fields were added:
+- [Project guide: curation rules, imports, architecture, deployment, and analytics](docs/project-guide.md)
+- [SEO and AI search visibility: implementation and verification](docs/seo-geo-implementation.md)
+- [Local development performance analysis](docs/local-dev-performance-analysis-2026-10-13.md)
+- [OpenSpec proposals and implementation tasks](openspec/changes/)
 
-```bash
-npx tsx scripts/backfill-trust-signals.ts
-# or
-npm run backfill:signals
-```
+## Contribute
 
-Options: `--dry-run`, `--skip-awesome`, `--skip-github-stars`, `--skip-producthunt`, `--limit N`. Requires `GITHUB_TOKEN` (recommended) and/or Product Hunt credentials for full backfill.
-
-**Other utilities**
-
-```bash
-npx tsx scripts/sync-categories.ts       # Sync category definitions
-npx tsx scripts/recategorize.ts          # Re-run category matching on existing tools
-npx tsx scripts/fix-icons.ts             # Backfill missing favicons
-npx tsx scripts/db-stats.ts              # Print database statistics
-npx tsx prisma/seed-stacks.ts            # Seed tool stacks and stage recommendations
-npx tsx prisma/seed-tool-enrichments.ts  # Seed use cases, pros, and cons
-```
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── page.tsx              # Home — daily discovery, Recently Added, workflows, Editor's Picks
-│   ├── how-we-curate/        # Public data sources and recommendation rules
-│   ├── stacks/               # Workflow listing and stage-based stack detail
-│   ├── tools/                # Browse listing (search, filters) and decision-focused detail
-│   ├── categories/           # Category browse (with Stacks cross-links)
-│   ├── submit/               # Community submission guide
-│   └── api/                  # Click tracking redirect, featured tools API
-├── components/               # Stack cards, tool signals, filters, layout
-└── lib/                      # Database client, stacks data, signal helpers
-prisma/
-├── schema.prisma             # Tool, Category, Tag, Stack, Stage models
-├── migrations/               # SQL migrations
-├── seed.ts                   # Seed data (~100 curated tools)
-├── seed-stacks.ts            # Nine curated workflows with stage recommendations
-└── seed-tool-enrichments.ts  # Use cases, pros, cons for select tools
-scripts/                      # Import and maintenance scripts
-openspec/                     # Design proposals and change specs
-```
-
-Site navigation: **Stacks · Browse · Categories · Submit**
-
-## Contributing
-
-### Submit a tool
-
-The easiest way to contribute is to [open a tool submission issue](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml). Fill in the template with the tool name, URL, tagline, description, category, and pricing. Maintainers review and approve submissions. You can also start from the in-app submit page at [toools.top/submit](https://toools.top/submit).
-
-### Contribute code
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feat/my-feature`)
-3. Make your changes and ensure `npm run lint` passes
-4. Open a pull request with a clear description of what changed and why
-
-Bug reports and feature suggestions are welcome via [GitHub Issues](https://github.com/korbinjoe/toools/issues).
-
-## Deployment
-
-The app is designed to deploy on [Vercel](https://vercel.com) with a managed PostgreSQL instance. Set `DATABASE_URL` in your deployment environment, then run migrations and seeds against the production database:
-
-```bash
-DATABASE_URL="postgresql://..." npx prisma migrate deploy
-DATABASE_URL="postgresql://..." npx prisma db seed
-DATABASE_URL="postgresql://..." npx tsx prisma/seed-stacks.ts
-DATABASE_URL="postgresql://..." npx tsx prisma/seed-tool-enrichments.ts
-```
-
-See `openspec/changes/vercel-deployment/` for detailed deployment notes.
-
-### Web Analytics
-
-Vercel Web Analytics is mounted once in `src/app/layout.tsx` using
-`@vercel/analytics/next`, covering page views and client-side navigation across
-the site. No analytics API key or additional environment variable is required.
-
-1. Open the [Toools Analytics dashboard](https://vercel.com/korbinzhaos-projects/toools/analytics) and enable Web Analytics if it is not already enabled.
-2. Deploy this version to the existing Toools Vercel project.
-3. Visit the deployed site, then check the dashboard for visitors, page views, and traffic sources.
-
-Development mode logs analytics events locally without sending them to Vercel.
-This integration adds page-view analytics; the existing tool view/click counters
-remain separate. Tool-detail website clicks emit `tool_website_click` with the tool slug and source; verify custom-event availability and ingestion in the deployed Analytics dashboard.
-
-See the [Vercel Web Analytics setup guide](https://vercel.com/docs/analytics/quickstart) for deployment and verification details.
-
-
-### SEO and AI search visibility
-
-Every primary route declares its canonical URL and social metadata. Normal tool-list pagination is crawlable; search and filter combinations use `noindex, follow`. The sitemap includes approved tools, populated categories, workflow pages, editorial information, and the automation comparison. Counters do not alter content timestamps, and the sitemap omits unreliable historical modification dates.
-
-Three core workflows include source-linked selection guides. Tool editorial configuration, curated alternatives, and reference review dates are kept in `src/lib/tool-editorial.ts`; approved records display that guidance automatically. No database migration is needed.
-
-Optional ownership-verification environment variables:
-
-| Variable | Purpose |
-|----------|---------|
-| `GOOGLE_SITE_VERIFICATION` | Google Search Console HTML verification token |
-| `BING_SITE_VERIFICATION` | Bing Webmaster Tools HTML verification token |
-
-Set `NEXT_PUBLIC_BASE_URL=https://toools.top` for the production build. See [SEO/GEO implementation and measurement](docs/seo-geo-implementation.md) for rollout checks, regression commands, and a fixed AI citation observation set.
+Suggest a tool using the [submission template](https://github.com/korbinjoe/toools/issues/new?template=tool-submission.yml), report bugs in [GitHub Issues](https://github.com/korbinjoe/toools/issues), or open a pull request. For code changes, run `npm run lint` and `npm run build` with a configured database. When updating documentation, keep translations aligned with the English README and preserve the language links.
 
 ## License
 
-This project is open source. See the repository for license details.
-
-SEO / GEO production rollout: [2026-10-13 release verification](docs/seo-geo-release-2026-10-13.md). Google sitemap read succeeded; Bing submission is processing.
+Licensed under the [MIT License](LICENSE). Third-party tools, trademarks, and imported content retain their respective rights and licenses.

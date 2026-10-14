@@ -41,6 +41,9 @@ model Tool {
   source      ToolSource?
   sourceUrl   String?
 
+  identities  ToolIdentity[]
+  discoveries ToolDiscovery[]
+
   useCases String[] @default([])
   pros     String[] @default([])
   cons     String[] @default([])
@@ -53,6 +56,33 @@ model Tool {
   @@index([categoryId])
   @@index([status])
   @@index([featured])
+}
+
+// Global identity aliases prevent one repository or website becoming two tools.
+model ToolIdentity {
+  key       String   @id
+  toolId    String
+  tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([toolId])
+}
+
+// Discovery provenance is additive; source/sourceUrl on Tool remain compatible.
+model ToolDiscovery {
+  id          String     @id @default(cuid())
+  toolId      String
+  tool        Tool       @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  source      ToolSource
+  method      String
+  sourceKey   String
+  sourceUrl   String
+  metadata    Json?
+  firstSeenAt DateTime   @default(now())
+  lastSeenAt  DateTime   @default(now())
+
+  @@unique([toolId, source, method, sourceKey])
+  @@index([source, method])
 }
 
 model Stack {
@@ -146,4 +176,6 @@ enum ToolSource {
   MANUAL
   PRODUCT_HUNT
   AWESOME_LIST
+  GITHUB_REPOSITORY
+  GITHUB_DIRECTORY
 }
