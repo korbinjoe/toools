@@ -19,7 +19,7 @@ test("normal pagination is indexable with its own canonical; tracking and UI par
 });
 
 test("search, filters, and alternative sorts are noindex while remaining crawlable", () => {
-  for (const params of [{ q: "AI agents" }, { category: "development" }, { pricing: "FREE" }, { sort: "clicks" }, { platform: "Web" }, { openSource: "1" }, { featured: "1" }]) {
+  for (const params of [{ q: "AI agents" }, { category: "development" }, { pricing: "FREE" }, { sort: "clicks" }, { platform: "Web" }, { openSource: "1" }, { featured: "1" }, { source: "GITHUB" }, { source: "PRODUCT_HUNT" }]) {
     const policy = toolsSearchPolicy(params);
     assert.equal(policy.index, false);
     assert.deepEqual(pageMetadata("Tools", "Description", policy.path, { index: policy.index }).robots, { index: false, follow: true });
@@ -34,7 +34,15 @@ test("malformed crawl parameters cannot reach Prisma as enum values or overflow 
     assert.equal(policy.index, false);
   }
   assert.equal(toolsSearchPolicy({ pricing: "NOT_A_PRICE" }).params.pricing, undefined);
+  for (const source of ["NOT_A_SOURCE", "constructor", "__proto__"]) assert.equal(toolsSearchPolicy({ source }).params.source, undefined);
   assert.equal(toolsSearchPolicy({ q: ["one", "two"] }).index, false);
+});
+
+test("source filters survive pagination alongside search, pricing, and sort", () => {
+  const params = { q: "AI", pricing: "FREE", source: "GITHUB", sort: "newest", focus: "search" };
+  assert.equal(toolsPageHref(params, 2), "/tools?q=AI&pricing=FREE&source=GITHUB&sort=newest&page=2");
+  assert.equal(toolsPageHref(params, 1), "/tools?q=AI&pricing=FREE&source=GITHUB&sort=newest");
+  assert.equal(toolsSearchPolicy({ source: "PRODUCT_HUNT" }).params.source, "PRODUCT_HUNT");
 });
 
 test("pagination preserves search and filters and removes only the page-one and UI parameters", () => {

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { toolSourceOptions } from "@/lib/tool-sources";
 import { useCallback, useState, useTransition } from "react";
 
 interface FilterPanelProps {
@@ -41,6 +42,8 @@ function Chip({
 }) {
   return (
     <button
+      type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={cn(
         "inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 min-h-[32px] active:scale-[0.97]",
@@ -66,6 +69,7 @@ export function FilterPanel({ categories }: FilterPanelProps) {
   const currentPricing = searchParams.get("pricing") || "";
   const currentSort = searchParams.get("sort") || "popular";
   const currentPlatform = searchParams.get("platform") || "";
+  const currentSource = searchParams.get("source") || "";
   const openSourceActive = searchParams.get("openSource") === "1";
   const featuredActive = searchParams.get("featured") === "1";
 
@@ -124,6 +128,23 @@ export function FilterPanel({ categories }: FilterPanelProps) {
 
   return (
     <div className="space-y-4">
+      <div>
+        <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2.5">
+          Source
+        </h4>
+        <div className="flex flex-wrap gap-1.5">
+          <Chip label="All sources" active={!currentSource} onClick={() => setFilter("source", "")} />
+          {toolSourceOptions.map((opt) => (
+            <Chip
+              key={opt.value}
+              label={opt.label}
+              active={currentSource === opt.value || (opt.value === "GITHUB" && ["GITHUB_REPOSITORY", "GITHUB_DIRECTORY"].includes(currentSource))}
+              onClick={() => setFilter("source", opt.value)}
+            />
+          ))}
+        </div>
+      </div>
+
       <div>
         <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2.5">
           Sort

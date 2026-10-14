@@ -13,7 +13,7 @@ export async function GET(
 
   const tool = await prisma.tool.findUnique({
     where: { slug, status: "APPROVED" },
-    select: { id: true, url: true, github: true, sourceUrl: true },
+    select: { id: true, url: true, github: true, sourceUrl: true, source: true },
   });
 
   if (!tool) {

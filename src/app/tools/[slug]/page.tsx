@@ -78,6 +78,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
   }));
   const editorial = toolEditorial[slug];
   const externalLinks = getToolExternalLinks(tool);
+  const githubLink = externalLinks.find((link) => link.kind === "github");
 
   const alternatives = await getAlternatives(tool.categoryId, tool.slug);
 
@@ -312,7 +313,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
               {tool.githubStars != null && (
                 <div className="flex justify-between items-center py-2 border-b border-muted text-[0.8125rem]">
                   <span className="text-muted-foreground">GitHub Stars</span>
-                  <span className="font-semibold font-mono">{compactNumber.format(tool.githubStars)}</span>
+                  {githubLink ? (
+                    <ToolWebsiteLink slug={tool.slug} destination="github" className="inline-flex items-center gap-1 font-semibold font-mono hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                      <span className="sr-only">View {tool.name} on GitHub, </span>
+                      {compactNumber.format(tool.githubStars)}
+                      <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+                    </ToolWebsiteLink>
+                  ) : <span className="font-semibold font-mono">{compactNumber.format(tool.githubStars)}</span>}
                 </div>
               )}
               {!tool.github && !tool.githubStars && (

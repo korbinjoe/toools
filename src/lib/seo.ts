@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "./site";
+import { isToolSourceFilter } from "./tool-sources";
 
 export function siteUrl(path = "/") {
   return new URL(path, `${SITE_URL}/`).toString();
@@ -30,7 +31,7 @@ export function breadcrumbData(items: { name: string; path: string }[]) {
 
 export type ToolsSearchParams = Record<string, string | string[] | undefined>;
 export const TOOLS_PAGE_SIZE = 24;
-const filterKeys = ["q", "category", "pricing", "platform", "openSource", "featured", "sort"] as const;
+const filterKeys = ["q", "category", "pricing", "platform", "openSource", "featured", "source", "sort"] as const;
 const pricingValues = ["FREE", "FREEMIUM", "PAID", "OPEN_SOURCE"];
 
 export function toolsSearchPolicy(raw: ToolsSearchParams) {
@@ -50,6 +51,7 @@ export function toolsSearchPolicy(raw: ToolsSearchParams) {
   const path = `/tools${query.size ? `?${query}` : ""}`;
   // Arbitrary crawl URLs must not pass invalid enum values to Prisma.
   if (params.pricing && !pricingValues.includes(params.pricing)) delete params.pricing;
+  if (params.source && !isToolSourceFilter(params.source)) delete params.source;
   return { params, page, index, path };
 }
 

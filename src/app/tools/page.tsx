@@ -10,6 +10,7 @@ import { prisma } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { pageMetadata, toolsSearchPolicy, TOOLS_PAGE_SIZE, type ToolsSearchParams } from "@/lib/seo";
+import { toolSourceWhere } from "@/lib/tool-sources";
 
 interface ToolsPageProps {
   searchParams: Promise<ToolsSearchParams>;
@@ -22,7 +23,7 @@ export async function generateMetadata({ searchParams }: ToolsPageProps): Promis
     if (policy.page > Math.max(1, Math.ceil(total / TOOLS_PAGE_SIZE))) notFound();
   }
   return pageMetadata(policy.page > 1 ? `Browse Tools — Page ${policy.page}` : "Browse Tools",
-    "Search and filter curated tools by category, pricing, platform, open-source status, and trust signals.",
+    "Search and filter curated tools by source, category, pricing, platform, open-source status, and trust signals.",
     policy.path, { index: policy.index });
 }
 
@@ -40,6 +41,7 @@ function buildWhere(params: {
   openSource?: string;
   featured?: string;
   platform?: string;
+  source?: string;
 }): Prisma.ToolWhereInput {
   const where: Prisma.ToolWhereInput = { status: "APPROVED" };
 
@@ -70,6 +72,11 @@ function buildWhere(params: {
 
   if (params.platform) {
     where.platforms = { has: params.platform };
+  }
+
+  if (params.source) {
+    const source = toolSourceWhere(params.source);
+    if (source) where.AND = [source];
   }
 
   return where;
