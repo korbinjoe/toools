@@ -31,6 +31,10 @@ test("queue diagnostics requires CRON_SECRET and refuses caller-selected input b
   assert.equal(response.headers.get("cache-control"), "no-store");
   assert.deepEqual(await response.json(), { checked: true });
   assert.equal(calls, 1);
+  const streamedEmpty = request(undefined, "", "");
+  assert.notEqual(streamedEmpty.body, null);
+  assert.equal((await handler(streamedEmpty)).status, 200);
+  assert.equal(calls, 2);
 });
 
 test("diagnostic provider failures cannot expose OIDC or database secrets", async () => {
