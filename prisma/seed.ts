@@ -906,6 +906,17 @@ const tools: ToolDef[] = [
     platforms: ["Web"],
     tags: ["AI"],
   },
+  {
+    name: "MangaTranslate",
+    tagline: "Translate manga images and PDFs with OCR and an online layout editor",
+    description:
+      "MangaTranslate is a cloud-based tool for translating manga, comic images, and PDFs. It combines OCR, translation, and typesetting with batch uploads and an online editor for reviewing dialogue, fonts, and layout. Limited daily free credits are available alongside paid plans; API access is billed separately. Use your own or authorized material and review the translated text and layout before publishing.",
+    url: "https://www.mangatranslate.com/",
+    category: "image-media",
+    pricing: "FREEMIUM",
+    platforms: ["Web"],
+    tags: ["AI", "Image Editing"],
+  },
 
   // ===== Video & Audio =====
   {
