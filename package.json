@@ -16,6 +16,7 @@
     "sources:inspect": "tsx scripts/inspect-tool-sources.ts",
     "cache:refresh": "tsx scripts/refresh-catalog.ts",
     "sql:publish": "tsx scripts/publish-sql.ts",
+    "recovery:cloud": "tsx scripts/cloud-recovery.ts",
     "test:imports": "tsx --test scripts/lib/*.test.ts"
   },
   "dependencies": {

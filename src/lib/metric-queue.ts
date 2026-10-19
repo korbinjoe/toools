@@ -58,7 +58,7 @@ type QueueMessage = {
 
 // The injected dependencies keep reliability tests completely offline. Production
 // uses the official SDK for publishing and OIDC for the documented receive API.
-type MetricQueueOptions = {
+export type MetricQueueOptions = {
   region?: VercelRegion;
   deploymentId?: string;
   publishEvent?: Publish;
@@ -68,6 +68,9 @@ type MetricQueueOptions = {
   now?: () => number;
   maxEvents?: number;
   maxDurationMs?: number;
+  /** Internal callers may use an isolated diagnostic topic, never request input. */
+  eventTopic?: string;
+  consumerGroup?: string;
 };
 
 export function getMetricQueueRegion(): VercelRegion {
@@ -87,6 +90,11 @@ export function createMetricQueue(options: MetricQueueOptions = {}) {
   }
   const region = options.region ?? getMetricQueueRegion();
   if (!/^[a-z]{3}[0-9]$/.test(region)) throw new TypeError("Invalid metric queue region");
+  const eventTopic = options.eventTopic ?? METRIC_EVENT_TOPIC;
+  const consumerGroup = options.consumerGroup ?? METRIC_CONSUMER_GROUP;
+  if (![eventTopic, consumerGroup].every((value) => /^[a-z0-9][a-z0-9-]{0,127}$/.test(value))) {
+    throw new TypeError("Invalid internal metric queue namespace");
+  }
   const deploymentId = options.deploymentId ?? process.env.VERCEL_DEPLOYMENT_ID ?? "local";
   // Instantiate lazily: importing this module never authenticates or sends data.
   let eventClient: PollingQueueClient | undefined;
@@ -115,11 +123,11 @@ export function createMetricQueue(options: MetricQueueOptions = {}) {
     });
   }
 
-  async function enqueueToolMetric(input: ToolMetricEvent): Promise<MetricQueueEnqueueResult> {
+  async function publishToolMetricEvent(input: ToolMetricEvent): Promise<{ accepted: true; messageId: string | null }> {
     const event = parseToolMetricEvent(input);
     let messageId: string | null;
     try {
-      ({ messageId } = await publishEvent(METRIC_EVENT_TOPIC, event, {
+      ({ messageId } = await publishEvent(eventTopic, event, {
         idempotencyKey: event.id,
         retentionSeconds: METRIC_RETENTION_SECONDS,
       }));
@@ -127,20 +135,25 @@ export function createMetricQueue(options: MetricQueueOptions = {}) {
       // Never expose SDK error bodies or OIDC tokens in application logs.
       throw new MetricQueueEnqueueError(event.id);
     }
+    return { accepted: true, messageId };
+  }
+
+  async function enqueueToolMetric(input: ToolMetricEvent): Promise<MetricQueueEnqueueResult> {
+    const published = await publishToolMetricEvent(input);
     try {
       await scheduleMetricFlush();
-      return { accepted: true, messageId, wakeScheduled: true };
+      return { ...published, wakeScheduled: true };
     } catch {
       // The durable event already exists. A later hourly wake or daily drain can
       // process it; treating this as rejected would cause unsafe direct retries.
-      return { accepted: true, messageId, wakeScheduled: false };
+      return { ...published, wakeScheduled: false };
     }
   }
 
   async function consumeMetricQueue(persist: Persist): Promise<MetricQueueConsumeResult> {
     const deadline = now() + maxDurationMs;
     const progress: MetricQueueConsumeResult = { received: 0, acknowledged: 0, hasMore: true };
-    const endpoint = `https://${region}.vercel-queue.com/api/v3/topic/${METRIC_EVENT_TOPIC}/consumer/${METRIC_CONSUMER_GROUP}`;
+    const endpoint = `https://${region}.vercel-queue.com/api/v3/topic/${eventTopic}/consumer/${consumerGroup}`;
 
     async function request(url: string, init: RequestInit): Promise<Response> {
       try {
@@ -214,7 +227,7 @@ export function createMetricQueue(options: MetricQueueOptions = {}) {
     return progress;
   }
 
-  return { enqueueToolMetric, scheduleMetricFlush, consumeMetricQueue };
+  return { enqueueToolMetric, publishToolMetricEvent, scheduleMetricFlush, consumeMetricQueue };
 }
 
 function parseQueueResponse(text: string): QueueMessage[] {
