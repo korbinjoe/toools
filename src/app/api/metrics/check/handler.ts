@@ -13,7 +13,9 @@ export function createMetricsCheckHandler(
     if (!secret || secret.length < 32) return json({ error: "Metric queue validation is not configured" }, 503);
     if (!validBearer(request, secret)) return json({ error: "Unauthorized" }, 401);
     // Neither topic, consumer, event, nor tool IDs may be selected by the caller.
-    if (request.body || new URL(request.url).search) return json({ error: "This endpoint accepts an empty POST only" }, 400);
+    // On Vercel an empty POST can still expose a ReadableStream. Validate its
+    // content rather than treating the existence of a stream as a payload.
+    if (new URL(request.url).search || await request.text() !== "") return json({ error: "This endpoint accepts an empty POST only" }, 400);
     try {
       return json(await check(), 200);
     } catch {
