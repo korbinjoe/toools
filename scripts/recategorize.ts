@@ -9,9 +9,11 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { CatalogPublication, runWithPublication } from "./lib/catalog-publication";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
+const publication = new CatalogPublication();
 
 const DRY_RUN = process.env.DRY_RUN !== "false";
 
@@ -216,6 +218,7 @@ function findBestCategory(
 }
 
 async function main() {
+  if (!DRY_RUN) publication.prepare();
   console.log(`=== Recategorize Tools ${DRY_RUN ? "(DRY RUN)" : "(LIVE)"} ===\n`);
 
   // 1. Create new categories
@@ -229,6 +232,7 @@ async function main() {
     }
     if (!DRY_RUN) {
       await prisma.category.create({ data: cat });
+      publication.markChanged();
     }
     console.log(`Created category: ${cat.name}`);
   }
@@ -279,6 +283,7 @@ async function main() {
         where: { id: tool.id },
         data: { categoryId: newCategoryId },
       });
+      publication.markChanged();
     }
   }
 
@@ -306,10 +311,8 @@ async function main() {
   }
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
+runWithPublication(main, () => publication, () => prisma.$disconnect())
+  .catch((e) => {
+    console.error(e instanceof Error ? e.message : "Recategorization failed");
+    process.exitCode = 1;
   });

@@ -6,10 +6,14 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { ImportStore, type ImportCandidate } from './import-store';
 import { IMPORT_FUNCTION_SQL, httpImportPayload, type NeonHttpWriter } from './neon-http-writer';
+import { CatalogPublication } from './catalog-publication';
 
 const connectionString = process.env.TOOOLS_TEST_DATABASE_URL;
 const enabled = Boolean(connectionString);
 let prisma: PrismaClient;
+function connectStore(writer?: Pick<NeonHttpWriter, 'persist'>) {
+  return ImportStore.connect(prisma, writer, new CatalogPublication({ environment: () => ({ DATABASE_URL: connectionString }) }));
+}
 before(async () => {
   if (!connectionString) return;
   const url = new URL(connectionString);
@@ -31,7 +35,7 @@ function candidate(name: string, sourceKey: string = 'topic:automation'): Import
 
 test('real database imports are PENDING, repeat imports are idempotent, and discovery dates and primary sources survive', { skip: !enabled }, async () => {
   process.env.PH_AUTO_APPROVE = 'true'; process.env.AWESOME_AUTO_APPROVE = 'true';
-  const store = await ImportStore.connect(prisma);
+  const store = await connectStore();
   const first = await store.ingest(candidate('Repeat'));
   assert.equal(first.status, 'PENDING');
   const firstDiscovery = await prisma.toolDiscovery.findFirstOrThrow({ where: { toolId: first.toolId } });
@@ -60,7 +64,7 @@ test('legacy website and GitHub URL match without creating tools or changing edi
     const name = `Legacy${status}`;
     const input = candidate(name);
     const existing = await prisma.tool.create({ data: { name, slug: name.toLowerCase(), description: 'Handwritten description', tagline: 'Editor tagline', url: input.url + '/', github: input.github, categoryId: category.id, status, featured: true, source: 'MANUAL', sourceUrl: 'https://editor.example/selection' } });
-    const store = await ImportStore.connect(prisma);
+    const store = await connectStore();
     const result = await store.ingest(input);
     assert.equal(result.toolId, existing.id);
     assert.equal(result.action, 'updated');
@@ -74,8 +78,8 @@ test('legacy website and GitHub URL match without creating tools or changing edi
 });
 
 test('independent importer processes safely converge via transaction identity claims', { skip: !enabled }, async () => {
-  const one = await ImportStore.connect(prisma);
-  const two = await ImportStore.connect(prisma);
+  const one = await connectStore();
+  const two = await connectStore();
   const results = await Promise.all([one.ingest(candidate('Concurrent', 'source-one')), two.ingest(candidate('Concurrent', 'source-two'))]);
   assert.equal(results[0].toolId, results[1].toolId);
   assert.equal(results.filter((r) => r.action === 'created').length, 1);
@@ -83,19 +87,19 @@ test('independent importer processes safely converge via transaction identity cl
 });
 
 test('repository IDs preserve deduplication through renames and homepage changes', { skip: !enabled }, async () => {
-  const store = await ImportStore.connect(prisma);
+  const store = await connectStore();
   const input = candidate('Rename');
   const first = await store.ingest(input);
   const renamed = await store.ingest({ ...input, name: 'Renamed', url: 'https://renamed.example', github: 'https://github.com/new-owner/renamed' });
   assert.equal(renamed.toolId, first.toolId);
-  const restarted = await ImportStore.connect(prisma);
+  const restarted = await connectStore();
   const original = await restarted.ingest(input);
   assert.equal(original.toolId, first.toolId);
   assert.equal(await prisma.toolIdentity.count({ where: { toolId: first.toolId } }), 5);
 });
 
 test('conflicting website and repository aliases roll back the whole import and keep separate tools', { skip: !enabled }, async () => {
-  const store = await ImportStore.connect(prisma);
+  const store = await connectStore();
   const one = await store.ingest(candidate('ConflictOne'));
   const two = await store.ingest(candidate('ConflictTwo'));
   const discoveriesBefore = await prisma.toolDiscovery.count();
@@ -106,7 +110,7 @@ test('conflicting website and repository aliases roll back the whole import and 
 });
 
 test('non-Latin names get stable fallback slugs and collisions remain distinct', { skip: !enabled }, async () => {
-  const store = await ImportStore.connect(prisma);
+  const store = await connectStore();
   const first = await store.ingest({ ...candidate('UnicodeOne'), name: '工具' });
   const second = await store.ingest({ ...candidate('UnicodeTwo'), name: '도구' });
   assert.equal(first.slug, 'tool');
@@ -152,7 +156,7 @@ test('Neon HTTP transaction SQL preserves PENDING, moderation, primary sources a
     finally { client.release(); }
   } };
   try {
-    const store = await ImportStore.connect(prisma, writer);
+    const store = await connectStore(writer);
     const first = await store.ingest(candidate('HttpRepeat'));
     assert.equal(first.status, 'PENDING');
     await prisma.tool.update({ where: { id: first.toolId }, data: { status: 'APPROVED', description: 'Curated description', featured: true } });
@@ -180,8 +184,8 @@ test('Neon HTTP transaction SQL preserves PENDING, moderation, primary sources a
     await assert.rejects(store.ingest({ ...candidate('HttpRepeat'), github: 'https://github.com/test/other-http', repositoryId: 'other-http' }), /Identity conflict/);
     assert.equal(await prisma.tool.count(), countBefore);
 
-    const one = await ImportStore.connect(prisma, writer);
-    const two = await ImportStore.connect(prisma);
+    const one = await connectStore(writer);
+    const two = await connectStore();
     const concurrent = await Promise.all([one.ingest(candidate('HttpConcurrent', 'http-source')), two.ingest(candidate('HttpConcurrent', 'pg-source'))]);
     assert.equal(concurrent[0].toolId, concurrent[1].toolId);
     assert.equal(concurrent.filter(r => r.action === 'created').length, 1);
@@ -191,14 +195,14 @@ test('Neon HTTP transaction SQL preserves PENDING, moderation, primary sources a
     for (const [index, legacyGithub] of ['https://github.com/test/old?tab=readme-ov-file', 'https://github.com/test/old#readme', 'https://www.github.com:443/Test//Old.git///#readme'].entries()) {
       const input = candidate(`HttpLegacy${index}`);
       const legacy = await prisma.tool.create({ data: { name: input.name, slug: input.name.toLowerCase(), tagline: 'Legacy', description: 'Curated', url: input.url, github: legacyGithub, categoryId: category.id, status: 'APPROVED', source: 'MANUAL' } });
-      const legacyStore = await ImportStore.connect(prisma, writer);
+      const legacyStore = await connectStore(writer);
       await assert.rejects(legacyStore.ingest(input), /different GitHub repository/);
       assert.equal(await prisma.toolIdentity.count({ where: { toolId: legacy.id } }), 0);
       assert.equal((await prisma.tool.findUniqueOrThrow({ where: { id: legacy.id } })).description, 'Curated');
     }
     const incomingUrl = 'https://github.com/test/http-url-only';
     const urlOnly = await prisma.tool.create({ data: { name: 'Http URL only', slug: 'http-url-only', tagline: 'Legacy', description: 'Curated', url: incomingUrl, github: 'https://github.com/test/old#readme', categoryId: category.id } });
-    const urlStore = await ImportStore.connect(prisma, writer);
+    const urlStore = await connectStore(writer);
     await assert.rejects(urlStore.ingest({ ...candidate('HttpUrlOnly'), url: incomingUrl, github: undefined }), /different GitHub repository/);
     assert.equal(await prisma.toolIdentity.count({ where: { toolId: urlOnly.id } }), 0);
 

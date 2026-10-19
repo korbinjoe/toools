@@ -68,6 +68,18 @@ model ToolIdentity {
   @@index([toolId])
 }
 
+// Durable deduplication for at-least-once queue delivery. No Tool foreign key:
+// deleting a listing must not leave its already accepted events unacknowledgeable.
+model ToolMetricReceipt {
+  id         String   @id
+  toolId     String
+  metric     String
+  occurredAt DateTime
+  appliedAt  DateTime @default(now())
+
+  @@index([appliedAt])
+}
+
 // Discovery provenance is additive; source/sourceUrl on Tool remain compatible.
 model ToolDiscovery {
   id          String     @id @default(cuid())

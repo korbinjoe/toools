@@ -1,20 +1,15 @@
-import { after, NextResponse } from "next/server";
-import { toolMetricQuery } from "@/lib/tool-metrics";
-import { prisma } from "@/lib/db";
+import { after, connection, NextResponse } from "next/server";
+import { recordToolMetric } from "@/lib/record-tool-metric";
+import { getApprovedToolLink } from "@/lib/tools";
 import { getToolOutboundUrl } from "@/lib/tool-links";
-
-export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  await connection();
   const { slug } = await params;
-
-  const tool = await prisma.tool.findUnique({
-    where: { slug, status: "APPROVED" },
-    select: { id: true, url: true, github: true, sourceUrl: true, source: true },
-  });
+  const tool = await getApprovedToolLink(slug);
 
   if (!tool) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -26,9 +21,7 @@ export async function GET(
     return NextResponse.json({ error: "Link not found" }, { status: 404 });
   }
 
-  after(() => prisma.$executeRaw(toolMetricQuery(tool.id, "click")).catch((error) => {
-    console.error("Tool click counter failed", error);
-  }));
+  after(() => recordToolMetric(tool.id, "click"));
 
   return NextResponse.redirect(url, 302);
 }

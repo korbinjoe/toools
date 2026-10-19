@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "src/app/api/queues/flush-metrics/route.ts": {
+      "maxDuration": 300,
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "toools-metric-flush-v1",
+          "maxConcurrency": 1,
+          "retryAfterSeconds": 3600
+        }
+      ]
+    },
+    "src/app/api/metrics/flush/route.ts": {
+      "maxDuration": 300
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/metrics/flush",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

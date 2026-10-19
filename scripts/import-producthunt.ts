@@ -19,9 +19,11 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PH_TOPIC_MAP } from "./lib/category-matcher";
 import { ImportStore } from "./lib/import-store";
 import { getProductHuntToken } from "./lib/producthunt-auth";
+import { runWithPublication } from "./lib/catalog-publication";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
+let store: ImportStore | undefined;
 
 const PH_API = "https://api.producthunt.com/v2/api/graphql";
 const POSTS_PER_TOPIC = parseInt(process.env.PH_POSTS_PER_TOPIC || "100", 10);
@@ -157,7 +159,7 @@ async function main() {
   console.log("New tools: PENDING (no auto-approval)");
   console.log(`Topics to scrape: ${Object.keys(PH_TOPIC_MAP).length}\n`);
 
-  const store = await ImportStore.connect(prisma);
+  store = await ImportStore.connect(prisma);
 
   // Load category map
   const categories = await prisma.category.findMany();
@@ -227,10 +229,8 @@ async function main() {
   if (errors) process.exitCode = 1;
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
+runWithPublication(main, () => store?.publication, () => prisma.$disconnect())
+  .catch((e) => {
+    console.error(e instanceof Error ? e.message : "Product Hunt import failed");
+    process.exitCode = 1;
   });

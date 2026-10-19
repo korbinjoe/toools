@@ -1,6 +1,5 @@
-export const dynamic = "force-dynamic";
-
 import Link from "next/link";
+import { connection } from "next/server";
 import { JsonLd } from "@/components/json-ld";
 import { siteUrl } from "@/lib/seo";
 import { SITE_DESCRIPTION, SITE_NAME, GITHUB_REPO_URL } from "@/lib/site";
@@ -11,6 +10,8 @@ import { stackPreviews } from "@/lib/stacks-data";
 import { getEditorialDay } from "@/lib/home-discovery";
 import { HomeDiscoverySections } from "@/components/home-discovery-sections";
 import { prisma } from "@/lib/db";
+import { catalogCache } from "@/lib/catalog-cache";
+import { getCatalogCategories } from "@/lib/tools";
 
 const homeToolSelect = {
   slug: true,
@@ -27,32 +28,25 @@ const homeToolSelect = {
   category: { select: { name: true, slug: true } },
 } as const;
 
-async function getFeaturedTools() {
-  return prisma.tool.findMany({
+const getFeaturedTools = catalogCache(async () => {
+  const tools = await prisma.tool.findMany({
     where: { status: "APPROVED", featured: true },
     select: homeToolSelect,
     orderBy: [{ createdAt: "desc" }, { slug: "asc" }],
     take: 24,
   });
-}
+  return tools.map((tool) => ({ ...tool, createdAt: tool.createdAt.toISOString() }));
+}, "home-featured", { metrics: true });
 
-async function getRecentTools() {
-  return prisma.tool.findMany({
+const getRecentTools = catalogCache(async () => {
+  const tools = await prisma.tool.findMany({
     where: { status: "APPROVED" },
     select: homeToolSelect,
     orderBy: [{ createdAt: "desc" }, { slug: "asc" }],
     take: 36,
   });
-}
-
-async function getCategories() {
-  return prisma.category.findMany({
-    orderBy: { sortOrder: "asc" },
-    include: {
-      _count: { select: { tools: { where: { status: "APPROVED" } } } },
-    },
-  });
-}
+  return tools.map((tool) => ({ ...tool, createdAt: tool.createdAt.toISOString() }));
+}, "home-recent", { metrics: true });
 
 function HeroIntro() {
   return (
@@ -138,16 +132,15 @@ function HeroIntro() {
 }
 
 export default async function HomePage() {
+  // Keep the daily editorial seed tied to the request, independently of the
+  // database snapshot's lifetime.
+  await connection();
   const [featuredTools, recentTools, categories] = await Promise.all([
     getFeaturedTools().catch(() => []),
     getRecentTools().catch(() => []),
-    getCategories().catch(() => []),
+    getCatalogCategories().catch(() => []),
   ]);
   const day = getEditorialDay();
-  const serializeTool = (tool: (typeof recentTools)[number]) => ({
-    ...tool,
-    createdAt: tool.createdAt.toISOString(),
-  });
   const workflows = stackPreviews.map((stack) => ({
     slug: stack.slug,
     name: stack.name,
@@ -190,8 +183,8 @@ export default async function HomePage() {
       <HomeDiscoverySections
         key={day + ":" + recentTools.map((tool) => tool.slug).join(":")}
         hero={<HeroIntro />}
-        recentTools={recentTools.map(serializeTool)}
-        featuredTools={featuredTools.map(serializeTool)}
+        recentTools={recentTools}
+        featuredTools={featuredTools}
         workflows={workflows}
         categories={categories.map((category) => ({
           slug: category.slug,

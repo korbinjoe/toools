@@ -1,7 +1,6 @@
-export const dynamic = "force-dynamic";
-
+import { connection } from "next/server";
 import { CategoryGrid } from "@/components/category-nav";
-import { prisma } from "@/lib/db";
+import { getCatalogCategories } from "@/lib/tools";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata(
@@ -11,12 +10,8 @@ export const metadata = pageMetadata(
 );
 
 export default async function CategoriesPage() {
-  const categories = await prisma.category.findMany({
-    include: {
-      _count: { select: { tools: { where: { status: "APPROVED" } } } },
-    },
-    orderBy: { sortOrder: "asc" },
-  });
+  await connection();
+  const categories = await getCatalogCategories();
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12 min-h-[calc(100dvh-8rem)]">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { pageMetadata } from "@/lib/seo";
 import { StackListCard } from "@/components/stack-list-card";
 import { getStacksForList } from "@/lib/stacks";
@@ -10,6 +11,7 @@ export const metadata = pageMetadata(
 );
 
 export default async function StacksListPage() {
+  await connection();
   const stacks = await getStacksForList();
 
   return (

@@ -10,9 +10,13 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "tsx --test src/lib/*.test.ts src/app/api/metrics/flush/handler.test.ts scripts/lib/*.test.ts",
     "backfill:signals": "tsx scripts/backfill-trust-signals.ts",
     "import:github": "tsx scripts/import-github.ts",
     "sources:inspect": "tsx scripts/inspect-tool-sources.ts",
+    "cache:refresh": "tsx scripts/refresh-catalog.ts",
+    "sql:publish": "tsx scripts/publish-sql.ts",
+    "recovery:cloud": "tsx scripts/cloud-recovery.ts",
     "test:imports": "tsx --test scripts/lib/*.test.ts"
   },
   "dependencies": {
@@ -22,6 +26,8 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/oidc": "^3.8.10",
+    "@vercel/queue": "^0.8.0",
     "@vercel/speed-insights": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -41,6 +47,7 @@
     "seed": "npx tsx prisma/seed.ts"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.4.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

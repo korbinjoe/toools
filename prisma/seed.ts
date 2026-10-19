@@ -6,9 +6,11 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { CatalogPublication, runWithPublication } from "../scripts/lib/catalog-publication";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
+const publication = new CatalogPublication();
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -1864,6 +1866,7 @@ const tools: ToolDef[] = [
 // ---------------------------------------------------------------------------
 
 async function main() {
+  publication.prepare();
   console.log("Seeding database...\n");
 
   // 1. Upsert categories
@@ -1886,6 +1889,7 @@ async function main() {
         sortOrder: cat.sortOrder,
       },
     });
+    publication.markChanged();
     categoryMap.set(cat.slug, record.id);
   }
   console.log(`  ${categories.length} categories upserted.\n`);
@@ -1990,12 +1994,8 @@ async function main() {
   console.log(`  Embeddable: ${iframeCount} (IFRAME)`);
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
+runWithPublication(main, () => publication, () => prisma.$disconnect())
+  .catch((e) => {
+    console.error(e instanceof Error ? e.message : "Seed failed");
+    process.exitCode = 1;
   });
