@@ -1,7 +1,6 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata } from "next";
 import { cache, Suspense } from "react";
+import { connection } from "next/server";
 import { SearchBar } from "@/components/search-bar";
 import { FilterPanel } from "@/components/filter-panel";
 import { ToolGrid } from "@/components/tool-grid";
@@ -11,12 +10,15 @@ import type { Prisma } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { pageMetadata, toolsSearchPolicy, TOOLS_PAGE_SIZE, type ToolsSearchParams } from "@/lib/seo";
 import { toolSourceWhere } from "@/lib/tool-sources";
+import { catalogCache } from "@/lib/catalog-cache";
+import { getCatalogCategories, toolCardSelect } from "@/lib/tools";
 
 interface ToolsPageProps {
   searchParams: Promise<ToolsSearchParams>;
 }
 
 export async function generateMetadata({ searchParams }: ToolsPageProps): Promise<Metadata> {
+  await connection();
   const policy = toolsSearchPolicy(await searchParams);
   if (policy.page > 1) {
     const total = await getToolsTotal(JSON.stringify(buildWhere(policy.params)));
@@ -25,13 +27,6 @@ export async function generateMetadata({ searchParams }: ToolsPageProps): Promis
   return pageMetadata(policy.page > 1 ? `Browse Tools — Page ${policy.page}` : "Browse Tools",
     "Search and filter curated tools by source, category, pricing, platform, open-source status, and trust signals.",
     policy.path, { index: policy.index });
-}
-
-async function getCategories() {
-  return prisma.category.findMany({
-    select: { slug: true, name: true },
-    orderBy: { sortOrder: "asc" },
-  });
 }
 
 function buildWhere(params: {
@@ -93,40 +88,37 @@ function buildOrderBy(sort?: string): Prisma.ToolOrderByWithRelationInput[] {
   }
 }
 
-async function getTools(
+const getCachedTools = catalogCache(async (
   where: Prisma.ToolWhereInput,
   orderBy: Prisma.ToolOrderByWithRelationInput[],
   page: number,
-) {
-  const [tools, total] = await Promise.all([
-    prisma.tool.findMany({
-      where,
-      include: {
-        category: { select: { name: true, slug: true } },
-        tags: { include: { tag: { select: { name: true } } } },
-      },
-      orderBy,
-      skip: (page - 1) * TOOLS_PAGE_SIZE,
-      take: TOOLS_PAGE_SIZE,
-    }),
-    getToolsTotal(JSON.stringify(where)),
-  ]);
+) => {
+  return prisma.tool.findMany({
+    where,
+    select: toolCardSelect,
+    orderBy,
+    skip: (page - 1) * TOOLS_PAGE_SIZE,
+    take: TOOLS_PAGE_SIZE,
+  });
+}, "tools-page", { metrics: true });
 
-  return { tools, total };
-}
-
-const getToolsTotal = cache((serializedWhere: string) =>
-  prisma.tool.count({ where: JSON.parse(serializedWhere) as Prisma.ToolWhereInput }),
-);
+const getToolsTotal = cache(catalogCache(
+  (serializedWhere: string) => prisma.tool.count({
+    where: JSON.parse(serializedWhere) as Prisma.ToolWhereInput,
+  }),
+  "tools-total",
+));
 
 export default async function ToolsPage({ searchParams }: ToolsPageProps) {
+  await connection();
   const { params, page } = toolsSearchPolicy(await searchParams);
   const where = buildWhere(params);
   const orderBy = buildOrderBy(params.sort);
 
-  const [{ tools, total }, categories] = await Promise.all([
-    getTools(where, orderBy, page),
-    getCategories(),
+  const [tools, total, categories] = await Promise.all([
+    getCachedTools(where, orderBy, page),
+    getToolsTotal(JSON.stringify(where)),
+    getCatalogCategories(),
   ]);
 
   const totalPages = Math.ceil(total / TOOLS_PAGE_SIZE);

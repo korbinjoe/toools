@@ -3,8 +3,9 @@ import { matchCategory } from './category-matcher';
 import { generateSlug } from './dedup';
 import { getGoogleFaviconUrl } from './favicon';
 import { identityKeys, canonicalRepoUrl, publicHttpUrl } from './import-identity';
-import { type NeonHttpWriter } from './neon-http-writer';
+import { IndeterminateWriteError, type NeonHttpWriter } from './neon-http-writer';
 import { databaseRead } from './database-read';
+import { CatalogPublication } from './catalog-publication';
 
 export interface ImportCandidate {
   name: string;
@@ -38,16 +39,24 @@ type ExistingTool = {
 };
 export type ImportResult = { action: 'created' | 'updated'; toolId: string; slug: string; status: ToolStatus; dryRun: boolean };
 
+function publicToolMayChange(candidate: ImportCandidate, tool: ExistingTool) {
+  return tool.status === 'APPROVED' && (
+    (!tool.github && Boolean(candidate.github)) || !tool.source
+    || (candidate.githubStars !== undefined && candidate.githubStars !== tool.githubStars)
+    || (candidate.phVotes !== undefined && Math.max(tool.phVotes ?? 0, candidate.phVotes) !== tool.phVotes)
+  );
+}
+
 export class ImportStore {
   private index = new Map<string, Set<string>>();
   private tools = new Map<string, ExistingTool>();
   private slugs = new Set<string>();
 
-  constructor(private prisma?: PrismaClient, private categories: Map<string, string> = new Map(), existing: ExistingTool[] = [], private httpWriter?: Pick<NeonHttpWriter, 'persist'>) {
+  constructor(private prisma?: PrismaClient, private categories: Map<string, string> = new Map(), existing: ExistingTool[] = [], private httpWriter?: Pick<NeonHttpWriter, 'persist'>, readonly publication = new CatalogPublication()) {
     for (const tool of existing) this.remember(tool, [...this.keysForExisting(tool), ...tool.identities.map((i) => i.key)]);
   }
 
-  static async connect(prisma: PrismaClient, httpWriter?: Pick<NeonHttpWriter, 'persist'>) {
+  static async connect(prisma: PrismaClient, httpWriter?: Pick<NeonHttpWriter, 'persist'>, publication = new CatalogPublication()) {
     const tools: ExistingTool[] = [];
     let cursor: string | undefined;
     do {
@@ -59,7 +68,7 @@ export class ImportStore {
       cursor = page.length === 250 ? page[page.length - 1].id : undefined;
     } while (cursor);
     const categories = await databaseRead(() => prisma.category.findMany({ select: { id: true, slug: true } }));
-    return new ImportStore(prisma, new Map(categories.map((c) => [c.slug, c.id])), tools, httpWriter);
+    return new ImportStore(prisma, new Map(categories.map((c) => [c.slug, c.id])), tools, httpWriter, publication);
   }
 
   private keysForExisting(tool: ExistingTool) {
@@ -120,10 +129,24 @@ export class ImportStore {
 
     if (this.httpWriter) {
       const legacyIds = [...this.matchingIds(keys)];
+      const mayChangePublic = legacyIds.some((id) => {
+        const tool = this.tools.get(id);
+        return tool ? publicToolMayChange(candidate, tool) : false;
+      });
+      if (mayChangePublic) this.publication.prepare();
+      const allowPublicWrite = mayChangePublic || this.publication.canWritePublic();
       const currentKeys = legacyIds.flatMap((id) => this.tools.get(id) ? this.keysForExisting(this.tools.get(id)!) : []);
       const normalized = { ...candidate, ...(candidate.github ? { github: canonicalRepoUrl(candidate.github) } : {}) };
-      const saved = await this.httpWriter.persist(normalized, keys, legacyIds, currentKeys, categoryId!, baseSlug);
+      let saved: Awaited<ReturnType<NeonHttpWriter['persist']>>;
+      try {
+        saved = await this.httpWriter.persist(normalized, keys, legacyIds, currentKeys, categoryId!, baseSlug, allowPublicWrite);
+      } catch (error) {
+        // A lost acknowledgement may have committed the intended public edit.
+        if (allowPublicWrite && error instanceof IndeterminateWriteError) this.publication.markChanged();
+        throw error;
+      }
       this.remember(saved.tool, saved.keys);
+      if (saved.tool.status === 'APPROVED' && saved.publicChanged !== false) this.publication.markChanged();
       return { action: saved.created ? 'created' : 'updated', toolId: saved.tool.id, slug: saved.tool.slug, status: saved.tool.status, dryRun: false };
     }
 
@@ -150,6 +173,8 @@ export class ImportStore {
         }
         if (!existing.source) { changes.source = candidate.discovery.source; changes.sourceUrl = candidate.discovery.sourceUrl; }
       }
+      const publicChanged = existing?.status === 'APPROVED' && Object.keys(changes).length > 0;
+      if (publicChanged) this.publication.prepare();
       const tool = existing ? Object.keys(changes).length ? await tx.tool.update({ where: { id: existing.id }, data: changes }) : existing : await tx.tool.create({ data: {
         name: candidate.name.trim().slice(0, 100), slug,
         tagline: (candidate.tagline || candidate.description || candidate.name).slice(0, 200),
@@ -174,9 +199,10 @@ export class ImportStore {
         create: { toolId: tool.id, ...discovery, metadata, firstSeenAt: seenAt, lastSeenAt: seenAt },
         update: { sourceUrl: discovery.sourceUrl, metadata, lastSeenAt: seenAt },
       });
-      return { tool: { ...tool, identities: allKeys.map((key) => ({ key })) }, keys: allKeys, created: !existing };
+      return { tool: { ...tool, identities: allKeys.map((key) => ({ key })) }, keys: allKeys, created: !existing, publicChanged };
     }, { timeout: 30_000 });
     this.remember(saved.tool, saved.keys);
+    if (saved.publicChanged) this.publication.markChanged();
     return { action: saved.created ? 'created' : 'updated', toolId: saved.tool.id, slug: saved.tool.slug, status: saved.tool.status, dryRun: false };
   }
 }

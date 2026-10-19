@@ -1,9 +1,11 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { CatalogPublication, runWithPublication } from "../scripts/lib/catalog-publication";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
+const publication = new CatalogPublication();
 
 const stacks = [
   {
@@ -444,6 +446,7 @@ const stacks = [
 ];
 
 async function main() {
+  publication.prepare();
   for (const stackData of stacks) {
     const stack = await prisma.stack.upsert({
       where: { slug: stackData.slug },
@@ -463,6 +466,7 @@ async function main() {
         sortOrder: stackData.sortOrder,
       },
     });
+    publication.markChanged();
 
     for (const stageData of stackData.stages) {
       const existingStage = await prisma.stage.findFirst({
@@ -487,6 +491,7 @@ async function main() {
               stackId: stack.id,
             },
           });
+      publication.markChanged();
 
       for (let i = 0; i < stageData.tools.length; i++) {
         const toolSlug = stageData.tools[i];
@@ -500,6 +505,7 @@ async function main() {
           update: { sortOrder: i },
           create: { stageId: stage.id, toolId: tool.id, sortOrder: i },
         });
+        publication.markChanged();
       }
     }
 
@@ -507,9 +513,8 @@ async function main() {
   }
 }
 
-main()
+runWithPublication(main, () => publication, () => prisma.$disconnect())
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+    console.error(e instanceof Error ? e.message : "Stack seed failed");
+    process.exitCode = 1;
+  });

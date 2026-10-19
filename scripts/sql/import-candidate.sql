@@ -13,6 +13,8 @@ DECLARE
   alias_owner TEXT;
   alias_key TEXT;
   metadata JSONB;
+  changed_rows INTEGER := 0;
+  changes_needed BOOLEAN;
   seen TIMESTAMP(3) := clock_timestamp();
 BEGIN
   PERFORM pg_advisory_xact_lock(1378392541);
@@ -48,6 +50,14 @@ BEGIN
       AND repo <> existing_repo AND NOT COALESCE(('github-id:' || (p->>'repositoryId')) = ANY(existing_ids), false) THEN
       RAISE EXCEPTION 'Identity conflict: website matches a different GitHub repository';
     END IF;
+    changes_needed :=
+      (t.github IS NULL AND p->>'github' IS NOT NULL)
+      OR (p ? 'githubStars' AND t."githubStars" IS DISTINCT FROM (p->>'githubStars')::INTEGER)
+      OR (p ? 'phVotes' AND t."phVotes" IS DISTINCT FROM GREATEST(COALESCE(t."phVotes", 0), (p->>'phVotes')::INTEGER))
+      OR t.source IS NULL;
+    IF t.status = 'APPROVED' AND changes_needed AND NOT COALESCE((p->>'allowPublicWrite')::BOOLEAN, false) THEN
+      RAISE EXCEPTION 'Public catalog changes require configured cache invalidation; no changes were committed. Configure REVALIDATION_SECRET and CACHE_REVALIDATION_URL before retrying this import';
+    END IF;
     UPDATE "Tool" SET
       github = COALESCE(github, p->>'github'),
       "githubStars" = COALESCE((p->>'githubStars')::INTEGER, "githubStars"),
@@ -55,12 +65,8 @@ BEGIN
       source = COALESCE(source, (p->'discovery'->>'source')::"ToolSource"),
       "sourceUrl" = CASE WHEN source IS NULL THEN p->'discovery'->>'sourceUrl' ELSE "sourceUrl" END,
       "updatedAt" = seen
-    WHERE id = t.id AND (
-      (github IS NULL AND p->>'github' IS NOT NULL)
-      OR (p ? 'githubStars' AND "githubStars" IS DISTINCT FROM (p->>'githubStars')::INTEGER)
-      OR (p ? 'phVotes' AND "phVotes" IS DISTINCT FROM GREATEST(COALESCE("phVotes", 0), (p->>'phVotes')::INTEGER))
-      OR source IS NULL
-    );
+    WHERE id = t.id AND changes_needed;
+    GET DIAGNOSTICS changed_rows = ROW_COUNT;
     SELECT * INTO STRICT t FROM "Tool" WHERE id = t.id;
   ELSE
     chosen_slug := p->>'baseSlug';
@@ -103,6 +109,7 @@ BEGIN
     "sourceUrl"=EXCLUDED."sourceUrl",metadata=EXCLUDED.metadata,"lastSeenAt"=EXCLUDED."lastSeenAt";
   RETURN jsonb_build_object('tool',to_jsonb(t)||jsonb_build_object('identities',
     (SELECT COALESCE(jsonb_agg(jsonb_build_object('key',key)),'[]'::jsonb) FROM "ToolIdentity" WHERE "toolId"=t.id)),
-    'keys',to_jsonb(keys),'created',is_new OR t.id = p->>'newId');
+    'keys',to_jsonb(keys),'created',is_new OR t.id = p->>'newId',
+    'publicChanged',t.status = 'APPROVED' AND changed_rows > 0);
 END;
 $function$;

@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/db";
 import { cache } from "react";
 import { stackPreviews, type StackPreview } from "@/lib/stacks-data";
+import { catalogCache } from "@/lib/catalog-cache";
+
+export const getCatalogStackSlugs = catalogCache(
+  () => prisma.stack.findMany({ select: { slug: true } }),
+  "stack-slugs",
+);
 
 export function getStackIconKey(slug: string): StackPreview["icon"] | null {
   return stackPreviews.find((s) => s.slug === slug)?.icon ?? null;
@@ -194,100 +200,114 @@ function previewToDetail(stack: StackPreview): StackDetail {
   };
 }
 
-export async function getStacksForList(): Promise<StackListItem[]> {
-  try {
-    const stacks = await prisma.stack.findMany({
-      orderBy: { sortOrder: "asc" },
-      include: {
-        stages: {
-          include: {
-            recommendations: { select: { toolId: true } },
-          },
+const getCachedStacksForList = catalogCache(async (): Promise<StackListItem[]> => {
+  const stacks = await prisma.stack.findMany({
+    orderBy: { sortOrder: "asc" },
+    include: {
+      stages: {
+        include: {
+          recommendations: { select: { toolId: true } },
         },
       },
-    });
+    },
+  });
 
-    if (stacks.length === 0) {
-      return stackPreviews.map(previewToListItem);
-    }
+  if (stacks.length === 0) {
+    return stackPreviews.map(previewToListItem);
+  }
 
-    return stacks.map((stack) => ({
-      slug: stack.slug,
-      name: stack.name,
-      tagline: stack.tagline,
-      description: stack.description,
-      stageCount: stack.stages.length,
-      toolCount: stack.stages.reduce((sum, s) => sum + s.recommendations.length, 0),
-    }));
+  return stacks.map((stack) => ({
+    slug: stack.slug,
+    name: stack.name,
+    tagline: stack.tagline,
+    description: stack.description,
+    stageCount: stack.stages.length,
+    toolCount: stack.stages.reduce((sum, s) => sum + s.recommendations.length, 0),
+  }));
+}, "stacks-list");
+
+export async function getStacksForList(): Promise<StackListItem[]> {
+  try {
+    return await getCachedStacksForList();
   } catch {
+    // Availability fallbacks are deliberately outside the cache callback.
     return stackPreviews.map(previewToListItem);
   }
 }
 
-export const getStackBySlug = cache(async (slug: string): Promise<StackDetail | null> => {
+const getCachedStackBySlug = catalogCache(async (slug: string): Promise<StackDetail | null> => {
   const preview = stackPreviews.find((s) => s.slug === slug);
 
-  try {
-    const stack = await prisma.stack.findUnique({
-      where: { slug },
-      include: {
-        stages: {
-          orderBy: { sortOrder: "asc" },
-          include: {
-            recommendations: {
-              orderBy: { sortOrder: "asc" },
-              include: {
-                tool: { select: toolSelect },
-              },
+  const stack = await prisma.stack.findUnique({
+    where: { slug },
+    include: {
+      stages: {
+        orderBy: { sortOrder: "asc" },
+        include: {
+          recommendations: {
+            orderBy: { sortOrder: "asc" },
+            include: {
+              tool: { select: toolSelect },
             },
           },
         },
       },
-    });
+    },
+  });
 
-    if (!stack) {
-      return preview ? previewToDetail(preview) : null;
-    }
+  if (!stack) {
+    return null;
+  }
 
-    const stageToolRows = stack.stages.map((stage) =>
-      stage.recommendations.filter((rec) => rec.tool.status === "APPROVED").map((rec) => rec.tool),
-    );
-    const recommendedSlugs = stageToolRows.flat().map((t) => t.slug);
-    const categoryIds = [...new Set(stageToolRows.flat().map((t) => t.categoryId))];
+  const stageToolRows = stack.stages.map((stage) =>
+    stage.recommendations.filter((rec) => rec.tool.status === "APPROVED").map((rec) => rec.tool),
+  );
+  const recommendedSlugs = stageToolRows.flat().map((t) => t.slug);
+  const categoryIds = [...new Set(stageToolRows.flat().map((t) => t.categoryId))];
 
-    const relatedCandidates =
-      categoryIds.length > 0
-        ? await prisma.tool.findMany({
-            where: {
-              status: "APPROVED",
-              categoryId: { in: categoryIds },
-              slug: { notIn: recommendedSlugs },
-            },
-            select: toolSelect,
-          })
-        : [];
+  const relatedCandidates =
+    categoryIds.length > 0
+      ? await prisma.tool.findMany({
+          where: {
+            status: "APPROVED",
+            categoryId: { in: categoryIds },
+            slug: { notIn: recommendedSlugs },
+          },
+          select: toolSelect,
+        })
+      : [];
 
-    return {
-      slug: stack.slug,
-      name: stack.name,
-      description: stack.description,
-      stages: stack.stages.map((stage, idx) => {
-        const stageRows = stageToolRows[idx];
-        const tools = stageRows.map((t) => mapToolToStageTool(t, preview));
-        const browseCategories = uniqueCategories(stageRows.map((t) => t.category));
-        const relatedGroups = pickRelatedGroups(stageRows, relatedCandidates, preview);
+  return {
+    slug: stack.slug,
+    name: stack.name,
+    description: stack.description,
+    stages: stack.stages.map((stage, idx) => {
+      const stageRows = stageToolRows[idx];
+      const tools = stageRows.map((t) => mapToolToStageTool(t, preview));
+      const browseCategories = uniqueCategories(stageRows.map((t) => t.category));
+      const relatedGroups = pickRelatedGroups(stageRows, relatedCandidates, preview);
 
-        return {
-          id: stage.id,
-          name: stage.name,
-          description: stage.description,
-          editorNote: stage.editorNote,
-          tools,
-          browseCategories,
-          relatedGroups,
-        };
-      }),
-    };
+      return {
+        id: stage.id,
+        name: stage.name,
+        description: stage.description,
+        editorNote: stage.editorNote,
+        tools,
+        browseCategories,
+        relatedGroups,
+      };
+    }),
+  };
+}, "stack-detail", { metrics: true });
+
+export const getStackBySlug = cache(async (slug: string): Promise<StackDetail | null> => {
+  const preview = stackPreviews.find((stack) => stack.slug === slug);
+  try {
+    const slugs = await getCatalogStackSlugs();
+    const stack = slugs.some((stack) => stack.slug === slug)
+      ? await getCachedStackBySlug(slug)
+      : null;
+    return stack ?? (preview ? previewToDetail(preview) : null);
   } catch {
     return preview ? previewToDetail(preview) : null;
   }

@@ -1,9 +1,11 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { CatalogPublication, runWithPublication } from "./lib/catalog-publication";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
+const publication = new CatalogPublication();
 
 const CATEGORIES = [
   { name: "AI Assistants", slug: "ai-assistants", icon: "bot", sortOrder: 1 },
@@ -26,6 +28,7 @@ const CATEGORIES = [
 ];
 
 async function main() {
+  publication.prepare();
   console.log("Syncing categories...\n");
 
   for (const cat of CATEGORIES) {
@@ -34,6 +37,7 @@ async function main() {
       update: { name: cat.name, icon: cat.icon, sortOrder: cat.sortOrder },
       create: { name: cat.name, slug: cat.slug, icon: cat.icon, sortOrder: cat.sortOrder },
     });
+    publication.markChanged();
   }
 
   const all = await prisma.category.findMany({ orderBy: { sortOrder: "asc" } });
@@ -42,7 +46,10 @@ async function main() {
     console.log(`  ${c.slug.padEnd(20)} ${c.name}`);
   }
 
-  await prisma.$disconnect();
 }
 
-main();
+runWithPublication(main, () => publication, () => prisma.$disconnect())
+  .catch((error) => {
+    console.error(error instanceof Error ? error.message : "Category sync failed");
+    process.exitCode = 1;
+  });

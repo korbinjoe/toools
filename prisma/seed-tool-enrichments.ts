@@ -1,9 +1,11 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { CatalogPublication, runWithPublication } from "../scripts/lib/catalog-publication";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
+const publication = new CatalogPublication();
 
 type ToolEnrichment = {
   useCases: string[];
@@ -487,6 +489,7 @@ async function main() {
       continue;
     }
 
+    if (tool.status === "APPROVED") publication.prepare();
     await prisma.tool.update({
       where: { id: tool.id },
       data: {
@@ -495,6 +498,7 @@ async function main() {
         cons: data.cons,
       },
     });
+    if (tool.status === "APPROVED") publication.markChanged();
     updated++;
     console.log(`  Enriched: ${tool.name}`);
   }
@@ -502,9 +506,8 @@ async function main() {
   console.log(`\nDone. Updated ${updated} tools, skipped ${skipped}.`);
 }
 
-main()
+runWithPublication(main, () => publication, () => prisma.$disconnect())
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+    console.error(e instanceof Error ? e.message : "Tool enrichment seed failed");
+    process.exitCode = 1;
+  });

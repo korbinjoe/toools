@@ -36,6 +36,8 @@ npm run import:github -- --transport neon-http --new-limit 500
 
 The HTTPS writer runs tool, alias, and discovery changes together in one transaction using a temporary SQL function. It shares the PostgreSQL writer's advisory lock and preserves moderation. Network retries reuse an operation ID to avoid duplicate creation after a lost response. If retries cannot determine the outcome, the run stops and its report marks `writeIndeterminate`; reconcile the actual database additions before resuming with the remaining new-tool budget. Source inspection currently uses PostgreSQL connections.
 
+Publication and edits to existing approved tools also require the cache configuration described in [Catalog operations](catalog-operations.md). Importers refresh the public catalog once after committed approved-tool updates. New pending tools do not invalidate public content. For a reviewed approval SQL file use `npm run sql:publish -- --file path/to/reviewed.sql`; if publication committed and refresh failed, retry only `npm run cache:refresh`.
+
 ## CLI options
 
 | Option | Default | Meaning |

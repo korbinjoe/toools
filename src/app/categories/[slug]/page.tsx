@@ -1,5 +1,4 @@
-export const dynamic = "force-dynamic";
-
+import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -10,35 +9,32 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolGrid } from "@/components/tool-grid";
 import { prisma } from "@/lib/db";
+import { catalogCache } from "@/lib/catalog-cache";
+import { getCatalogCategories, toolCardSelect } from "@/lib/tools";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
 
 const getCategory = cache(async (slug: string) => {
-  return prisma.category.findUnique({
-    where: { slug },
-    include: { _count: { select: { tools: { where: { status: "APPROVED" } } } } },
-  });
+  return (await getCatalogCategories()).find((category) => category.slug === slug) ?? null;
 });
 
-async function getCategoryTools(slug: string) {
+const getCategoryTools = catalogCache(async (slug: string) => {
   return prisma.tool.findMany({
     where: {
       status: "APPROVED",
       category: { slug },
     },
-    include: {
-      category: { select: { name: true, slug: true } },
-      tags: { include: { tag: { select: { name: true } } } },
-    },
+    select: toolCardSelect,
     orderBy: [{ featured: "desc" }, { viewCount: "desc" }],
   });
-}
+}, "category-tools", { metrics: true });
 
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
+  await connection();
   const { slug } = await params;
   const category = await getCategory(slug);
   if (!category) notFound();
@@ -52,13 +48,11 @@ export async function generateMetadata({
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
+  await connection();
   const { slug } = await params;
-  const [category, tools] = await Promise.all([
-    getCategory(slug),
-    getCategoryTools(slug),
-  ]);
-
+  const category = await getCategory(slug);
   if (!category) notFound();
+  const tools = await getCategoryTools(slug);
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12">

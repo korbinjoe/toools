@@ -1,13 +1,11 @@
-export const dynamic = "force-dynamic";
-
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getApprovedTool as getTool } from "@/lib/tools";
-import { after } from "next/server";
+import { after, connection } from "next/server";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbData, pageMetadata, siteUrl } from "@/lib/seo";
 import { toolEditorial } from "@/lib/tool-editorial";
-import { toolMetricQuery } from "@/lib/tool-metrics";
+import { recordToolMetric } from "@/lib/record-tool-metric";
 import { getToolExternalLinks } from "@/lib/tool-links";
 import type { Metadata } from "next";
 import { ArrowUpRight, ChevronRight, ExternalLink, Star, Triangle } from "lucide-react";
@@ -18,12 +16,14 @@ import { ToolWebsiteLink } from "@/components/tool-website-link";
 import { prisma } from "@/lib/db";
 import { getStackIconKey } from "@/lib/stacks";
 import { StackIcon } from "@/components/stack-icon";
+import { catalogCache } from "@/lib/catalog-cache";
+import { toolCardSelect } from "@/lib/tools";
 
 interface ToolPageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getAlternatives(categoryId: string, excludeSlug: string) {
+const getAlternatives = catalogCache(async (categoryId: string, excludeSlug: string) => {
   const editorial = toolEditorial[excludeSlug];
   const slugs = editorial?.alternatives.map((alternative) => alternative.slug) ?? [];
   const tools = await prisma.tool.findMany({
@@ -32,10 +32,7 @@ async function getAlternatives(categoryId: string, excludeSlug: string) {
       status: "APPROVED",
       NOT: { slug: excludeSlug },
     },
-    include: {
-      category: { select: { name: true, slug: true } },
-      tags: { include: { tag: { select: { name: true } } } },
-    },
+    select: toolCardSelect,
     take: 4,
     orderBy: [
       { githubStars: { sort: "desc", nulls: "last" } },
@@ -44,9 +41,10 @@ async function getAlternatives(categoryId: string, excludeSlug: string) {
     ],
   });
   return slugs.length ? tools.sort((a, b) => slugs.indexOf(a.slug) - slugs.indexOf(b.slug)) : tools;
-}
+}, "tool-alternatives", { metrics: true });
 
 export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
+  await connection();
   const { slug } = await params;
   const tool = await getTool(slug);
   if (!tool) notFound();
@@ -69,13 +67,12 @@ const compactNumber = new Intl.NumberFormat("en", { notation: "compact", maximum
 const countNumber = new Intl.NumberFormat("en");
 
 export default async function ToolPage({ params }: ToolPageProps) {
+  await connection();
   const { slug } = await params;
   const tool = await getTool(slug);
   if (!tool) notFound();
 
-  after(() => prisma.$executeRaw(toolMetricQuery(tool.id, "view")).catch((error) => {
-    console.error("Tool view counter failed", error);
-  }));
+  after(() => recordToolMetric(tool.id, "view"));
   const editorial = toolEditorial[slug];
   const externalLinks = getToolExternalLinks(tool);
   const githubLink = externalLinks.find((link) => link.kind === "github");

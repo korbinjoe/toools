@@ -1,8 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import { unstable_noStore as noStore } from "next/cache";
+import { connection } from "next/server";
 import { getDatabaseUrl } from "@/lib/database-url";
+import { catalogCache } from "@/lib/catalog-cache";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
@@ -21,14 +22,19 @@ export const prisma = globalForPrisma.prisma || createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
+const getCachedDataUpdatedAt = catalogCache(async () => {
+  const result = await prisma.tool.aggregate({
+    where: { status: "APPROVED" },
+    _max: { updatedAt: true },
+  });
+  return result._max.updatedAt?.toISOString() ?? null;
+}, "updated-at");
+
 export async function getDataUpdatedAt() {
-  noStore();
+  await connection();
   try {
-    const result = await prisma.tool.aggregate({
-      where: { status: "APPROVED" },
-      _max: { updatedAt: true },
-    });
-    return result._max.updatedAt;
+    const updatedAt = await getCachedDataUpdatedAt();
+    return updatedAt ? new Date(updatedAt) : null;
   } catch {
     return null;
   }

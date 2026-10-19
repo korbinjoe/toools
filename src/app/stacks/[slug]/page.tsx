@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { StageToolsSection } from "@/components/stage-tools-section";
@@ -19,6 +20,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: StackPageProps): Promise<Metadata> {
+  await connection();
   const { slug } = await params;
   const stack = await getStackBySlug(slug);
   if (!stack) notFound();
@@ -40,6 +42,7 @@ function StackJsonLd({ stack }: { stack: NonNullable<Awaited<ReturnType<typeof g
 }
 
 export default async function StackDetailPage({ params }: StackPageProps) {
+  await connection();
   const { slug } = await params;
   const stack = await getStackBySlug(slug);
   if (!stack) notFound();

@@ -31,6 +31,7 @@ import {
 import { PH_TOPIC_MAP } from "./lib/category-matcher";
 import { getProductHuntToken } from "./lib/producthunt-auth";
 import { ImportStore } from "./lib/import-store";
+import { runWithPublication } from "./lib/catalog-publication";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
@@ -196,7 +197,7 @@ async function backfillGithubStars() {
       github: { not: null },
       OR: [{ githubStars: null }, { githubStars: 0 }],
     },
-    select: { id: true, slug: true, github: true },
+    select: { id: true, slug: true, github: true, status: true },
     orderBy: { viewCount: "desc" },
     ...(Number.isFinite(githubLimit) ? { take: githubLimit } : {}),
   });
@@ -223,11 +224,13 @@ async function backfillGithubStars() {
       console.log(`  [dry-run] ${tool.slug}: ${stars} stars`);
       updated++;
     } else {
+      if (tool.status === "APPROVED") importStore.publication.prepare();
       try {
         await prisma.tool.update({
           where: { id: tool.id },
           data: { githubStars: stars },
         });
+        if (tool.status === "APPROVED") importStore.publication.markChanged();
         updated++;
       } catch {
         errors++;
@@ -426,10 +429,8 @@ async function main() {
   await printStats();
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
+runWithPublication(main, () => importStore?.publication, () => prisma.$disconnect())
+  .catch((e) => {
+    console.error(e instanceof Error ? e.message : "Signal backfill failed");
+    process.exitCode = 1;
   });

@@ -15,9 +15,11 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { getGoogleFaviconUrl } from "./lib/favicon";
+import { CatalogPublication, runWithPublication } from "./lib/catalog-publication";
 
 const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
+const publication = new CatalogPublication();
 
 const DRY_RUN = process.env.DRY_RUN !== "false";
 const CONCURRENCY = 30;
@@ -129,10 +131,12 @@ async function main() {
       if (domain) {
         fixed++;
         if (!DRY_RUN) {
+          publication.prepare();
           await prisma.tool.update({
             where: { id: tool.id },
             data: { iconUrl: getGoogleFaviconUrl(`https://${domain}`) },
           });
+          publication.markChanged();
         }
       } else {
         notFound++;
@@ -151,10 +155,8 @@ async function main() {
   }
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
+runWithPublication(main, () => publication, () => prisma.$disconnect())
+  .catch((e) => {
+    console.error(e instanceof Error ? e.message : "Icon repair failed");
+    process.exitCode = 1;
   });
