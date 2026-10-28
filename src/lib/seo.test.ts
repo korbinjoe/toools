@@ -75,3 +75,12 @@ test("sitemap contains only canonical content URLs and no fabricated modificatio
   assert.ok(sitemap.some((entry) => entry.url === siteUrl("/tools/cursor")));
   assert.ok(sitemap.every((entry) => !entry.url.includes("?") && !entry.lastModified));
 });
+
+test("an empty catalog sitemap still lists the homepage and static routes", () => {
+  const sitemap = buildSitemap([], [], []);
+  assert.ok(sitemap.some((entry) => entry.url === siteUrl("/")));
+  assert.ok(sitemap.some((entry) => entry.url === siteUrl("/tools")));
+  assert.ok(sitemap.some((entry) => entry.url === siteUrl("/categories")));
+  assert.equal(sitemap.some((entry) => entry.url.includes("/tools/")), false);
+  assert.equal(sitemap.some((entry) => entry.url.includes("/categories/")), false);
+});

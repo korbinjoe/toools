@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getApprovedTool as getTool } from "@/lib/tools";
+import { loadApprovedTool, toolCardSelect } from "@/lib/tools";
 import { after, connection } from "next/server";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbData, pageMetadata, siteUrl } from "@/lib/seo";
@@ -16,8 +16,9 @@ import { ToolWebsiteLink } from "@/components/tool-website-link";
 import { prisma } from "@/lib/db";
 import { getStackIconKey } from "@/lib/stacks";
 import { StackIcon } from "@/components/stack-icon";
+import { CatalogDegraded } from "@/components/catalog-degraded";
 import { catalogCache } from "@/lib/catalog-cache";
-import { toolCardSelect } from "@/lib/tools";
+import { catalogOr } from "@/lib/catalog-fallback";
 
 interface ToolPageProps {
   params: Promise<{ slug: string }>;
@@ -46,8 +47,12 @@ const getAlternatives = catalogCache(async (categoryId: string, excludeSlug: str
 export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
   await connection();
   const { slug } = await params;
-  const tool = await getTool(slug);
-  if (!tool) notFound();
+  const loaded = await loadApprovedTool(slug);
+  if (loaded.status === "missing") notFound();
+  if (loaded.status === "unavailable") {
+    return pageMetadata("Tool", "This listing is temporarily unavailable.", `/tools/${slug}`, { index: false });
+  }
+  const tool = loaded.tool;
   return pageMetadata(
     `${tool.name}: Use Cases & Alternatives`,
     toolEditorial[slug]?.summary || tool.tagline,
@@ -69,15 +74,19 @@ const countNumber = new Intl.NumberFormat("en");
 export default async function ToolPage({ params }: ToolPageProps) {
   await connection();
   const { slug } = await params;
-  const tool = await getTool(slug);
-  if (!tool) notFound();
+  const loaded = await loadApprovedTool(slug);
+  if (loaded.status === "missing") notFound();
+  if (loaded.status === "unavailable") {
+    return <CatalogDegraded title="Tool" message="This listing is temporarily unavailable." />;
+  }
+  const tool = loaded.tool;
 
   after(() => recordToolMetric(tool.id, "view"));
   const editorial = toolEditorial[slug];
   const externalLinks = getToolExternalLinks(tool);
   const githubLink = externalLinks.find((link) => link.kind === "github");
 
-  const alternatives = await getAlternatives(tool.categoryId, tool.slug);
+  const alternatives = (await catalogOr(() => getAlternatives(tool.categoryId, tool.slug), [])).value;
 
   const stacks = tool.stageRecommendations.map((sr) => ({
     name: sr.stage.stack.name,

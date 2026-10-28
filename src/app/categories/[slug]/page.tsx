@@ -2,23 +2,20 @@ import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { cache } from "react";
 import { JsonLd } from "@/components/json-ld";
+import { CatalogDegraded } from "@/components/catalog-degraded";
 import { breadcrumbData, pageMetadata } from "@/lib/seo";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolGrid } from "@/components/tool-grid";
 import { prisma } from "@/lib/db";
 import { catalogCache } from "@/lib/catalog-cache";
-import { getCatalogCategories, toolCardSelect } from "@/lib/tools";
+import { catalogOr } from "@/lib/catalog-fallback";
+import { loadCatalogCategory, toolCardSelect } from "@/lib/tools";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
-
-const getCategory = cache(async (slug: string) => {
-  return (await getCatalogCategories()).find((category) => category.slug === slug) ?? null;
-});
 
 const getCategoryTools = catalogCache(async (slug: string) => {
   return prisma.tool.findMany({
@@ -31,13 +28,24 @@ const getCategoryTools = catalogCache(async (slug: string) => {
   });
 }, "category-tools", { metrics: true });
 
+export async function loadCategoryPageData(slug: string) {
+  const loaded = await loadCatalogCategory(slug);
+  if (loaded.status !== "ready") return loaded;
+  const tools = (await catalogOr(() => getCategoryTools(slug), [])).value;
+  return { status: "ready" as const, category: loaded.category, tools };
+}
+
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
   await connection();
   const { slug } = await params;
-  const category = await getCategory(slug);
-  if (!category) notFound();
+  const loaded = await loadCatalogCategory(slug);
+  if (loaded.status === "missing") notFound();
+  if (loaded.status === "unavailable") {
+    return pageMetadata("Category", "This category is temporarily unavailable.", `/categories/${slug}`, { index: false });
+  }
+  const category = loaded.category;
 
   return pageMetadata(
     `${category.name} Tools`,
@@ -50,9 +58,12 @@ export async function generateMetadata({
 export default async function CategoryPage({ params }: CategoryPageProps) {
   await connection();
   const { slug } = await params;
-  const category = await getCategory(slug);
-  if (!category) notFound();
-  const tools = await getCategoryTools(slug);
+  const data = await loadCategoryPageData(slug);
+  if (data.status === "missing") notFound();
+  if (data.status === "unavailable") {
+    return <CatalogDegraded title="Category" message="This category is temporarily unavailable." />;
+  }
+  const { category, tools } = data;
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12">

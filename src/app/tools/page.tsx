@@ -11,22 +11,41 @@ import { notFound } from "next/navigation";
 import { pageMetadata, toolsSearchPolicy, TOOLS_PAGE_SIZE, type ToolsSearchParams } from "@/lib/seo";
 import { toolSourceWhere } from "@/lib/tool-sources";
 import { catalogCache } from "@/lib/catalog-cache";
-import { getCatalogCategories, toolCardSelect } from "@/lib/tools";
+import { catalogOr } from "@/lib/catalog-fallback";
+import { loadCatalogCategories, toolCardSelect } from "@/lib/tools";
 
 interface ToolsPageProps {
   searchParams: Promise<ToolsSearchParams>;
 }
 
+export async function toolsPageBounds(where: Prisma.ToolWhereInput, page: number) {
+  const totalRead = await catalogOr(() => getToolsTotal(JSON.stringify(where)), 0);
+  const totalPages = Math.ceil(totalRead.value / TOOLS_PAGE_SIZE);
+  return {
+    total: totalRead.value,
+    degraded: totalRead.degraded,
+    outOfRange: !totalRead.degraded && page > Math.max(1, totalPages),
+  };
+}
+
+export async function resolveToolsListingMeta(raw: ToolsSearchParams) {
+  const policy = toolsSearchPolicy(raw);
+  let index = policy.index;
+  if (policy.page > 1) {
+    const bounds = await toolsPageBounds(buildWhere(policy.params), policy.page);
+    if (bounds.outOfRange) return { notFound: true as const };
+    if (bounds.degraded) index = false;
+  }
+  return { notFound: false as const, index, path: policy.path, page: policy.page };
+}
+
 export async function generateMetadata({ searchParams }: ToolsPageProps): Promise<Metadata> {
   await connection();
-  const policy = toolsSearchPolicy(await searchParams);
-  if (policy.page > 1) {
-    const total = await getToolsTotal(JSON.stringify(buildWhere(policy.params)));
-    if (policy.page > Math.max(1, Math.ceil(total / TOOLS_PAGE_SIZE))) notFound();
-  }
-  return pageMetadata(policy.page > 1 ? `Browse Tools — Page ${policy.page}` : "Browse Tools",
+  const meta = await resolveToolsListingMeta(await searchParams);
+  if (meta.notFound) notFound();
+  return pageMetadata(meta.page > 1 ? `Browse Tools — Page ${meta.page}` : "Browse Tools",
     "Search and filter curated tools by source, category, pricing, platform, open-source status, and trust signals.",
-    policy.path, { index: policy.index });
+    meta.path, { index: meta.index });
 }
 
 function buildWhere(params: {
@@ -109,20 +128,32 @@ const getToolsTotal = cache(catalogCache(
   "tools-total",
 ));
 
-export default async function ToolsPage({ searchParams }: ToolsPageProps) {
-  await connection();
-  const { params, page } = toolsSearchPolicy(await searchParams);
+export async function loadToolsPageData(raw: ToolsSearchParams) {
+  const { params, page } = toolsSearchPolicy(raw);
   const where = buildWhere(params);
   const orderBy = buildOrderBy(params.sort);
-
-  const [tools, total, categories] = await Promise.all([
-    getCachedTools(where, orderBy, page),
-    getToolsTotal(JSON.stringify(where)),
-    getCatalogCategories(),
+  const [toolsRead, categories, bounds] = await Promise.all([
+    catalogOr(() => getCachedTools(where, orderBy, page), []),
+    loadCatalogCategories(),
+    toolsPageBounds(where, page),
   ]);
+  return {
+    params,
+    page,
+    tools: toolsRead.value,
+    categories,
+    total: bounds.degraded ? 0 : bounds.total,
+    outOfRange: bounds.outOfRange,
+    degraded: toolsRead.degraded || bounds.degraded,
+  };
+}
+
+export default async function ToolsPage({ searchParams }: ToolsPageProps) {
+  await connection();
+  const { params, page, tools, categories, total, outOfRange } = await loadToolsPageData(await searchParams);
+  if (outOfRange) notFound();
 
   const totalPages = Math.ceil(total / TOOLS_PAGE_SIZE);
-  if (page > Math.max(1, totalPages)) notFound();
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12">
