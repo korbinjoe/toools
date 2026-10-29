@@ -1,7 +1,7 @@
 import { connection, NextResponse } from "next/server";
-import { getRandomApprovedTools } from "@/lib/tools";
+import { loadFeaturedTools } from "@/lib/tools";
 
 export async function GET() {
   await connection();
-  return NextResponse.json(await getRandomApprovedTools());
+  return NextResponse.json(await loadFeaturedTools());
 }

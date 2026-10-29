@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { CategoryGrid } from "@/components/category-nav";
-import { getCatalogCategories } from "@/lib/tools";
+import { loadCatalogCategories } from "@/lib/tools";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata(
@@ -11,7 +11,7 @@ export const metadata = pageMetadata(
 
 export default async function CategoriesPage() {
   await connection();
-  const categories = await getCatalogCategories();
+  const categories = await loadCatalogCategories();
 
   return (
     <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 sm:py-12 min-h-[calc(100dvh-8rem)]">
@@ -21,7 +21,11 @@ export default async function CategoriesPage() {
           Browse tools organized by what they help you do
         </p>
       </div>
-      <CategoryGrid categories={categories} />
+      {categories.length === 0 ? (
+        <p className="py-20 text-center text-sm text-muted-foreground">No categories to show right now.</p>
+      ) : (
+        <CategoryGrid categories={categories} />
+      )}
     </div>
   );
 }

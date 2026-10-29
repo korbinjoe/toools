@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { prisma } from "./db";
 import { catalogCache } from "./catalog-cache";
+import { catalogOr } from "./catalog-fallback";
 
 // Reuse the same category/count entry on home, filters, category pages and SEO.
 export const getCatalogCategories = catalogCache(
@@ -12,6 +13,19 @@ export const getCatalogCategories = catalogCache(
   }),
   "categories",
 );
+
+export async function loadCatalogCategories() {
+  return (await catalogOr(() => getCatalogCategories(), [])).value;
+}
+
+export const loadCatalogCategory = cache(async (slug: string) => {
+  const read = await catalogOr(async () => {
+    return (await getCatalogCategories()).find((category) => category.slug === slug) ?? null;
+  }, null);
+  if (read.degraded) return { status: "unavailable" as const };
+  if (!read.value) return { status: "missing" as const };
+  return { status: "ready" as const, category: read.value };
+});
 
 export const toolCardSelect = {
   slug: true,
@@ -84,6 +98,10 @@ export async function getRandomApprovedTools(limit = 6, random = Math.random) {
   return tools.filter((tool) => tool !== null);
 }
 
+export async function loadFeaturedTools() {
+  return (await catalogOr(() => getRandomApprovedTools(), [])).value;
+}
+
 const getCachedApprovedTool = catalogCache(async (slug: string) => {
   const tool = await prisma.tool.findFirst({
     where: { slug, status: "APPROVED" },
@@ -117,4 +135,11 @@ export const getApprovedTool = cache(async (slug: string) => {
     createdAt: new Date(tool.createdAt),
     updatedAt: new Date(tool.updatedAt),
   } : null;
+});
+
+export const loadApprovedTool = cache(async (slug: string) => {
+  const read = await catalogOr(() => getApprovedTool(slug), null);
+  if (read.degraded) return { status: "unavailable" as const };
+  if (!read.value) return { status: "missing" as const };
+  return { status: "ready" as const, tool: read.value };
 });
